@@ -1,0 +1,273 @@
+{
+  "production": {
+    "networks": {
+      "1": {
+        "api": "https://cfd-ethelectra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "56": {
+        "api": "https://cfd-bsc.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "250": {
+        "api": "https://cfd-ftm.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "137": {
+        "api": "https://cfd-polygon.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "66": {
+        "api": "https://cfd-okc.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      }
+    }
+  },
+  "testing": {
+    "networks": {
+      "97": {
+        "api": "https://testing.electra.finance/bsc-testnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "5": {
+        "api": "https://testing.electra.finance/eth-goerli",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "421613": {
+        "api": "https://testing.electra.finance/arbitrum-goerli",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "4002": {
+        "api": "https://testing.electra.finance/ftm-testnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "80001": {
+        "api": "https://testing.electra.finance/polygon-mumbai",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      }
+    }
+  },
+  "staging": {
+    "networks": {
+      "1": {
+        "api": "https://staging.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "56": {
+        "api": "https://staging-bsc.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "250": {
+        "api": "https://staging-ftm.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "137": {
+        "api": "https://staging-polygon.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "66": {
+        "api": "https://staging-okc.electra.finance",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      }
+    }
+  },
+  "experimental": {
+    "networks": {
+      "97": {
+        "api": "https://exp.electra.finance/bsc-testnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "3": {
+        "api": "https://exp.electra.finance/eth-ropsten",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      }
+    }
+  }
+}

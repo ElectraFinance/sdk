@@ -1,0 +1,10 @@
+const SubscriptionType = {
+  ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE: 'apcus',
+  ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE: 'apius',
+  ADDRESS_UPDATES_SUBSCRIBE: 'aus',
+  AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE: 'aobus',
+  CFD_ADDRESS_UPDATES_SUBSCRIBE: 'ausf',
+  FUTURES_TRADE_INFO_SUBSCRIBE: 'fts',
+} as const;
+
+export default SubscriptionType;

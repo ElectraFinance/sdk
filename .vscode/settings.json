@@ -1,0 +1,13 @@
+{
+    "cSpell.words": [
+        "bignumber",
+        "orderbook",
+        "electra.finance"
+    ],
+    "markdown.extension.toc.omittedFromToc": {
+        "./README.md": [
+            "# Electra SDK"
+        ]
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
+}
