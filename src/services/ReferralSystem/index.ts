@@ -1,4 +1,4 @@
-import {fetchWithValidation} from 'simple-typed-fetch';
+import { fetchWithValidation } from 'simple-typed-fetch';
 import {
   errorSchema,
   miniStatsSchema,
@@ -11,7 +11,7 @@ import {
   claimInfoSchema,
   aggregatedHistorySchema,
 } from './schemas/index.js';
-import {SupportedChainId} from "../../types.js";
+import type { SupportedChainId } from '../../types.js';
 
 type CreateLinkPayloadType = {
   referer: string
@@ -128,35 +128,33 @@ class ReferralSystem {
           'Content-type': 'application/json',
         },
         method: 'POST',
-        body: JSON.stringify({payload, signature}),
+        body: JSON.stringify({ payload, signature }),
       }
     );
 
   createReferralLink = (
-    payload: CreateLinkPayloadType,
-    signature: SignatureType
+    payload: CreateLinkPayloadType
   ) =>
-    fetchWithValidation(`${this.apiUrl}/referer/create`, linkSchema, {
+    fetchWithValidation(`${this.apiUrl}/referer/create2`, linkSchema, {
       headers: {
         'Content-type': 'application/json',
       },
       method: 'POST',
-      body: JSON.stringify({payload, signature}),
+      body: JSON.stringify(payload),
     });
 
   subscribeToReferral = (
-    payload: SubscribePayloadType,
-    signature: SignatureType
+    payload: SubscribePayloadType
   ) =>
     fetchWithValidation(
-      `${this.apiUrl}/referer/subscribe`,
+      `${this.apiUrl}/referer/subscribe2`,
       linkSchema,
       {
         headers: {
           'Content-type': 'application/json',
         },
         method: 'POST',
-        body: JSON.stringify({payload, signature}),
+        body: JSON.stringify(payload),
       },
       errorSchema
     );
@@ -166,7 +164,7 @@ class ReferralSystem {
       `${this.apiUrl}/referer/ve/rating-table-leaderboard?chain_id=${chainId}`,
       ratingSchema,
       {
-        headers: refererAddress !== undefined ? {'referer-address': refererAddress} : {},
+        headers: refererAddress !== undefined ? { 'referer-address': refererAddress } : {},
       },
       errorSchema
     );
@@ -220,4 +218,4 @@ class ReferralSystem {
 }
 
 export * as schemas from './schemas/index.js';
-export {ReferralSystem};
+export { ReferralSystem };
