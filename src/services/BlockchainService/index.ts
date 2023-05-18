@@ -6,6 +6,7 @@ import {
 } from './schemas/index.js';
 import { makePartial } from '../../utils/index.js';
 import { fetchWithValidation } from 'simple-typed-fetch';
+import governanceContractsSchema from './schemas/governanceContractsSchema.js';
 
 type CfdHistoryQuery = {
   instrument?: string
@@ -73,6 +74,11 @@ class BlockchainService {
   getCFDContracts = () => fetchWithValidation(
     `${this.apiUrl}/api/cfd/contracts`,
     cfdContractsSchema,
+  );
+
+  getGovernanceContracts = () => fetchWithValidation(
+    `${this.apiUrl}/api/governance/info`,
+    governanceContractsSchema,
   );
 
   getCFDHistory = (address: string, query: CfdHistoryQuery = {}) => {
