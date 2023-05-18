@@ -1,5 +1,6 @@
 {
   "production": {
+    "referralAPI": "https://electra.finance/referral-api",
     "networks": {
       "1": {
         "api": "https://cfd-ethelectra.finance",
@@ -79,6 +80,7 @@
     }
   },
   "testing": {
+    "referralAPI": "https://testing.electra.finance/referral-api",
     "networks": {
       "97": {
         "api": "https://testing.electra.finance/bsc-testnet",
@@ -158,6 +160,7 @@
     }
   },
   "staging": {
+    "referralAPI": "https://staging.electra.finance/referral-api",
     "networks": {
       "1": {
         "api": "https://staging.electra.finance",
@@ -237,6 +240,7 @@
     }
   },
   "experimental": {
+    "referralAPI": "https://exp.electra.finance/referral-api",
     "networks": {
       "97": {
         "api": "https://exp.electra.finance/bsc-testnet",

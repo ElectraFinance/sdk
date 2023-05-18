@@ -5,8 +5,10 @@ import Unit from '../Unit/index.js';
 import type { SupportedChainId, DeepPartial, VerboseUnitConfig, KnownEnv } from '../types.js';
 import { isValidChainId } from '../utils/index.js';
 import { simpleFetch } from 'simple-typed-fetch';
+import { ReferralSystem } from '../services/ReferralSystem/index.js';
 
 type EnvConfig = {
+  referralAPI: string
   networks: Partial<
     Record<
       SupportedChainId,
@@ -20,6 +22,8 @@ export default class Electra {
 
   public readonly units: Partial<Record<SupportedChainId, Unit>>;
 
+  public readonly referralSystem: ReferralSystem;
+
   constructor(
     envOrConfig: KnownEnv | EnvConfig = 'production',
     overrides?: DeepPartial<EnvConfig>
@@ -32,6 +36,7 @@ export default class Electra {
       }
       this.env = envOrConfig;
       config = {
+        referralAPI: envConfig.referralAPI,
         networks: Object.entries(envConfig.networks).map(([chainId, networkConfig]) => {
           if (!isValidChainId(chainId)) throw new Error(`Invalid chainId: ${chainId}`);
           const chainConfig = chains[chainId];
@@ -71,6 +76,8 @@ export default class Electra {
     } else {
       config = envOrConfig;
     }
+
+    this.referralSystem = new ReferralSystem(config.referralAPI);
 
     this.units = Object.entries(config.networks)
       .reduce<Partial<Record<SupportedChainId, Unit>>>((acc, [chainId, networkConfig]) => {

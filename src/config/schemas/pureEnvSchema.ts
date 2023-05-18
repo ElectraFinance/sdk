@@ -19,6 +19,7 @@ export const pureEnvNetworksSchema = z.object({
 });
 
 export const pureEnvPayloadSchema = z.object({
+  referralAPI: z.string().url(),
   networks: z.record(
     z.nativeEnum(SupportedChainId),
     pureEnvNetworksSchema
