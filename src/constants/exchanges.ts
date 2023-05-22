@@ -4,14 +4,14 @@ export default [
   'OKX',
   'BINANCE',
   'KUCOIN',
-  'INTERNAL_CEX',
+  'INTERNAL_ORDER_BOOK',
 
   // DEXes
   'SPOOKYSWAP',
   'PANCAKESWAP',
   'UNISWAP',
   'QUICKSWAP',
-  'INTERNAL_DEX',
+  'INTERNAL_POOL_V2',
   'CHERRYSWAP',
   'OKXSWAP',
   'CURVE',
