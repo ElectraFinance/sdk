@@ -24,29 +24,38 @@ const cfdHistoryItem = z.object({
   createdAt: z.number(),
 });
 
-const cfdHistorySchema = z.object({
-  success: z.boolean(),
-  count: z.number(),
-  total: z.number(),
-  pagination: z.object({}),
-  data: z.array(cfdHistoryItem),
-}).transform((response) => {
-  return response.data.map((item) => {
-    const {
-      createdAt, reason, transactionHash, amountNumber,
-    } = item;
-    const type = historyTransactionType[reason];
+const cfdHistorySchema = z
+  .object({
+    success: z.boolean(),
+    count: z.number(),
+    total: z.number(),
+    pagination: z.object({}),
+    data: z.array(cfdHistoryItem),
+  })
+  .transform((response) => {
+    return response.data.map((item) => {
+      const {
+        createdAt,
+        reason,
+        transactionHash,
+        amountNumber,
+        instrument,
+        instrumentAddress,
+      } = item;
+      const type = historyTransactionType[reason];
 
-    return {
-      type,
-      date: createdAt,
-      token: 'USDT',
-      amount: amountNumber,
-      status: HistoryTransactionStatus.DONE,
-      transactionHash,
-      user: item.address,
-    };
+      return {
+        type,
+        date: createdAt,
+        token: 'USDT',
+        instrument,
+        instrumentAddress,
+        amount: amountNumber,
+        status: HistoryTransactionStatus.DONE,
+        transactionHash,
+        user: item.address,
+      };
+    });
   });
-});
 
 export default cfdHistorySchema;
