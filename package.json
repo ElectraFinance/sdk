@@ -1,6 +1,6 @@
 {
   "name": "@electra.finance/sdk",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Electra finance SDK",
   "main": "./lib/index.cjs",
   "module": "./lib/index.js",
@@ -49,18 +49,18 @@
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/plugin-syntax-import-assertions": "^7.20.0",
-    "@tsconfig/esm": "^1.0.2",
-    "@tsconfig/strictest": "^2.0.0",
+    "@tsconfig/esm": "^1.0.3",
+    "@tsconfig/strictest": "^2.0.1",
     "@types/express": "^4.17.17",
-    "@types/jest": "^29.5.0",
-    "@types/node": "^20.1.1",
+    "@types/jest": "^29.5.1",
+    "@types/node": "^20.2.3",
     "@types/uuid": "^9.0.1",
     "@types/ws": "^8.5.4",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.7",
+    "@typescript-eslint/parser": "^5.59.7",
     "babel-loader": "^9.1.2",
     "concurrently": "^8.0.1",
-    "eslint": "^8.38.0",
+    "eslint": "^8.41.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-config-standard-with-typescript": "^34.0.1",
@@ -80,7 +80,7 @@
     "@babel/runtime": "^7.21.0",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
-    "@electra.finance/contracts": "0.1.0",
+    "@electra.finance/contracts": "0.1.4",
     "bignumber.js": "^9.1.1",
     "bson-objectid": "^2.0.4",
     "buffer": "^6.0.3",
@@ -88,13 +88,13 @@
     "express": "^4.18.2",
     "isomorphic-ws": "^5.0.0",
     "just-clone": "^6.2.0",
-    "merge-anything": "^5.1.4",
+    "merge-anything": "^5.1.7",
     "neverthrow": "^6.0.0",
-    "simple-typed-fetch": "^0.1.9",
+    "simple-typed-fetch": "^0.2.1",
     "stream-browserify": "^3.0.0",
     "tiny-invariant": "^1.3.1",
     "ts-is-present": "^1.2.2",
-    "ts-node": "^10.9.1",
+    "ts-node": "github:TypeStrong/ts-node#main",
     "uuid": "^9.0.0",
     "ws": "^8.13.0",
     "zod": "3.21.4"
@@ -102,5 +102,8 @@
   "homepage": "https://github.com/ElectraFinance/sdk#readme",
   "files": [
     "lib/**/*"
-  ]
+  ],
+  "overrides": {
+    "tsconfig-paths": "^4.0.0"
+  }
 }

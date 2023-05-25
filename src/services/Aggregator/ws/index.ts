@@ -19,9 +19,17 @@ import type { fullOrderSchema, orderUpdateSchema } from './schemas/addressUpdate
 import cfdAddressUpdateSchema from './schemas/cfdAddressUpdateSchema.js';
 import futuresTradeInfoSchema from './schemas/futuresTradeInfoSchema.js';
 import { objectKeys } from '../../../utils/objectKeys.js';
+// import assertError from '../../../utils/assertError.js';
 // import errorSchema from './schemas/errorSchema';
 
 const UNSUBSCRIBE = 'u';
+
+type FuturesTradeInfoPayload = {
+  s: string // wallet address
+  i: string // pair
+  a: number // amount
+  p?: number // price
+}
 
 type PairsConfigSubscription = {
   callback: ({ kind, data }: {
@@ -49,12 +57,7 @@ type AggregatedOrderbookSubscription = {
 }
 
 type FuturesTradeInfoSubscription = {
-  payload: {
-    s: string
-    i: string
-    a: number
-    p?: number
-  }
+  payload: FuturesTradeInfoPayload
   callback: (futuresTradeInfo: FuturesTradeInfo) => void
   errorCb?: (message: string) => void
 }
@@ -139,6 +142,11 @@ const isSubType = (subType: string): subType is keyof Subscription => Object.val
 
 const unknownMessageTypeRegex = /An unknown message type: '(.*)', json: (.*)/;
 const nonExistentMessageRegex = /Could not cancel nonexistent subscription: (.*)/;
+
+// type Message = {
+//   message: Json
+//   resolve: () => void
+// };
 class AggregatorWS {
   private ws?: WebSocket | undefined;
 
@@ -148,7 +156,7 @@ class AggregatorWS {
   // https://stackoverflow.com/questions/19304157/getting-the-reason-why-websockets-closed-with-close-code-1006
   private isClosedIntentionally = false;
 
-  private subscriptions: Partial<{
+  readonly subscriptions: Partial<{
     [K in keyof Subscription]: Partial<Record<string, Subscription[K]>>
   }> = {};
 
@@ -164,6 +172,8 @@ class AggregatorWS {
     return this.wsUrl;
   }
 
+  readonly instanceId = uuidv4();
+
   constructor(
     wsUrl: string,
     logger?: (msg: string) => void,
@@ -175,6 +185,8 @@ class AggregatorWS {
     this.onInit = onInit;
     this.onError = onError;
   }
+
+  // readonly messageQueue: Message[] = [];
 
   private sendRaw(data: BufferLike) {
     if (this.ws?.readyState === 1) {
@@ -202,39 +214,62 @@ class AggregatorWS {
     type: T,
     subscription: Subscription[T],
   ) {
-    if (!this.ws) this.init();
-    const isExclusive = exclusiveSubscriptions.some((t) => t === type);
-    const subs = this.subscriptions[type];
-    if (isExclusive && subs && Object.keys(subs).length > 0) {
-      throw new Error(`Subscription '${type}' already exists. Please unsubscribe first.`);
-    }
-
     const id = type === 'aobus'
       ? ((subscription as any).payload as string) // TODO: Refactor!!!
       : uuidv4();
-    const subRequest: Json = {};
-    subRequest['T'] = type;
-    subRequest['id'] = id;
 
-    // TODO Refactor this
-    if ('payload' in subscription) {
-      if (typeof subscription.payload === 'string') {
-        subRequest['S'] = subscription.payload;
-      } else {
-        subRequest['S'] = {
-          d: id,
-          ...subscription.payload,
-        };
+    const makeSubscription = () => {
+      const isExclusive = exclusiveSubscriptions.some((t) => t === type);
+      const subs = this.subscriptions[type];
+      if (isExclusive && subs && Object.keys(subs).length > 0) {
+        throw new Error(`Subscription '${type}' already exists. Please unsubscribe first.`);
       }
+
+      const subRequest: Json = {};
+      subRequest['T'] = type;
+      subRequest['id'] = id;
+
+      if ('payload' in subscription) {
+        if (typeof subscription.payload === 'string') {
+          subRequest['S'] = subscription.payload;
+        } else { // SwapInfoSubscriptionPayload | FuturesTradeInfoPayload
+          subRequest['S'] = { ...subscription.payload }
+
+          if (!('s' in subscription.payload)) { // SwapInfoSubscriptionPayload
+            subRequest['S'] = {
+              ...subRequest['S'],
+              d: id,
+            };
+          }
+        }
+      }
+
+      this.send(subRequest);
+
+      const subKey = isExclusive ? 'default' : id;
+      this.subscriptions[type] = {
+        ...this.subscriptions[type],
+        [subKey]: subscription,
+      };
     }
 
-    this.send(subRequest);
+    // if (!this.ws) {
+    //   this.initAsync()
+    //     .then(() => {
+    //       console.log(`Aggregator WS ${this.instanceId} is initialized`);
+    //       makeSubscription();
+    //     })
+    //     .catch((err) => {
+    //       assertError(err);
+    //       this.onError?.(err.message);
+    //     });
+    // } else makeSubscription();
 
-    const subKey = isExclusive ? 'default' : id;
-    this.subscriptions[type] = {
-      ...this.subscriptions[type],
-      [subKey]: subscription,
-    };
+    if (!this.ws) {
+      this.init();
+      console.log(`Aggregator WS ${this.instanceId} is initialized`);
+    }
+    makeSubscription();
 
     return id;
   }
@@ -289,6 +324,23 @@ class AggregatorWS {
     delete this.ws;
   }
 
+  // private initPromise: Promise<void> | null = null;
+
+  // private initAsync() {
+  //   if (!this.initPromise) {
+  //     this.initPromise = new Promise<void>((resolve, reject) => {
+  //       try {
+  //         this.init();
+  //         resolve();
+  //       } catch (err) {
+  //         reject(err);
+  //       }
+  //     });
+  //   }
+
+  //   return this.initPromise;
+  // }
+
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
     this.ws = new WebSocket(this.wsUrl);
@@ -303,7 +355,10 @@ class AggregatorWS {
       // Re-subscribe to all subscriptions
       if (isReconnect) {
         const subscriptionsToReconnect = this.subscriptions;
-        this.subscriptions = {};
+        objectKeys(this.subscriptions).forEach((subType) => {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+          delete this.subscriptions[subType];
+        });
         Object.keys(subscriptionsToReconnect)
           .filter(isSubType)
           .forEach((subType) => {
@@ -373,10 +428,10 @@ class AggregatorWS {
         }
           break;
         case MessageType.PING_PONG:
-          this.sendRaw(data.toString());
+          this.sendRaw(data);
           break;
         case MessageType.UNSUBSCRIPTION_DONE:
-          // To implement
+          // const { id } = json;
           break;
         case MessageType.FUTURES_TRADE_INFO_UPDATE:
           this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[json.id]?.callback({
