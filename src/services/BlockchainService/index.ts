@@ -1,12 +1,15 @@
 import { z } from 'zod';
+import { fetchWithValidation } from 'simple-typed-fetch';
+
+import { makePartial } from '../../utils/index.js';
+
 import {
   infoSchema, historySchema,
   cfdContractsSchema,
   cfdHistorySchema,
+  governanceContractsSchema,
+  governanceChainsInfoSchema,
 } from './schemas/index.js';
-import { makePartial } from '../../utils/index.js';
-import { fetchWithValidation } from 'simple-typed-fetch';
-import governanceContractsSchema from './schemas/governanceContractsSchema.js';
 
 type CfdHistoryQuery = {
   instrument?: string
@@ -30,6 +33,8 @@ class BlockchainService {
     this.getBlockNumber = this.getBlockNumber.bind(this);
     this.getCFDContracts = this.getCFDContracts.bind(this);
     this.getCFDHistory = this.getCFDHistory.bind(this);
+    this.getGovernanceContracts = this.getGovernanceContracts.bind(this);
+    this.getGovernanceChainsInfo = this.getGovernanceChainsInfo.bind(this);
   }
 
   get blockchainServiceWsUrl() {
@@ -79,6 +84,11 @@ class BlockchainService {
   getGovernanceContracts = () => fetchWithValidation(
     `${this.apiUrl}/api/governance/info`,
     governanceContractsSchema,
+  );
+
+  getGovernanceChainsInfo = () => fetchWithValidation(
+    `${this.apiUrl}/api/governance/chains-info`,
+    governanceChainsInfoSchema,
   );
 
   getCFDHistory = (address: string, query: CfdHistoryQuery = {}) => {
