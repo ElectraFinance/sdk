@@ -21,7 +21,6 @@ import futuresTradeInfoSchema from './schemas/futuresTradeInfoSchema.js';
 import { objectKeys } from '../../../utils/objectKeys.js';
 // import assertError from '../../../utils/assertError.js';
 // import errorSchema from './schemas/errorSchema';
-import clone from 'just-clone';
 
 const UNSUBSCRIBE = 'u';
 
@@ -352,7 +351,7 @@ class AggregatorWS {
     this.ws.onopen = () => {
       // Re-subscribe to all subscriptions
       if (isReconnect) {
-        const subscriptionsToReconnect = clone(this.subscriptions);
+        const subscriptionsToReconnect = structuredClone(this.subscriptions);
         objectKeys(this.subscriptions).forEach((subType) => {
           // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete this.subscriptions[subType];
