@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-const governanceContractsSchema = z.object({
+const governanceChainsInfoSchema = z.object({
   isChainSupported: z.boolean(),
 });
 
-export default governanceContractsSchema;
+export default governanceChainsInfoSchema;
