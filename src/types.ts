@@ -103,6 +103,7 @@ export type CancelOrderRequest = {
   id: number | string
   senderAddress: string
   isPersonalSign: boolean
+  isFromDelegate?: boolean | undefined
 }
 
 export type SignedCancelOrderRequest = {

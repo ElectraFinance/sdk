@@ -14,11 +14,13 @@ const signCancelOrder = async (
   usePersonalSign: boolean,
   signer: ethers.Signer,
   chainId: SupportedChainId,
+  isFromDelegate?: boolean,
 ) => {
   const cancelOrderRequest: CancelOrderRequest = {
     id,
     senderAddress,
     isPersonalSign: usePersonalSign,
+    isFromDelegate,
   };
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const typedDataSigner = signer as SignerWithTypedDataSign;
