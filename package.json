@@ -80,7 +80,7 @@
     "@babel/runtime": "^7.21.0",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
-    "@electra.finance/contracts": "0.1.4",
+    "@electra.finance/contracts": "0.1.9",
     "bignumber.js": "^9.1.1",
     "bson-objectid": "^2.0.4",
     "buffer": "^6.0.3",
