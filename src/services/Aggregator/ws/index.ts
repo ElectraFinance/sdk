@@ -166,6 +166,8 @@ class AggregatorWS {
 
   public logger: ((message: string) => void) | undefined
 
+  private subIdReplacements: Partial<Record<string, string>> = {}
+
   private readonly wsUrl: string;
 
   get api() {
@@ -221,11 +223,6 @@ class AggregatorWS {
 
     const makeSubscription = () => {
       const isExclusive = exclusiveSubscriptions.some((t) => t === type);
-      const subs = this.subscriptions[type];
-      if (isExclusive && subs && Object.keys(subs).length > 0) {
-        throw new Error(`Subscription '${type}' already exists. Please unsubscribe first.`);
-      }
-
       const subRequest: Json = {};
       subRequest['T'] = type;
       subRequest['id'] = id;
@@ -241,18 +238,23 @@ class AggregatorWS {
         }
       }
 
-      this.logger?.(`Subscribing to ${type} with id ${id}. Subscription request: ${JSON.stringify(subRequest)}`);
-      this.send(subRequest);
-
       const subKey = isExclusive ? 'default' : id;
+
       if (prevSubscriptionId === undefined) { // Just subscribe
+        const subs = this.subscriptions[type];
+        if (isExclusive && subs && Object.keys(subs).length > 0) {
+          throw new Error(`Subscription '${type}' already exists. Please unsubscribe first.`);
+        }
+        this.logger?.(`Subscribing to ${type} with id ${id}. Subscription request: ${JSON.stringify(subRequest)}`);
         this.subscriptions[type] = {
           ...this.subscriptions[type],
           [subKey]: subscription,
         };
       } else { // Replace subscription. Set new sub id, but save callback
+        this.logger?.(`Resubscribing to ${type} with id ${id}. Subscription request: ${JSON.stringify(subRequest)}`);
         const prevSub = this.subscriptions[type]?.[prevSubscriptionId];
         if (prevSub) {
+          this.subIdReplacements[prevSubscriptionId] = id; // Save mapping for future use (unsubscribe)
           this.subscriptions[type] = {
             ...this.subscriptions[type],
             [subKey]: {
@@ -262,6 +264,8 @@ class AggregatorWS {
           };
         }
       }
+
+      this.send(subRequest);
     }
 
     // if (!this.ws) {
@@ -285,17 +289,32 @@ class AggregatorWS {
     return id;
   }
 
+  /**
+   * Returns newest subscription id for given id. Subscription id can be changed during resubscription.
+   * This function ensure that old subscription id will be replaced with newest one.
+   * @param id Id of subscription
+   * @returns Newest subscription id
+   */
+  getNewestSubscriptionId(id: string): string {
+    const newId = this.subIdReplacements[id];
+    if (newId !== undefined) {
+      return this.getNewestSubscriptionId(newId);
+    }
+    return id;
+  }
+
   unsubscribe(subscription: keyof typeof UnsubscriptionType | string, details?: string) {
+    const newestSubId = this.getNewestSubscriptionId(subscription);
     this.send({
       T: UNSUBSCRIBE,
-      S: subscription,
+      S: newestSubId,
       ...(details !== undefined) && { d: details },
     });
 
-    if (subscription.includes('0x')) { // is wallet address (ADDRESS_UPDATE)
+    if (newestSubId.includes('0x')) { // is wallet address (ADDRESS_UPDATE)
       const auSubscriptions = this.subscriptions[SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE];
       if (auSubscriptions) {
-        const targetAuSub = Object.entries(auSubscriptions).find(([, value]) => value?.payload === subscription);
+        const targetAuSub = Object.entries(auSubscriptions).find(([, value]) => value?.payload === newestSubId);
         if (targetAuSub) {
           const [key] = targetAuSub;
           delete this.subscriptions[SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE]?.[key];
@@ -304,27 +323,27 @@ class AggregatorWS {
 
       const aufSubscriptions = this.subscriptions[SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE];
       if (aufSubscriptions) {
-        const targetAufSub = Object.entries(aufSubscriptions).find(([, value]) => value?.payload === subscription);
+        const targetAufSub = Object.entries(aufSubscriptions).find(([, value]) => value?.payload === newestSubId);
         if (targetAufSub) {
           const [key] = targetAufSub;
           delete this.subscriptions[SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE]?.[key];
         }
       }
-    } else if (uuidValidate(subscription)) {
+    } else if (uuidValidate(newestSubId)) {
       // is swap info subscription (contains hyphen)
-      delete this.subscriptions[SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]?.[subscription];
-      delete this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[subscription];
+      delete this.subscriptions[SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]?.[newestSubId];
+      delete this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[newestSubId];
       // !!! swap info subscription is uuid that contains hyphen
-    } else if (subscription.includes('-') && subscription.split('-').length === 2) { // is pair name(AGGREGATED_ORDER_BOOK_UPDATE)
+    } else if (newestSubId.includes('-') && newestSubId.split('-').length === 2) { // is pair name(AGGREGATED_ORDER_BOOK_UPDATE)
       const aobSubscriptions = this.subscriptions[SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE];
       if (aobSubscriptions) {
-        const targetAobSub = Object.entries(aobSubscriptions).find(([, value]) => value?.payload === subscription);
+        const targetAobSub = Object.entries(aobSubscriptions).find(([, value]) => value?.payload === newestSubId);
         if (targetAobSub) {
           const [key] = targetAobSub;
           delete this.subscriptions[SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE]?.[key];
         }
       }
-    } else if (subscription === UnsubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_UNSUBSCRIBE) {
+    } else if (newestSubId === UnsubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_UNSUBSCRIBE) {
       delete this.subscriptions[SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]?.['default'];
     }
   }
