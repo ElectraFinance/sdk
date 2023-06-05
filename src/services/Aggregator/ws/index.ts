@@ -293,7 +293,7 @@ class AggregatorWS {
    */
   getNewestSubscriptionId(id: string): string {
     const newId = this.subIdReplacements[id];
-    if (newId !== undefined) {
+    if (newId !== undefined && newId !== id) {
       return this.getNewestSubscriptionId(newId);
     }
     return id;
