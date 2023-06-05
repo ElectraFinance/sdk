@@ -27,7 +27,6 @@ export const signCFDOrder = async (
   chainId: SupportedChainId,
   stopPrice: BigNumber.Value | undefined,
   isFromDelegate?: boolean,
-  isReversedOrder = false
 ) => {
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
@@ -59,7 +58,6 @@ export const signCFDOrder = async (
       : undefined,
     isPersonalSign: usePersonalSign,
     isFromDelegate,
-    isReversedOrder,
   };
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

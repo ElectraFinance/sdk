@@ -86,7 +86,6 @@ export type CFDOrder = {
   stopPrice?: number | undefined // uint64
   isPersonalSign: boolean // bool
   isFromDelegate?: boolean | undefined // bool
-  isReversedOrder?: boolean | undefined // bool
 }
 
 export type SignedCFDOrder = {

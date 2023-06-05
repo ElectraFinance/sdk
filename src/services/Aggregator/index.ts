@@ -166,6 +166,7 @@ class Aggregator {
     signedOrder: SignedOrder,
     isCreateInternalOrder: boolean,
     partnerId?: string,
+    isReversedOrder?: boolean,
   ) => {
     const headers = {
       'Content-Type': 'application/json',
@@ -173,8 +174,13 @@ class Aggregator {
       ...(partnerId !== undefined) && { 'X-Partner-Id': partnerId },
     };
 
+    const url = new URL(`${this.apiUrl}/api/v1/order/${isCreateInternalOrder ? 'internal' : ''}`);
+
+    if (isReversedOrder ?? false) {
+      url.searchParams.append('reversed', 'true');
+    }
     return fetchWithValidation(
-      `${this.apiUrl}/api/v1/order/${isCreateInternalOrder ? 'internal' : ''}`,
+      url.toString(),
       z.object({
         orderId: z.string(),
         placementRequests: z.array(
