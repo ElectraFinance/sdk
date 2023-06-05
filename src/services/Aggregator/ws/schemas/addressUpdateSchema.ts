@@ -38,6 +38,7 @@ export const orderUpdateSchema = z.object({
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
   c: subOrderSchema.array(),
+  rpnl: z.number().optional(), // realized PnL
 })
   .transform((val) => ({
     ...val,
@@ -50,6 +51,7 @@ export const orderUpdateSchema = z.object({
     liquidated: o.l,
     executionType: o.E,
     triggerCondition: o.C,
+    realizedPnL: o.rpnl,
     subOrders: o.c.map((so) => ({
       pair: so.P,
       exchange: so.e,
@@ -82,6 +84,7 @@ export const fullOrderSchema = z.object({
   c: subOrderSchema.array(),
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
+  rpnl: z.number().optional(), // realized PnL
 }).transform((val) => ({
   ...val,
   k: 'full' as const,
@@ -102,6 +105,7 @@ export const fullOrderSchema = z.object({
   price: o.p,
   executionType: o.E,
   triggerCondition: o.C,
+  realizedPnL: o.rpnl,
   subOrders: o.c.map((so) => ({
     pair: so.P,
     exchange: so.e,
