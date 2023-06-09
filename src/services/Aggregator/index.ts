@@ -172,13 +172,13 @@ class Aggregator {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...(partnerId !== undefined) && { 'X-Partner-Id': partnerId },
+      ...(isReversedOrder !== undefined) && {
+        'X-Reverse-Order': isReversedOrder ? 'true' : 'false',
+      },
     };
 
     const url = new URL(`${this.apiUrl}/api/v1/order/${isCreateInternalOrder ? 'internal' : ''}`);
 
-    if (isReversedOrder ?? false) {
-      url.searchParams.append('reversed', 'true');
-    }
     return fetchWithValidation(
       url.toString(),
       z.object({
