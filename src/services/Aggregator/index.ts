@@ -166,15 +166,11 @@ class Aggregator {
     signedOrder: SignedOrder,
     isCreateInternalOrder: boolean,
     partnerId?: string,
-    isReversedOrder?: boolean,
   ) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...(partnerId !== undefined) && { 'X-Partner-Id': partnerId },
-      ...(isReversedOrder !== undefined) && {
-        'X-Reverse-Order': isReversedOrder ? 'true' : 'false',
-      },
     };
 
     const url = new URL(`${this.apiUrl}/api/v1/order/${isCreateInternalOrder ? 'internal' : ''}`);
@@ -218,11 +214,15 @@ class Aggregator {
   );
 
   placeCFDOrder = (
-    signedOrder: SignedCFDOrder
+    signedOrder: SignedCFDOrder,
+    isReversedOrder?: boolean,
   ) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...(isReversedOrder !== undefined) && {
+        'X-Reverse-Order': isReversedOrder ? 'true' : 'false',
+      },
     };
 
     return fetchWithValidation(
