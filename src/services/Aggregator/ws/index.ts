@@ -23,6 +23,8 @@ import { objectKeys } from '../../../utils/objectKeys.js';
 // import errorSchema from './schemas/errorSchema';
 
 const UNSUBSCRIBE = 'u';
+const SERVER_PING_INTERVAL = 30000;
+const HEARBEAT_THRESHOLD = 5000;
 
 type FuturesTradeInfoPayload = {
   s: string // wallet address
@@ -177,6 +179,8 @@ class AggregatorWS {
 
   private readonly wsUrl: string;
 
+  private isAlive = false;
+
   get api() {
     return this.wsUrl;
   }
@@ -187,28 +191,50 @@ class AggregatorWS {
     this.wsUrl = wsUrl
   }
 
-  // readonly messageQueue: Message[] = [];
+
+  private messageQueue: unknown[] = [];
+  private sendWsMessage(message: unknown) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(message);
+    } else {
+      this.messageQueue.push(message);
+    }
+  }
+  private handleWsOpen = () => {
+    for (const message of this.messageQueue) {
+      this.ws?.send(message);
+    }
+    this.messageQueue = [];
+    this.setupHeartbeat();
+  }
 
   private sendRaw(data: BufferLike) {
-    if (this.ws?.readyState === 1) {
-      this.ws.send(data);
-    } else if (this.ws?.readyState === 0) {
-      setTimeout(() => {
-        this.sendRaw(data);
-      }, 50);
-    }
+    this.sendWsMessage(data);
   }
 
   private send(jsonObject: Json) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      const jsonData = JSON.stringify(jsonObject);
-      this.ws.send(jsonData);
-      this.logger?.(`Sent: ${jsonData}`);
-    } else {
-      setTimeout(() => {
-        this.send(jsonObject);
-      }, 50);
-    }
+    const jsonData = JSON.stringify(jsonObject);
+    this.sendWsMessage(jsonData);
+    this.logger?.(`Sent: ${jsonData}`);
+  }
+
+  private hearbeatIntervalId: number | undefined;
+  private setupHeartbeat() {
+    const heartbeat = () => {
+      if (this.isAlive) {
+        this.isAlive = false;
+      } else {
+        this.logger?.('Heartbeat timeout');
+        this.isClosedIntentionally = true;
+        this.ws?.close(4000);
+      }
+    };
+
+    this.hearbeatIntervalId = setInterval(heartbeat, SERVER_PING_INTERVAL + HEARBEAT_THRESHOLD);
+  }
+  private clearHeartbeat() {
+    this.isAlive = false;
+    clearInterval(this.hearbeatIntervalId);
   }
 
   subscribe<T extends typeof SubscriptionType[keyof typeof SubscriptionType]>(
@@ -386,10 +412,12 @@ class AggregatorWS {
     this.ws.onclose = (event) => {
       this.onWSClose?.(event);
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
+      this.clearHeartbeat();
       if (!this.isClosedIntentionally) this.init(true);
     };
     this.ws.onopen = (e) => {
       this.onWSOpen?.(e);
+      this.handleWsOpen();
       // Re-subscribe to all subscriptions
       if (isReconnect) {
         Object.keys(this.subscriptions)
@@ -408,6 +436,7 @@ class AggregatorWS {
       this.logger?.(`AggregatorWS: connection opened${isReconnect ? ' (reconnect)' : ''}`);
     };
     this.ws.onmessage = (e) => {
+      this.isAlive = true;
       const { data } = e;
       if (typeof data !== 'string') throw new Error('AggregatorWS: received non-string message');
       this.logger?.(`AggregatorWS: received message: ${data}`);
