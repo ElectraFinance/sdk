@@ -6,12 +6,13 @@ export enum historyTransactionType {
   DEPOSIT = 'deposit',
 }
 
-const cfdHistoryItem = z.object({
+const baseHistoryItem = z.object({
   _id: z.string(),
   __v: z.number(),
   address: z.string(),
   instrument: z.string(),
-  instrumentAddress: z.string(),
+  instrumentAddress: z.string().optional(),
+  instrumentIndex: z.number().optional(),
   balance: z.string(),
   amount: z.string(),
   amountNumber: z.string(),
@@ -24,13 +25,13 @@ const cfdHistoryItem = z.object({
   createdAt: z.number(),
 });
 
-const cfdHistorySchema = z
+const baseHistorySchema = z
   .object({
     success: z.boolean(),
     count: z.number(),
     total: z.number(),
     pagination: z.object({}),
-    data: z.array(cfdHistoryItem),
+    data: z.array(baseHistoryItem),
   })
   .transform((response) => {
     return response.data.map((item) => {
@@ -40,7 +41,6 @@ const cfdHistorySchema = z
         transactionHash,
         amountNumber,
         instrument,
-        instrumentAddress,
       } = item;
       const type = historyTransactionType[reason];
 
@@ -49,7 +49,6 @@ const cfdHistorySchema = z
         date: createdAt,
         token: 'USDT',
         instrument,
-        instrumentAddress,
         amount: amountNumber,
         status: HistoryTransactionStatus.DONE,
         transactionHash,
@@ -58,4 +57,10 @@ const cfdHistorySchema = z
     });
   });
 
-export default cfdHistorySchema;
+export const cfdHistorySchema = baseHistorySchema.transform((response) => {
+  return { ...response, instrumentAddress: z.string() };
+});
+
+export const crossMarginHistorySchema = baseHistorySchema.transform((response) => {
+  return { ...response, instrumentIndex: z.number() }
+});

@@ -7,8 +7,10 @@ import {
   infoSchema, historySchema,
   cfdContractsSchema,
   cfdHistorySchema,
+  crossMarginHistorySchema,
   governanceContractsSchema,
   governanceChainsInfoSchema,
+  crossMarginInfoSchema,
 } from './schemas/index.js';
 
 type CfdHistoryQuery = {
@@ -33,8 +35,10 @@ class BlockchainService {
     this.getBlockNumber = this.getBlockNumber.bind(this);
     this.getCFDContracts = this.getCFDContracts.bind(this);
     this.getCFDHistory = this.getCFDHistory.bind(this);
+    this.getCrossMarginHistory = this.getCrossMarginHistory.bind(this);
     this.getGovernanceContracts = this.getGovernanceContracts.bind(this);
     this.getGovernanceChainsInfo = this.getGovernanceChainsInfo.bind(this);
+    this.getCrossMarginInfo = this.getCrossMarginInfo.bind(this);
   }
 
   get blockchainServiceWsUrl() {
@@ -101,6 +105,23 @@ class BlockchainService {
       });
 
     return fetchWithValidation(url.toString(), cfdHistorySchema);
+  };
+
+  getCrossMarginInfo = () => fetchWithValidation(
+    `${this.apiUrl}/api/cfd/cross-margin/info`,
+    crossMarginInfoSchema,
+  );
+
+  getCrossMarginHistory = (address: string, query: CfdHistoryQuery = {}) => {
+    const url = new URL(`${this.apiUrl}/api/cfd/cross-margin/deposit-withdraw/${address}`);
+
+    Object.entries(query)
+      .forEach(([key, value]) => {
+        if (value === undefined) throw new Error('Value must be defined');
+        url.searchParams.append(key, value.toString());
+      });
+
+    return fetchWithValidation(url.toString(), crossMarginHistorySchema);
   };
 }
 
