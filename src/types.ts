@@ -73,10 +73,15 @@ export type Order = {
   isPersonalSign: boolean // bool
 }
 
-export type CFDOrder = {
+export type SignedOrder = {
+  id: string // hash of Order (it's not part of order structure in smart-contract)
+  signature: string // bytes
+  needWithdraw?: boolean // bool (not supported yet by smart-contract)
+} & Order
+
+type BaseFuturesOrder = {
   senderAddress: string // address
   matcherAddress: string // address
-  instrumentAddress: string // address
   amount: number // uint64
   price: number // uint64
   matcherFee: number // uint64
@@ -88,16 +93,23 @@ export type CFDOrder = {
   isFromDelegate?: boolean | undefined // bool
 }
 
+export type CFDOrder = {
+  instrumentAddress: string // address
+} & BaseFuturesOrder
+
 export type SignedCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
 } & CFDOrder
 
-export type SignedOrder = {
+export type CrossMarginOrder = {
+  instrumentIndex: number // index
+} & BaseFuturesOrder
+
+export type SignedCrossMarginOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
-  needWithdraw?: boolean // bool (not supported yet by smart-contract)
-} & Order
+} & CrossMarginOrder
 
 export type CancelOrderRequest = {
   id: number | string
