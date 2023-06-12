@@ -26,12 +26,16 @@ Electra’s SDK is free to use and does not require an API key or registration. 
 - [Install](#install)
 - [Usage](#usage)
 - [Initialization](#initialization)
-- [High level methods](#high-level-methods)
+- [Crosschain methods](#crosschain-methods)
   - [Get pairs](#get-pairs)
-- [Low level methods](#low-level-methods)
+- [Chain-specific methods](#chain-specific-methods)
+  - [Deposit and withdraw](#deposit-and-withdraw)
   - [Get aggregated orderbook](#get-aggregated-orderbook)
   - [Get historical price](#get-historical-price)
   - [Get tradable pairs](#get-tradable-pairs)
+  - [Get deposits and withdrawals](#get-deposits-and-withdrawals)
+  - [Get available contracts](#get-available-contracts)
+  - [Place order](#place-order)
   - [Aggregator WebSocket](#aggregator-websocket)
   - [Balances and order history stream](#balances-and-order-history-stream)
   - [Orderbook stream](#orderbook-stream)
@@ -87,7 +91,7 @@ detectEthereumProvider().then((provider) => {
 });
 ```
 
-## High level methods
+## Crosschain methods
 
 ### Get pairs
 
@@ -101,12 +105,27 @@ const pairs = await electra.getPairs("futures"); // 'futures'
 // }
 ```
 
-## Low level methods
+## Chain-specific methods
+
+### Deposit and withdraw
+
+To make deposits and withdrawals, you need to use package `@electra.finance/contracts`.
+
+```ts
+import { IsolatedMarginCFD__factory } from "@electra.finance/contracts";
+
+const cfdContractAddress = "0x0000000000000000000000000000000000000000";
+const cfdContract = IsolatedMarginCFD__factory.connect(cfdContractAddress, signer);
+
+const deposit = await cfdContract.depositAsset("12423450000"); // Deposit
+const withdraw = await cfdContract.withdrawAsset("12423450000"); // Withdraw
+
+```
 
 ### Get aggregated orderbook
 
 ```ts
-import { simpleFetch } from "@electra.finance/sdk";
+import { simpleFetch } from "simple-typed-fetch";
 
 const orderbook = await simpleFetch(unit.aggregator.getAggregatedOrderbook)(
   "BTCUSDF",
@@ -117,7 +136,7 @@ const orderbook = await simpleFetch(unit.aggregator.getAggregatedOrderbook)(
 ### Get historical price
 
 ```ts
-import { simpleFetch } from "@electra.finance/sdk";
+import { simpleFetch } from "simple-typed-fetch";
 
 const candles = await simpleFetch(unit.priceFeed.getCandles)(
   "BTCUSDF",
@@ -130,9 +149,58 @@ const candles = await simpleFetch(unit.priceFeed.getCandles)(
 ### Get tradable pairs
 
 ```ts
-import { simpleFetch } from "@electra.finance/sdk";
+import { simpleFetch } from "simple-typed-fetch";
 const pairsList = await simpleFetch(unit.aggregator.getPairsList)("futures");
 console.log(pairsList); // ['ETHUSDF, 'BTCUSDF']
+```
+
+### Get deposits and withdrawals
+
+```ts
+import { simpleFetch } from "simple-typed-fetch";
+const depositsAndWithdrawals = await simpleFetch(unit.blockchainService.getCFDHistory)(
+  "0x0000000000000000000000000000000000000000", // Some wallet address
+);
+console.log(depositsAndWithdrawals);
+
+```
+
+### Get available contracts
+
+```ts
+import { simpleFetch } from "simple-typed-fetch";
+const contracts = await simpleFetch(unit.blockchainService.getCFDContracts)();
+console.log(contracts);
+```
+
+### Place order
+
+```ts
+import { simpleFetch } from "simple-typed-fetch";
+import { signCFDOrder } from "@electra.finance/sdk";
+
+const {
+  matcherAddress, // The address that will transfer funds to you during the exchange process
+} = await simpleFetch(unit.blockchainService.getInfo)();
+
+const signedOrder = signCFDOrder(
+  "0x0000000000000000000000000000000000000000", // instrumentAddress, you can retrieve list of available instruments from blockchainService.getCFDContracts()
+  'BUY', // side: 'BUY' | 'SELL'
+  "0.34543", // price
+  "245234.234", // amount
+  "matcherFee", // matcherFee
+  "0xfffffffffffffffffffffffffffffffffffffff", // senderAddress
+  matcherAddress,
+  false, // usePersonalSign
+  signer, // pass here ethers.Signer instance
+  chainId: SupportedChainId.BSC,
+  "0.34", // optional stopPrice
+  false // isFromDelegate — if true, then the order will be placed on behalf of the delegate
+);
+
+const { orderId } =  = await simpleFetch(unit.aggregator.placeCFDOrder)(signedOrder);
+console.log(`Order placed: ${orderId}`);
+
 ```
 
 ### Aggregator WebSocket
