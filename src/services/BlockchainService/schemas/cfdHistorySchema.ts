@@ -25,6 +25,19 @@ const baseHistoryItem = z.object({
   createdAt: z.number(),
 });
 
+type BaseTransform = {
+  type: historyTransactionType
+  date: number
+  token: string
+  instrument: string
+  amount: string
+  status: HistoryTransactionStatus.DONE
+  transactionHash: string
+  user: string
+  instrumentAddress?: string | undefined
+  instrumentIndex?: number | undefined
+}
+
 const baseHistorySchema = z
   .object({
     success: z.boolean(),
@@ -32,35 +45,45 @@ const baseHistorySchema = z
     total: z.number(),
     pagination: z.object({}),
     data: z.array(baseHistoryItem),
-  })
-  .transform((response) => {
-    return response.data.map((item) => {
-      const {
-        createdAt,
-        reason,
-        transactionHash,
-        amountNumber,
-        instrument,
-      } = item;
-      const type = historyTransactionType[reason];
-
-      return {
-        type,
-        date: createdAt,
-        token: 'USDT',
-        instrument,
-        amount: amountNumber,
-        status: HistoryTransactionStatus.DONE,
-        transactionHash,
-        user: item.address,
-      };
-    });
   });
 
-export const cfdHistorySchema = baseHistorySchema.transform((response) => {
-  return { ...response, instrumentAddress: z.string() };
-});
+enum SchemaType {
+  SINGLE = 'single',
+  CROSSMARGIN = 'cross',
+}
 
-export const crossMarginHistorySchema = baseHistorySchema.transform((response) => {
-  return { ...response, instrumentIndex: z.number() }
-});
+const baseTransform = (response: z.infer<typeof baseHistorySchema>, schemaType: SchemaType): BaseTransform[] => {
+  return response.data.map((item) => {
+    const {
+      createdAt,
+      reason,
+      transactionHash,
+      amountNumber,
+      instrument,
+      instrumentAddress,
+      instrumentIndex,
+    } = item;
+    const type = historyTransactionType[reason];
+    const result: BaseTransform = {
+      type,
+      date: createdAt,
+      token: 'USDT',
+      instrument,
+      amount: amountNumber,
+      status: HistoryTransactionStatus.DONE,
+      transactionHash,
+      user: item.address,
+    }
+
+    if (schemaType === SchemaType.SINGLE) {
+      result.instrumentAddress = instrumentAddress;
+    } else {
+      result.instrumentIndex = instrumentIndex;
+    }
+
+    return result;
+  });
+};
+
+export const cfdHistorySchema = baseHistorySchema.transform((response) => baseTransform(response, SchemaType.SINGLE));
+export const crossMarginHistorySchema = baseHistorySchema.transform((response) => baseTransform(response, SchemaType.CROSSMARGIN));
