@@ -208,37 +208,25 @@ console.log(`Order placed: ${orderId}`);
 Available subscriptions:
 
 ```ts
-ADDRESS_UPDATES_SUBSCRIBE = 'aus', // Orders history, balances info
+CFD_ADDRESS_UPDATES_SUBSCRIBE = 'ausf', // Orders history, positions info, balances info
 AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE = 'aobus', // Bids and asks
-ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE = 'apcus',
 ```
 
 ### Balances and order history stream
 
 ```ts
 unit.aggregator.ws.subscribe(
-  "aus", // ADDRESS_UPDATES_SUBSCRIBE — orders, balances
+  "ausf", // CFD_ADDRESS_UPDATES_SUBSCRIBE — orders, positions, balances
   {
     payload: "0x0000000000000000000000000000000000000000", // Some wallet address
     callback: (data) => {
       switch (data.kind) {
         case "initial":
           if (data.orders) console.log(data.orders); // All orders. "orders" is undefined if you don't have any orders yet
-          console.log(data.balances); // Since this is initial message, the balances contain all assets
+          if (data.balances) console.log(data.balances); // All balances
           break;
         case "update": {
-          if (data.order) {
-            switch (data.order.kind) {
-              case "full":
-                console.log("Pool order", data.order); // Orders from the pool go into history with the SETTLED status
-                break;
-              case "update":
-                console.log("Order in the process of execution", data.order);
-                break;
-              default:
-                break;
-            }
-          }
+          if (data.orders) console.log("Order update", data.orders); // Since this is an update message, the orders only contain the changed orders
           if (data.balances) console.log("Balance update", data.balances); // Since this is an update message, the balances only contain the changed assets
         }
       }
