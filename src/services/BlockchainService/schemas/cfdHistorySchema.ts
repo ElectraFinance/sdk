@@ -54,26 +54,18 @@ const baseHistoryItemTransform = (item: z.infer<typeof baseHistoryItem>) => {
   return result;
 };
 
-function cfdHistoryTransform(response: z.infer<typeof cfdHistory>) {
-  return {
-    ...response,
-    data: response.data.map(({ instrumentAddress, ...item }) => ({
-      ...baseHistoryItemTransform(item),
-      instrumentAddress,
-    })),
-  };
-}
-function crossMarginHistoryTransform(
-  response: z.infer<typeof crossMarginHistory>
-) {
-  return {
-    ...response,
-    data: response.data.map(({ instrumentIndex, ...item }) => ({
-      ...baseHistoryItemTransform(item),
-      instrumentIndex,
-    })),
-  };
-}
+const cfdHistoryTransform = (response: z.infer<typeof cfdHistory>) => (
+  response.data.map(({ instrumentAddress, ...item }) => ({
+    ...baseHistoryItemTransform(item),
+    instrumentAddress,
+  }))
+);
+const crossMarginHistoryTransform = (response: z.infer<typeof crossMarginHistory>) => (
+  response.data.map(({ instrumentIndex, ...item }) => ({
+    ...baseHistoryItemTransform(item),
+    instrumentIndex,
+  }))
+);
 
 export const cfdHistorySchema = cfdHistory.transform(cfdHistoryTransform);
 export const crossMarginHistorySchema = crossMarginHistory.transform(
