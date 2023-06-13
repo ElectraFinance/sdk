@@ -11,8 +11,6 @@ const baseHistoryItem = z.object({
   __v: z.number(),
   address: z.string(),
   instrument: z.string(),
-  instrumentAddress: z.string().optional(),
-  instrumentIndex: z.number().optional(),
   balance: z.string(),
   amount: z.string(),
   amountNumber: z.string(),
@@ -25,65 +23,59 @@ const baseHistoryItem = z.object({
   createdAt: z.number(),
 });
 
-type BaseTransform = {
-  type: historyTransactionType
-  date: number
-  token: string
-  instrument: string
-  amount: string
-  status: HistoryTransactionStatus.DONE
-  transactionHash: string
-  user: string
-  instrumentAddress?: string | undefined
-  instrumentIndex?: number | undefined
-}
+const baseHistorySchema = z.object({
+  success: z.boolean(),
+  count: z.number(),
+  total: z.number(),
+  pagination: z.object({}),
+});
 
-const baseHistorySchema = z
-  .object({
-    success: z.boolean(),
-    count: z.number(),
-    total: z.number(),
-    pagination: z.object({}),
-    data: z.array(baseHistoryItem),
-  });
+const cfdHistory = baseHistorySchema.extend({
+  data: z.array(baseHistoryItem.extend({ instrumentAddress: z.string() })),
+});
+const crossMarginHistory = baseHistorySchema.extend({
+  data: z.array(baseHistoryItem.extend({ instrumentIndex: z.number() })),
+});
 
-enum SchemaType {
-  SINGLE = 'single',
-  CROSSMARGIN = 'cross',
-}
+const baseHistoryItemTransform = (item: z.infer<typeof baseHistoryItem>) => {
+  const { createdAt, reason, transactionHash, amountNumber, instrument } = item;
+  const type = historyTransactionType[reason];
+  const result = {
+    type,
+    date: createdAt,
+    token: 'USDT',
+    instrument,
+    amount: amountNumber,
+    status: HistoryTransactionStatus.DONE,
+    transactionHash,
+    user: item.address,
+  };
 
-const baseTransform = (response: z.infer<typeof baseHistorySchema>, schemaType: SchemaType): BaseTransform[] => {
-  return response.data.map((item) => {
-    const {
-      createdAt,
-      reason,
-      transactionHash,
-      amountNumber,
-      instrument,
-      instrumentAddress,
-      instrumentIndex,
-    } = item;
-    const type = historyTransactionType[reason];
-    const result: BaseTransform = {
-      type,
-      date: createdAt,
-      token: 'USDT',
-      instrument,
-      amount: amountNumber,
-      status: HistoryTransactionStatus.DONE,
-      transactionHash,
-      user: item.address,
-    }
-
-    if (schemaType === SchemaType.SINGLE) {
-      result.instrumentAddress = instrumentAddress;
-    } else {
-      result.instrumentIndex = instrumentIndex;
-    }
-
-    return result;
-  });
+  return result;
 };
 
-export const cfdHistorySchema = baseHistorySchema.transform((response) => baseTransform(response, SchemaType.SINGLE));
-export const crossMarginHistorySchema = baseHistorySchema.transform((response) => baseTransform(response, SchemaType.CROSSMARGIN));
+function cfdHistoryTransform(response: z.infer<typeof cfdHistory>) {
+  return {
+    ...response,
+    data: response.data.map(({ instrumentAddress, ...item }) => ({
+      ...baseHistoryItemTransform(item),
+      instrumentAddress,
+    })),
+  };
+}
+function crossMarginHistoryTransform(
+  response: z.infer<typeof crossMarginHistory>
+) {
+  return {
+    ...response,
+    data: response.data.map(({ instrumentIndex, ...item }) => ({
+      ...baseHistoryItemTransform(item),
+      instrumentIndex,
+    })),
+  };
+}
+
+export const cfdHistorySchema = cfdHistory.transform(cfdHistoryTransform);
+export const crossMarginHistorySchema = crossMarginHistory.transform(
+  crossMarginHistoryTransform
+);
