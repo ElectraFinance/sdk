@@ -193,7 +193,7 @@ class AggregatorWS {
 
 
   private messageQueue: unknown[] = [];
-  private sendWsMessage(message: unknown) {
+  private sendWsMessage(message: any) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(message);
     } else {
