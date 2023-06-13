@@ -3,11 +3,8 @@ import exchangeInfoSchema from './schemas/exchangeInfoSchema.js';
 import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws/index.js';
-import type { Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedOrder } from '../../types.js';
-import { pairConfigSchema } from './schemas/index.js';
-import {
-  aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema,
-} from './schemas/aggregatedOrderbookSchema.js';
+import type { Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginOrder, SignedOrder } from '../../types.js';
+import { pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema } from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
 import httpToWS from '../../utils/httpToWS.js';
 import { ethers } from 'ethers';
@@ -36,6 +33,7 @@ class Aggregator {
     this.getPairsList = this.getPairsList.bind(this);
     this.placeOrder = this.placeOrder.bind(this);
     this.placeCFDOrder = this.placeCFDOrder.bind(this);
+    this.placeCrossMarginOrder = this.placeCrossMarginOrder.bind(this);
     this.cancelOrder = this.cancelOrder.bind(this);
     this.checkWhitelisted = this.checkWhitelisted.bind(this);
     this.getLockedBalance = this.getLockedBalance.bind(this);
@@ -223,6 +221,35 @@ class Aggregator {
       ...(isReversedOrder !== undefined) && {
         'X-Reverse-Order': isReversedOrder ? 'true' : 'false',
       },
+    };
+
+    return fetchWithValidation(
+      `${this.apiUrl}/api/v1/order/futures`,
+      z.object({
+        orderId: z.string(),
+        placementRequests: z.array(
+          z.object({
+            amount: z.number(),
+            brokerAddress: z.string(),
+            exchange: z.string(),
+          }),
+        ).optional(),
+      }),
+      {
+        headers,
+        method: 'POST',
+        body: JSON.stringify(signedOrder),
+      },
+      errorSchema,
+    );
+  };
+
+  placeCrossMarginOrder = (
+    signedOrder: SignedCrossMarginOrder,
+  ) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     };
 
     return fetchWithValidation(

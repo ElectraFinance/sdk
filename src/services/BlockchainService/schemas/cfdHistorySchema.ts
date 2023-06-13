@@ -6,12 +6,11 @@ export enum historyTransactionType {
   DEPOSIT = 'deposit',
 }
 
-const cfdHistoryItem = z.object({
+const baseHistoryItem = z.object({
   _id: z.string(),
   __v: z.number(),
   address: z.string(),
   instrument: z.string(),
-  instrumentAddress: z.string(),
   balance: z.string(),
   amount: z.string(),
   amountNumber: z.string(),
@@ -24,38 +23,51 @@ const cfdHistoryItem = z.object({
   createdAt: z.number(),
 });
 
-const cfdHistorySchema = z
-  .object({
-    success: z.boolean(),
-    count: z.number(),
-    total: z.number(),
-    pagination: z.object({}),
-    data: z.array(cfdHistoryItem),
-  })
-  .transform((response) => {
-    return response.data.map((item) => {
-      const {
-        createdAt,
-        reason,
-        transactionHash,
-        amountNumber,
-        instrument,
-        instrumentAddress,
-      } = item;
-      const type = historyTransactionType[reason];
+const baseHistorySchema = z.object({
+  success: z.boolean(),
+  count: z.number(),
+  total: z.number(),
+  pagination: z.object({}),
+});
 
-      return {
-        type,
-        date: createdAt,
-        token: 'USDT',
-        instrument,
-        instrumentAddress,
-        amount: amountNumber,
-        status: HistoryTransactionStatus.DONE,
-        transactionHash,
-        user: item.address,
-      };
-    });
-  });
+const cfdHistory = baseHistorySchema.extend({
+  data: z.array(baseHistoryItem.extend({ instrumentAddress: z.string() })),
+});
+const crossMarginHistory = baseHistorySchema.extend({
+  data: z.array(baseHistoryItem.extend({ instrumentIndex: z.number() })),
+});
 
-export default cfdHistorySchema;
+const baseHistoryItemTransform = (item: z.infer<typeof baseHistoryItem>) => {
+  const { createdAt, reason, transactionHash, amountNumber, instrument } = item;
+  const type = historyTransactionType[reason];
+  const result = {
+    type,
+    date: createdAt,
+    token: 'USDT',
+    instrument,
+    amount: amountNumber,
+    status: HistoryTransactionStatus.DONE,
+    transactionHash,
+    user: item.address,
+  };
+
+  return result;
+};
+
+const cfdHistoryTransform = (response: z.infer<typeof cfdHistory>) => (
+  response.data.map(({ instrumentAddress, ...item }) => ({
+    ...baseHistoryItemTransform(item),
+    instrumentAddress,
+  }))
+);
+const crossMarginHistoryTransform = (response: z.infer<typeof crossMarginHistory>) => (
+  response.data.map(({ instrumentIndex, ...item }) => ({
+    ...baseHistoryItemTransform(item),
+    instrumentIndex,
+  }))
+);
+
+export const cfdHistorySchema = cfdHistory.transform(cfdHistoryTransform);
+export const crossMarginHistorySchema = crossMarginHistory.transform(
+  crossMarginHistoryTransform
+);
