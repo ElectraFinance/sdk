@@ -80,12 +80,12 @@ export const fullOrderSchema = z.object({
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
   c: subOrderSchema.array(),
+  E: z.enum(executionTypes).optional(), // execution type
+  C: z.string().optional(), // trigger condition
 
   // CFD only
   L: z.number().optional(), // stop limit price,
   l: z.boolean().optional(), // is liquidation order
-  E: z.enum(executionTypes).optional(), // execution type
-  C: z.string().optional(), // trigger condition
   rpnl: z.number().optional(), // realized PnL
 }).transform((val) => ({
   ...val,
