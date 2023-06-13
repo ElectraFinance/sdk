@@ -75,13 +75,15 @@ export const fullOrderSchema = z.object({
   p: z.number(), // price
   F: z.string().toUpperCase(), // fee asset
   f: z.number(), // fee
-  l: z.boolean().optional(), // is liquidation order
-  L: z.number().optional(), // stop limit price,
   o: z.boolean(), // internal only
   S: z.enum(orderStatuses), // status
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
   c: subOrderSchema.array(),
+
+  // CFD only
+  L: z.number().optional(), // stop limit price,
+  l: z.boolean().optional(), // is liquidation order
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
   rpnl: z.number().optional(), // realized PnL
@@ -94,8 +96,6 @@ export const fullOrderSchema = z.object({
   settledAmount: o.A,
   feeAsset: o.F,
   fee: o.f,
-  liquidated: o.l,
-  stopPrice: o.L,
   status: o.S,
   date: o.T,
   clientOrdId: o.O,
@@ -103,6 +103,8 @@ export const fullOrderSchema = z.object({
   pair: o.P,
   amount: o.a,
   price: o.p,
+  stopPrice: o.L,
+  liquidated: o.l,
   executionType: o.E,
   triggerCondition: o.C,
   realizedPnL: o.rpnl,

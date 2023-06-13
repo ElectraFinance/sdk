@@ -223,11 +223,56 @@ unit.aggregator.ws.subscribe(
       switch (data.kind) {
         case "initial":
           if (data.orders) console.log(data.orders); // All orders. "orders" is undefined if you don't have any orders yet
+          // Orders is array of objects with the following structure:
+          // {
+          //  id: string                       // Order ID
+          //  settledAmount: number            // Settled amount
+          //  feeAsset: string                 // Fee asset
+          //  fee: number                      // Fee
+          //  status: "NEW" | "ACCEPTED" | "PARTIALLY_FILLED" | "FILLED" | "TX_PENDING" | "CANCELED" | "REJECTED" | "FAILED" | "SETTLED" | "NOT_FOUND" | "ROUTING"
+          //  date: number                     // Creation time / unix timestamp
+          //  clientOrdId: string              // sender (owner)
+          //  type: "BUY" | "SELL"             // Order type
+          //  pair: string                     // Pair
+          //  amount: number                   // Amount
+          //  price: number                    // Price
+          //  stopPrice: number | undefined    // Stop price
+          //  liquidated: boolean | undefined  // Is liquidated
+          //  executionType: "LIMIT" | "STOP_LIMIT" | undefined
+          //  triggerCondition: string | undefined
+          //  realizedPnL: number | undefined
+          //  subOrders: SubOrder[]
+          // }
           if (data.balances) console.log(data.balances); // All balances
+          // Balances is array of objects with the following structure:
+          // {
+          //  instrument: string,
+          //  balance: string,       
+          //  profitLoss: string,    
+          //  fundingRate: string,   
+          //  equity: string,       
+          //  position: string,      
+          //  currentPrice: string,  
+          //  positionPrice: string, 
+          //  reserves: string,      
+          //  margin: string,        
+          //  marginUSD: string,
+          //  freeMarginUSD: string,
+          //  availableWithdrawBalance: string,
+          //  leverage: string,
+          //  status: "SHORT" | "LONG" | "CLOSING" | "LIQUIDATION" | "ZERO"
+          //  longFundingRatePerSecond: string,
+          //  longFundingRatePerDay: string,
+          //  shortFundingRatePerSecond: string,
+          //  shortFundingRatePerDay: string,
+          //  stopOutPrice: string | undefined,
+          // }
           break;
         case "update": {
-          if (data.orders) console.log("Order update", data.orders); // Since this is an update message, the orders only contain the changed orders
-          if (data.balances) console.log("Balance update", data.balances); // Since this is an update message, the balances only contain the changed assets
+          if (data.order) console.log("Order update", data.order); // Since this is an update message, the "order" only contain the changed order
+          // Data structure is similar to the structure of the "initial" message. See details: https://github.com/ElectraFinance/sdk/blob/main/src/services/Aggregator/ws/schemas/addressUpdateSchema.ts#L32
+          if (data.balances) console.log("Balances update", data.balances); // Since this is an update message, the balances only contain the changed assets
+          // Data structure is the same as in "initial" message
         }
       }
     },
