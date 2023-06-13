@@ -204,16 +204,16 @@ class AggregatorWS {
     this.wsUrl = wsUrl
   }
 
-
-  private messageQueue: any[] = [];
-  private sendWsMessage(message: any) {
+  private messageQueue: BufferLike[] = [];
+  private sendWsMessage(message: BufferLike) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(message);
     } else {
       this.messageQueue.push(message);
     }
   }
-  private handleWsOpen = () => {
+
+  private readonly handleWsOpen = () => {
     for (const message of this.messageQueue) {
       this.ws?.send(message);
     }
@@ -231,7 +231,7 @@ class AggregatorWS {
     this.logger?.(`Sent: ${jsonData}`);
   }
 
-  private hearbeatIntervalId: number | undefined;
+  private hearbeatIntervalId: NodeJS.Timer | undefined;
   private setupHeartbeat() {
     const heartbeat = () => {
       if (this.isAlive) {
@@ -245,6 +245,7 @@ class AggregatorWS {
 
     this.hearbeatIntervalId = setInterval(heartbeat, SERVER_PING_INTERVAL + HEARBEAT_THRESHOLD);
   }
+
   private clearHeartbeat() {
     this.isAlive = false;
     clearInterval(this.hearbeatIntervalId);
