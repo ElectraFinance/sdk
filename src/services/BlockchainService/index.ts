@@ -36,9 +36,9 @@ class BlockchainService {
     this.getCFDContracts = this.getCFDContracts.bind(this);
     this.getCFDHistory = this.getCFDHistory.bind(this);
     this.getCrossMarginHistory = this.getCrossMarginHistory.bind(this);
+    this.getCrossMarginInfo = this.getCrossMarginInfo.bind(this);
     this.getGovernanceContracts = this.getGovernanceContracts.bind(this);
     this.getGovernanceChainsInfo = this.getGovernanceChainsInfo.bind(this);
-    this.getCrossMarginInfo = this.getCrossMarginInfo.bind(this);
   }
 
   get blockchainServiceWsUrl() {
