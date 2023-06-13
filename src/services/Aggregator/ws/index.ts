@@ -26,6 +26,19 @@ const UNSUBSCRIBE = 'u';
 const SERVER_PING_INTERVAL = 30000;
 const HEARBEAT_THRESHOLD = 5000;
 
+const messageSchema = z.union([
+  initMessageSchema,
+  pingPongMessageSchema,
+  addressUpdateSchema,
+  cfdAddressUpdateSchema,
+  assetPairsConfigSchema,
+  assetPairConfigSchema,
+  orderBookSchema,
+  futuresTradeInfoSchema,
+  errorSchema,
+  unsubscriptionDoneSchema,
+]);
+
 type FuturesTradeInfoPayload = {
   s: string // wallet address
   i: string // pair
@@ -192,7 +205,7 @@ class AggregatorWS {
   }
 
 
-  private messageQueue: unknown[] = [];
+  private messageQueue: any[] = [];
   private sendWsMessage(message: any) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(message);
@@ -441,19 +454,6 @@ class AggregatorWS {
       if (typeof data !== 'string') throw new Error('AggregatorWS: received non-string message');
       this.logger?.(`AggregatorWS: received message: ${data}`);
       const rawJson: unknown = JSON.parse(data);
-
-      const messageSchema = z.union([
-        initMessageSchema,
-        pingPongMessageSchema,
-        addressUpdateSchema,
-        cfdAddressUpdateSchema,
-        assetPairsConfigSchema,
-        assetPairConfigSchema,
-        orderBookSchema,
-        futuresTradeInfoSchema,
-        errorSchema,
-        unsubscriptionDoneSchema,
-      ]);
 
       const json = messageSchema.parse(rawJson);
 
