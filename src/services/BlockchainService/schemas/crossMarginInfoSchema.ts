@@ -1,17 +1,14 @@
 import { z } from 'zod';
 
 const crossMarginCFDItemInfo = z.object({
-  index: z.number(),
-  alias: z.string(),
+  id: z.number(),
   name: z.string(),
-  leverage: z.string(),
-  longFR: z.string(),
-  shortFR: z.string(),
-  longFRStored: z.string(),
-  shortFRStored: z.string(),
+  leverage: z.number(),
+  longFR: z.number(),
+  shortFR: z.number(),
+  longFRStored: z.number(),
+  shortFRStored: z.number(),
   lastFRPriceUpdateTime: z.number(),
-  feePercent: z.number(),
-  withdrawMarginLevel: z.number(),
 });
 
 const crossMarginInfoSchema = z.object({
