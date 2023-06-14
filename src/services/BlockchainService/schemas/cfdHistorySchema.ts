@@ -10,14 +10,10 @@ const baseHistoryItem = z.object({
   _id: z.string(),
   __v: z.number(),
   address: z.string(),
-  instrument: z.string(),
   balance: z.string(),
   amount: z.string(),
   amountNumber: z.string(),
-  position: z.string(),
   reason: z.enum(['WITHDRAW', 'DEPOSIT']),
-  positionPrice: z.string(),
-  fundingRate: z.string(),
   transactionHash: z.string(),
   blockNumber: z.number(),
   createdAt: z.number(),
@@ -31,20 +27,25 @@ const baseHistorySchema = z.object({
 });
 
 const cfdHistory = baseHistorySchema.extend({
-  data: z.array(baseHistoryItem.extend({ instrumentAddress: z.string() })),
+  data: z.array(baseHistoryItem.extend({
+    instrumentAddress: z.string(),
+    instrument: z.string(),
+    position: z.string(),
+    positionPrice: z.string(),
+    fundingRate: z.string(),
+  })),
 });
 const crossMarginHistory = baseHistorySchema.extend({
-  data: z.array(baseHistoryItem.extend({ instrumentIndex: z.number() })),
+  data: z.array(baseHistoryItem),
 });
 
 const baseHistoryItemTransform = (item: z.infer<typeof baseHistoryItem>) => {
-  const { createdAt, reason, transactionHash, amountNumber, instrument } = item;
+  const { createdAt, reason, transactionHash, amountNumber } = item;
   const type = historyTransactionType[reason];
   const result = {
     type,
     date: createdAt,
     token: 'USDT',
-    instrument,
     amount: amountNumber,
     status: HistoryTransactionStatus.DONE,
     transactionHash,
@@ -55,16 +56,24 @@ const baseHistoryItemTransform = (item: z.infer<typeof baseHistoryItem>) => {
 };
 
 const cfdHistoryTransform = (response: z.infer<typeof cfdHistory>) => (
-  response.data.map(({ instrumentAddress, ...item }) => ({
+  response.data.map(({
+    instrumentAddress,
+    instrument,
+    position,
+    positionPrice,
+    fundingRate,
+    ...item
+  }) => ({
     ...baseHistoryItemTransform(item),
     instrumentAddress,
+    instrument,
+    position,
+    positionPrice,
+    fundingRate,
   }))
 );
 const crossMarginHistoryTransform = (response: z.infer<typeof crossMarginHistory>) => (
-  response.data.map(({ instrumentIndex, ...item }) => ({
-    ...baseHistoryItemTransform(item),
-    instrumentIndex,
-  }))
+  response.data.map(baseHistoryItemTransform)
 );
 
 export const cfdHistorySchema = cfdHistory.transform(cfdHistoryTransform);
