@@ -48,7 +48,7 @@ const getTransformedSubOrder = (subOrders: TSubOrder[]) => {
 
 export const orderUpdateSchema = z.object({
   I: z.string(), // id
-  A: z.number(), // settled amount
+  A: z.string(), // settled amount
   S: z.enum(orderStatuses), // status
   l: z.boolean().optional(), // is liquidation order
   t: z.number(), // update time
