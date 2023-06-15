@@ -1,51 +1,72 @@
 import { z } from 'zod';
 import positionStatuses from '../../../../constants/positionStatuses.js';
 
+const sbiSchema = z
+  .object({
+    i: z.string(), // instrument
+    s: z.enum(positionStatuses), // position status
+    cp: z.string(), // current price
+    pnl: z.string(), // floating profit & loss
+    fr: z.string(), // accumulated funding rate
+    p: z.string(), // position
+    pp: z.string(), // position price
+    mu: z.string(), // margin in USD
+    fmu: z.string(), // free margin in USD
+    l: z.string(), // leverage
+    lfrs: z.string(), // long funding rate per second
+    lfrd: z.string(), // long funding rate per day
+    sfrs: z.string(), // short funding rate per second
+    sfrd: z.string(), // short funding rate per day
+    sop: z.string().optional() // stop out price
+  })
+
 const cfdBalanceSchema = z
   .object({
-    i: z.string(),
-    b: z.string(),
-    pnl: z.string(),
-    fr: z.string(),
-    e: z.string(),
-    p: z.string(),
-    cp: z.string(),
-    pp: z.string(),
-    r: z.string(),
-    m: z.string(),
-    mu: z.string(),
-    fmu: z.string(),
-    awb: z.string(),
-    l: z.string(),
-    s: z.enum(positionStatuses),
-    lfrs: z.string(),
-    lfrd: z.string(),
-    sfrs: z.string(),
-    sfrd: z.string(),
-    sop: z.string().optional(),
+    b: z.string(), // balance
+    pnl: z.string(), // total floating profit & loss
+    fr: z.string(), // total accumulated funding rate
+    e: z.string(), // equity
+    r: z.string(), // total reserves
+    m: z.string(), // total margin
+    mu: z.string(), // total margin in USD
+    fmu: z.string(), // total free margin in USD
+    awb: z.string(), // available withdraw balance
+    sbi: sbiSchema.array() // states by instruments
   })
-  .transform((obj) => ({
-    instrument: obj.i,
-    balance: obj.b,
-    profitLoss: obj.pnl,
-    fundingRate: obj.fr,
-    equity: obj.e,
-    position: obj.p,
-    currentPrice: obj.cp,
-    positionPrice: obj.pp,
-    reserves: obj.r,
-    margin: obj.m,
-    marginUSD: obj.mu,
-    freeMarginUSD: obj.fmu,
-    availableWithdrawBalance: obj.awb,
-    leverage: obj.l,
-    status: obj.s,
-    longFundingRatePerSecond: obj.lfrs,
-    longFundingRatePerDay: obj.lfrd,
-    shortFundingRatePerSecond: obj.sfrs,
-    shortFundingRatePerDay: obj.sfrd,
-    stopOutPrice: obj.sop,
-  }));
+  .transform((obj) => {
+    const sbi = obj.sbi.map((state) => {
+      return {
+        instrument: state.i,
+        positionStatus: state.s,
+        currentPrice: state.cp,
+        floatingProfitLoss: state.pnl,
+        accumulatedFundingRate: state.fr,
+        position: state.p,
+        positionPrice: state.pp,
+        marginUSD: state.mu,
+        freeMarginUSD: state.fmu,
+        leverage: state.l,
+        longFundingRatePerSecond: state.lfrs,
+        longFundingRatePerDay: state.lfrd,
+        shortFundingRatePerSecond: state.sfrs,
+        shortFundingRatePerDay: state.sfrd,
+        stopOutPrice: state.sop,
+      }
+    });
+
+    return {
+      balance: obj.b,
+      profitLoss: obj.pnl,
+      fundingRate: obj.fr,
+      equity: obj.e,
+      reserves: obj.r,
+      margin: obj.m,
+      marginUSD: obj.mu,
+      freeMarginUSD: obj.fmu,
+      availableWithdrawBalance: obj.awb,
+      statesByInstruments: sbi,
+    }
+  });
 
 const cfdBalancesSchema = z.array(cfdBalanceSchema);
 

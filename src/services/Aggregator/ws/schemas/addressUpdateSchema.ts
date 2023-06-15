@@ -18,16 +18,33 @@ const subOrderSchema = z.object({
   i: z.number(), // id
   I: z.string(), // parent order id
   O: z.string(), // sender (owner)
-  P: z.string().toUpperCase(), // asset pair
-  s: z.enum(['BUY', 'SELL']), // side
-  a: z.number(), // amount
-  A: z.number(), // settled amount
-  p: z.number(), // avg weighed settlement price
+  P: z.string().toUpperCase(), // instrument
+  s: z.enum(['buy', 'sell']), // side
+  a: z.string(), // amount
+  A: z.string(), // settled amount
+  p: z.string(), // price
   e: z.enum(exchanges), // exchange
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
-  o: z.boolean(), // internal only
 });
+
+type TSubOrder = z.infer<typeof subOrderSchema>
+
+const getTransformedSubOrder = (subOrders: TSubOrder[]) => {
+  return subOrders.map((so) => ({
+    id: so.i,
+    parentId: so.I,
+    sender: so.O,
+    instrument: so.P,
+    side: so.s,
+    amount: so.a,
+    settledAmount: so.A,
+    price: so.p,
+    exchange: so.e,
+    brokerAddress: so.b,
+    status: so.S,
+  }))
+}
 
 export const orderUpdateSchema = z.object({
   I: z.string(), // id
@@ -37,8 +54,8 @@ export const orderUpdateSchema = z.object({
   t: z.number(), // update time
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
-  c: subOrderSchema.array(),
   rpnl: z.number().optional(), // realized PnL
+  c: subOrderSchema.array(), // sub orders (content)
 })
   .transform((val) => ({
     ...val,
@@ -52,39 +69,29 @@ export const orderUpdateSchema = z.object({
     executionType: o.E,
     triggerCondition: o.C,
     realizedPnL: o.rpnl,
-    subOrders: o.c.map((so) => ({
-      pair: so.P,
-      exchange: so.e,
-      id: so.i,
-      amount: so.a,
-      settledAmount: so.A,
-      price: so.p,
-      status: so.S,
-      side: so.s,
-      subOrdQty: so.A,
-    })),
+    subOrders: getTransformedSubOrder(o.c),
   }));
 
 export const fullOrderSchema = z.object({
   I: z.string(), // id
   O: z.string(), // sender (owner)
   P: z.string().toUpperCase(), // asset pair
-  s: z.enum(['BUY', 'SELL']), // side
-  a: z.number(), // amount
-  A: z.number(), // settled amount
-  p: z.number(), // price
+  s: z.enum(['buy', 'sell']), // side
+  a: z.string(), // amount
+  A: z.string(), // settled amount
+  p: z.string(), // signed price
+  E: z.enum(executionTypes).optional(), // execution type
+  C: z.string().optional(), // trigger condition
   F: z.string().toUpperCase(), // fee asset
-  f: z.number(), // fee
+  f: z.string(), // fee
   o: z.boolean(), // internal only
   S: z.enum(orderStatuses), // status
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
-  c: subOrderSchema.array(),
-  E: z.enum(executionTypes).optional(), // execution type
-  C: z.string().optional(), // trigger condition
+  c: subOrderSchema.array(), // sub orders (content)
 
   // CFD only
-  L: z.number().optional(), // stop limit price,
+  L: z.string().optional(), // stop limit price,
   l: z.boolean().optional(), // is liquidation order
   rpnl: z.number().optional(), // realized PnL
 }).transform((val) => ({
@@ -100,7 +107,7 @@ export const fullOrderSchema = z.object({
   date: o.T,
   clientOrdId: o.O,
   type: o.s,
-  pair: o.P,
+  instrument: o.P,
   amount: o.a,
   price: o.p,
   stopPrice: o.L,
@@ -108,17 +115,7 @@ export const fullOrderSchema = z.object({
   executionType: o.E,
   triggerCondition: o.C,
   realizedPnL: o.rpnl,
-  subOrders: o.c.map((so) => ({
-    pair: so.P,
-    exchange: so.e,
-    id: so.i,
-    amount: so.a,
-    settledAmount: so.A,
-    price: so.p,
-    status: so.S,
-    side: so.s,
-    subOrdQty: so.A,
-  })),
+  subOrders: getTransformedSubOrder(o.c),
 }));
 
 const updateMessageSchema = baseAddressUpdate.extend({
