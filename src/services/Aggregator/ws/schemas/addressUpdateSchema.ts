@@ -19,7 +19,7 @@ const subOrderSchema = z.object({
   I: z.string(), // parent order id
   O: z.string(), // sender (owner)
   P: z.string().toUpperCase(), // instrument
-  s: z.enum(['buy', 'sell']), // side
+  s: z.enum(['BUY', 'SELL']), // side
   a: z.string(), // amount
   A: z.string(), // settled amount
   p: z.string(), // price
@@ -76,7 +76,7 @@ export const fullOrderSchema = z.object({
   I: z.string(), // id
   O: z.string(), // sender (owner)
   P: z.string().toUpperCase(), // asset pair
-  s: z.enum(['buy', 'sell']), // side
+  s: z.enum(['BUY', 'SELL']), // side
   a: z.string(), // amount
   A: z.string(), // settled amount
   p: z.string(), // signed price
