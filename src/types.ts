@@ -35,27 +35,35 @@ export type Balance = {
 
 export type PositionStatus = typeof positionStatuses[number];
 
-export type CFDBalance = {
+type StatesByInstrument = {
   instrument: string
-  balance: string
-  profitLoss: string
-  fundingRate: string
-  equity: string
-  position: string
+  positionStatus: PositionStatus
   currentPrice: string
+  floatingProfitLoss: string
+  accumulatedFundingRate: string
+  position: string
   positionPrice: string
-  reserves: string
-  margin: string
   marginUSD: string
   freeMarginUSD: string
-  availableWithdrawBalance: string
   leverage: string
-  status: PositionStatus
   longFundingRatePerSecond: string
   longFundingRatePerDay: string
   shortFundingRatePerSecond: string
   shortFundingRatePerDay: string
   stopOutPrice: string | undefined
+}
+
+export type CFDBalance = {
+  balance: string
+  profitLoss: string
+  fundingRate: string
+  equity: string
+  reserves: string
+  margin: string
+  marginUSD: string
+  freeMarginUSD: string
+  availableWithdrawBalance: string
+  statesByInstruments: StatesByInstrument[]
 }
 
 export type Order = {
