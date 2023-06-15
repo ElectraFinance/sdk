@@ -8,7 +8,7 @@ export const orderBookItemSchema = z.tuple([
   z.string(), // size
   z.array(
     z.enum(exchanges),
-  ), // exchanges
+  ).optional(), // exchanges
   z.array(z.tuple([
     z.enum(['SELL', 'BUY']), // side
     z.string().toUpperCase(), // pairname

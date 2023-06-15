@@ -23,7 +23,7 @@ const subOrderSchema = z.object({
   a: z.number(), // amount
   A: z.number(), // settled amount
   p: z.number(), // avg weighed settlement price
-  e: z.enum(exchanges), // exchange
+  e: z.enum(exchanges).optional(), // exchange
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
   o: z.boolean(), // internal only

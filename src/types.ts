@@ -203,7 +203,7 @@ export type Exchange = typeof exchanges[number];
 export type OrderbookItem = {
   price: string
   amount: string
-  exchanges: Exchange[]
+  exchanges?: Exchange[] | undefined
   vob: Array<{
     side: 'BUY' | 'SELL'
     pairName: string

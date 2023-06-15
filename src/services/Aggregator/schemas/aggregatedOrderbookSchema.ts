@@ -12,7 +12,7 @@ const orderbookElementSchema = z.object({
 
 const aggregatedOrderbookElementSchema = orderbookElementSchema
   .extend({
-    exchanges: z.enum(exchanges).array(),
+    exchanges: z.enum(exchanges).array().optional(),
   });
 
 export const aggregatedOrderbookSchema = z.object({
