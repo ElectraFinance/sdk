@@ -20,7 +20,7 @@ const sbiSchema = z
     sop: z.string().optional() // stop out price
   })
 
-const cfdBalanceSchema = z
+export const cfdBalanceSchema = z
   .object({
     b: z.string(), // balance
     pnl: z.string(), // total floating profit & loss
