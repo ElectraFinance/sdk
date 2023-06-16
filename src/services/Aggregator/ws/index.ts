@@ -101,13 +101,13 @@ type AddressUpdateInitial = {
 
 type CfdAddressUpdateUpdate = {
   kind: 'update'
-  balances?: CFDBalance[] | undefined
+  balance?: CFDBalance | undefined
   order?: z.infer<typeof orderUpdateSchema> | z.infer<typeof fullOrderSchema> | undefined
 }
 
 type CfdAddressUpdateInitial = {
   kind: 'initial'
-  balances: CFDBalance[]
+  balance: CFDBalance
   orders?: Array<z.infer<typeof fullOrderSchema>> | undefined // The field is not defined if the user has no orders
 }
 
@@ -594,7 +594,7 @@ class AggregatorWS {
               ]?.[json.id]?.callback({
                 kind: 'initial',
                 orders: fullOrders,
-                balances: json.b,
+                balance: json.b,
               });
             }
               break;
@@ -610,7 +610,7 @@ class AggregatorWS {
               ]?.[json.id]?.callback({
                 kind: 'update',
                 order: orderUpdate,
-                balances: json.b,
+                balance: json.b,
               });
             }
               break;
