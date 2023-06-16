@@ -11,6 +11,7 @@ import {
   governanceContractsSchema,
   governanceChainsInfoSchema,
   crossMarginInfoSchema,
+  baseLimitsSchema,
 } from './schemas/index.js';
 
 type CfdHistoryQuery = {
@@ -39,6 +40,7 @@ class BlockchainService {
     this.getCrossMarginInfo = this.getCrossMarginInfo.bind(this);
     this.getGovernanceContracts = this.getGovernanceContracts.bind(this);
     this.getGovernanceChainsInfo = this.getGovernanceChainsInfo.bind(this);
+    this.getBaseLimits = this.getBaseLimits.bind(this);
   }
 
   get blockchainServiceWsUrl() {
@@ -57,6 +59,11 @@ class BlockchainService {
   }
 
   getInfo = () => fetchWithValidation(`${this.apiUrl}/api/info`, infoSchema);
+
+  getBaseLimits = () => fetchWithValidation(
+    `${this.apiUrl}/api/baseLimits`,
+    baseLimitsSchema,
+  );
 
   getHistory = (address: string) => fetchWithValidation(
     `${this.apiUrl}/api/history/${address}`,

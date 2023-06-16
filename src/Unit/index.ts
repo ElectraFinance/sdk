@@ -5,6 +5,9 @@ import { PriceFeed } from '../services/PriceFeed/index.js';
 import type { KnownEnv, SupportedChainId, VerboseUnitConfig } from '../types.js';
 import { chains, envs } from '../config/index.js';
 import type { networkCodes } from '../constants/index.js';
+import { simpleFetch } from 'simple-typed-fetch';
+import calculateNetworkFee from '../utils/calculateNetworkFee.js';
+import { BigNumber } from 'bignumber.js';
 
 type KnownConfig = {
   env: KnownEnv
@@ -13,6 +16,8 @@ type KnownConfig = {
 
 export default class Unit {
   public readonly networkCode: typeof networkCodes[number];
+
+  public readonly baseCurrencyName: string;
 
   public readonly chainId: SupportedChainId;
 
@@ -61,6 +66,7 @@ export default class Unit {
 
     this.chainId = config.chainId;
     this.networkCode = chainInfo.code;
+    this.baseCurrencyName = chainInfo.baseCurrencyName;
     const intNetwork = parseInt(this.chainId, 10);
     if (Number.isNaN(intNetwork)) throw new Error('Invalid chainId (not a number)' + this.chainId);
     this.provider = new ethers.providers.StaticJsonRpcProvider(this.config.nodeJsonRpc, intNetwork);
@@ -72,5 +78,62 @@ export default class Unit {
       this.config.services.aggregator.ws,
     );
     this.priceFeed = new PriceFeed(this.config.services.priceFeed.api);
+  }
+
+  async calculateFee(symbol: string, amount: BigNumber.Value) {
+    const feeAssetName = 'USDT';
+    const CFDContracts = await simpleFetch(this.blockchainService.getCFDContracts)();
+    const contractInfo = CFDContracts.find((c) => c.name === symbol);
+    if (contractInfo === undefined) {
+      throw new Error(`CFD contract ${symbol} not found`);
+    }
+    const { feePercent } = contractInfo;
+    const CFDPrices = await simpleFetch(this.blockchainService.getCFDPrices)();
+    const symbolPrice = CFDPrices[symbol];
+    if (symbolPrice === undefined) throw new Error(`CFD price ${symbol} not found`);
+    const {
+      FILL_CFD_ORDERS_TRADE_GAS_LIMIT
+    } = await simpleFetch(this.blockchainService.getBaseLimits)();
+    const gasPriceWei = await simpleFetch(this.blockchainService.getGasPriceWei)();
+    const gasPriceGwei = ethers.utils.formatUnits(gasPriceWei, 'gwei');
+
+    const prices = await simpleFetch(this.blockchainService.getPrices)();
+    const baseCurrencyPriceInELT = prices[this.baseCurrencyName];
+    if (baseCurrencyPriceInELT === undefined) throw new Error(`Base currency ${this.baseCurrencyName} not found`);
+    const feeAssetPriceInELT = prices[feeAssetName];
+    if (feeAssetPriceInELT === undefined) throw new Error(`Fee asset ${feeAssetName} not found`);
+
+    const networkFee = calculateNetworkFee(
+      gasPriceGwei.toString(),
+      FILL_CFD_ORDERS_TRADE_GAS_LIMIT
+    )
+
+    const amountBN = new BigNumber(amount);
+    const priceForFee = new BigNumber(symbolPrice);
+
+    const networkFeeInElt = new BigNumber(networkFee)
+      .multipliedBy(baseCurrencyPriceInELT)
+      .toString();
+
+    const networkFeeInFeeAsset = new BigNumber(networkFeeInElt)
+      .multipliedBy(
+        new BigNumber(1)
+          .div(feeAssetPriceInELT),
+      ).toString();
+
+    const fee = new BigNumber(priceForFee)
+      .multipliedBy(amountBN)
+      .multipliedBy(feePercent)
+      .div(100);
+
+    const totalFee = fee.plus(networkFeeInFeeAsset);
+
+    return {
+      networkFee,
+      networkFeeInElt,
+      networkFeeInFeeAsset,
+      fee,
+      totalFee
+    }
   }
 }
