@@ -8,4 +8,4 @@ export { default as globalAnalyticsSchema } from './globalAnalyticsSchema.js';
 export { default as ratingSchema } from './ratingSchema.js';
 export { default as claimInfoSchema } from './claimInfoSchema.js';
 export { default as aggregatedHistorySchema } from './aggregatedHistorySchema.js';
-export { default as сontractsAddressesSchema } from './contractsAddressesSchema.js';
+export { default as contractsAddressesSchema } from './contractsAddressesSchema.js';
