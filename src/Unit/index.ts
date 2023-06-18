@@ -105,8 +105,8 @@ export default class Unit {
     const gasPriceGwei = ethers.utils.formatUnits(gasPriceWei, 'gwei');
 
     const prices = await simpleFetch(this.blockchainService.getPrices)();
-    const baseCurrencyPriceInELT = prices[this.baseCurrencyName];
-    if (baseCurrencyPriceInELT === undefined) throw new Error(`Base currency ${this.baseCurrencyName} not found. Available: ${Object.keys(prices).join(', ')}`);
+    const baseCurrencyPriceInELT = prices[ethers.constants.AddressZero];
+    if (baseCurrencyPriceInELT === undefined) throw new Error(`Base currency ${this.baseCurrencyName} price not found. Available: ${Object.keys(prices).join(', ')}`);
     const feeAssetPriceInELT = prices[feeAssetName];
     if (feeAssetPriceInELT === undefined) throw new Error(`Fee asset ${feeAssetName} not found`);
 
