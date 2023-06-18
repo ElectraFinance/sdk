@@ -106,7 +106,7 @@ export default class Unit {
 
     const prices = await simpleFetch(this.blockchainService.getPrices)();
     const baseCurrencyPriceInELT = prices[this.baseCurrencyName];
-    if (baseCurrencyPriceInELT === undefined) throw new Error(`Base currency ${this.baseCurrencyName} not found`);
+    if (baseCurrencyPriceInELT === undefined) throw new Error(`Base currency ${this.baseCurrencyName} not found. Available: ${Object.keys(prices).join(', ')}`);
     const feeAssetPriceInELT = prices[feeAssetName];
     if (feeAssetPriceInELT === undefined) throw new Error(`Fee asset ${feeAssetName} not found`);
 
