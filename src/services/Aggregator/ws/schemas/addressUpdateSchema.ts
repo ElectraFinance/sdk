@@ -20,9 +20,9 @@ const subOrderSchema = z.object({
   O: z.string(), // sender (owner)
   P: z.string().toUpperCase(), // instrument
   s: z.enum(['BUY', 'SELL']), // side
-  a: z.string(), // amount
-  A: z.string(), // settled amount
-  p: z.string(), // price
+  a: z.number(), // amount
+  A: z.number(), // settled amount
+  p: z.number(), // price
   e: z.enum(exchanges), // exchange
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
@@ -48,7 +48,7 @@ const getTransformedSubOrder = (subOrders: TSubOrder[]) => {
 
 export const orderUpdateSchema = z.object({
   I: z.string(), // id
-  A: z.string(), // settled amount
+  A: z.number(), // settled amount
   S: z.enum(orderStatuses), // status
   l: z.boolean().optional(), // is liquidation order
   t: z.number(), // update time
@@ -77,13 +77,13 @@ export const fullOrderSchema = z.object({
   O: z.string(), // sender (owner)
   P: z.string().toUpperCase(), // asset pair
   s: z.enum(['BUY', 'SELL']), // side
-  a: z.string(), // amount
-  A: z.string(), // settled amount
-  p: z.string(), // signed price
+  a: z.number(), // amount
+  A: z.number(), // settled amount
+  p: z.number(), // signed price
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
   F: z.string().toUpperCase(), // fee asset
-  f: z.string(), // fee
+  f: z.number(), // fee
   o: z.boolean(), // internal only
   S: z.enum(orderStatuses), // status
   T: z.number(), // creation time / unix timestamp
