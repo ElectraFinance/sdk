@@ -1,5 +1,6 @@
 import type WebSocket from 'ws';
 import PriceFeedSubscription, { type SubscriptionType, type Subscription } from './PriceFeedSubscription.js';
+import type { BasicAuthCredentials } from '../../../types.js';
 
 export * as schemas from './schemas/index.js';
 export class PriceFeedWS {
@@ -14,8 +15,23 @@ export class PriceFeedWS {
 
   private readonly url: string;
 
-  constructor(url: string) {
+  readonly basicAuth?: BasicAuthCredentials | undefined;
+
+  constructor(
+    url: string,
+    basicAuth?: BasicAuthCredentials
+  ) {
     this.url = url;
+    this.basicAuth = basicAuth;
+  }
+
+  get basicAuthHeaders() {
+    if (this.basicAuth) {
+      return {
+        Authorization: `Basic ${btoa(`${this.basicAuth.username}:${this.basicAuth.password}`)}`,
+      };
+    }
+    return {};
   }
 
   subscribe<S extends SubscriptionType>(
@@ -27,7 +43,8 @@ export class PriceFeedWS {
       type,
       this.url,
       params,
-      onOpen
+      onOpen,
+      this.basicAuthHeaders,
     );
     this.subscriptions = {
       ...this.subscriptions,
