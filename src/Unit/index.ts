@@ -89,6 +89,7 @@ export default class Unit {
 
   async calculateFee(symbol: string, amount: BigNumber.Value) {
     const feeAssetName = 'USDT';
+    const { assetToAddress } = await simpleFetch(this.blockchainService.getInfo)();
     const CFDContracts = await simpleFetch(this.blockchainService.getCFDContracts)();
     const contractInfo = CFDContracts.find((c) => c.name === symbol);
     if (contractInfo === undefined) {
@@ -107,8 +108,10 @@ export default class Unit {
     const prices = await simpleFetch(this.blockchainService.getPrices)();
     const baseCurrencyPriceInELT = prices[ethers.constants.AddressZero];
     if (baseCurrencyPriceInELT === undefined) throw new Error(`Base currency ${this.baseCurrencyName} price not found. Available: ${Object.keys(prices).join(', ')}`);
-    const feeAssetPriceInELT = prices[feeAssetName];
-    if (feeAssetPriceInELT === undefined) throw new Error(`Fee asset ${feeAssetName} not found`);
+    const feeAssetAddress = assetToAddress[feeAssetName];
+    if (feeAssetAddress === undefined) throw new Error(`Fee asset ${feeAssetName} address not found`);
+    const feeAssetPriceInELT = prices[feeAssetAddress];
+    if (feeAssetPriceInELT === undefined) throw new Error(`Fee asset ${feeAssetName} not found. Available: ${Object.keys(prices).join(', ')}`);
 
     const networkFee = calculateNetworkFee(
       gasPriceGwei.toString(),
