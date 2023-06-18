@@ -228,6 +228,11 @@ export enum HistoryTransactionStatus {
   CANCELLED = 'Cancelled',
 }
 
+export type BasicAuthCredentials = {
+  username: string
+  password: string
+}
+
 export type VerboseUnitConfig = {
   // env?: string;
   // api: string;
@@ -257,6 +262,7 @@ export type VerboseUnitConfig = {
       // https://price-feed:3003/
     }
   }
+  basicAuth?: BasicAuthCredentials
 }
 
 export type KnownEnv = typeof knownEnvs[number];
