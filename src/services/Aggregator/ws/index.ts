@@ -495,6 +495,10 @@ class AggregatorWS {
   }
 
   private handleFuturesTradeInfoMessage(json: FuturesTradeInfoUpdateJson) {
+    const subscriptionTimestamp = this.subscriptionsTimestamps[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE];
+    if (subscriptionTimestamp) {
+      subscriptionTimestamp[json.id] = Date.now();
+    }
     this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[json.id]?.callback({
       futuresTradeRequestId: json.id,
       sender: json.S,
@@ -508,6 +512,10 @@ class AggregatorWS {
   }
 
   private handleAggregatedOrderBookUpdateMessage(json: AggregatedOrderBookUpdateJson) {
+    const subscriptionTimestamp = this.subscriptionsTimestamps[SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE];
+    if (subscriptionTimestamp) {
+      subscriptionTimestamp[json.S] = Date.now();
+    }
     const { ob, S } = json;
     const mapOrderbookItems = (rawItems: typeof ob.a | typeof ob.b) => rawItems.reduce<OrderbookItem[]>((acc, item) => {
       const [
