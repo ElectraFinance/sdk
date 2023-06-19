@@ -97,10 +97,19 @@ export type CFDOrder = {
   instrumentAddress: string // address
 } & BaseFuturesOrder
 
+export type CrossMarginCFDOrder = {
+  instrumentIndex: number // uint16
+} & BaseFuturesOrder
+
 export type SignedCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
 } & CFDOrder
+
+export type SignedCrossMarginCFDOrder = {
+  id: string // hash of Order (it's not part of order structure in smart-contract)
+  signature: string // bytes
+} & CrossMarginCFDOrder
 
 export type CrossMarginOrder = {
   instrumentIndex: number // index

@@ -1,5 +1,5 @@
 import Electra from '../Electra/index.js';
-import signCFDOrder from '../crypt/signCFDOrder.js';
+import signCFDOrder from '../crypt/signIsolatedMarginCFDOrder.js';
 
 import { simpleFetch } from 'simple-typed-fetch';
 import { ethers } from 'ethers';

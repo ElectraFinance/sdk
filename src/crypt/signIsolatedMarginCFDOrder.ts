@@ -6,15 +6,15 @@ import { INTERNAL_PROTOCOL_PRECISION } from '../constants/index.js';
 import type { CFDOrder, SignedCFDOrder, SupportedChainId } from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
 import getDomainData from './getDomainData.js';
-import signCFDOrderPersonal from './signCFDOrderPersonal.js';
-import hashCFDOrder from './hashCFDOrder.js';
-import CFD_ORDER_TYPES from '../constants/cfdOrderTypes.js';
+import signIsolatedMarginCFDOrderPersonal from './signIsolatedMarginCFDOrderPersonal.js';
+import hashIsolatedMarginCFDOrder from './hashIsolatedMarginCFDOrder.js';
+import { ISOLATED_MARGIN_CFD_ORDER_TYPES } from '../constants/cfdOrderTypes.js';
 
 const DEFAULT_EXPIRATION = 29 * 24 * 60 * 60 * 1000; // 29 days
 
 type SignerWithTypedDataSign = ethers.Signer & TypedDataSigner;
 
-export const signCFDOrder = async (
+export const signIsolatedMarginCFDOrder = async (
   instrumentAddress: string,
   side: 'BUY' | 'SELL',
   price: BigNumber.Value,
@@ -63,10 +63,10 @@ export const signCFDOrder = async (
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const typedDataSigner = signer as SignerWithTypedDataSign;
   const signature = usePersonalSign
-    ? await signCFDOrderPersonal(order, signer)
+    ? await signIsolatedMarginCFDOrderPersonal(order, signer)
     : await typedDataSigner._signTypedData(
       getDomainData(chainId),
-      CFD_ORDER_TYPES,
+      ISOLATED_MARGIN_CFD_ORDER_TYPES,
       order,
     );
 
@@ -78,11 +78,11 @@ export const signCFDOrder = async (
 
   const signedOrder: SignedCFDOrder = {
     ...order,
-    id: hashCFDOrder(order),
+    id: hashIsolatedMarginCFDOrder(order),
     signature: fixedSignature,
   };
 
   return signedOrder;
 };
 
-export default signCFDOrder;
+export default signIsolatedMarginCFDOrder;
