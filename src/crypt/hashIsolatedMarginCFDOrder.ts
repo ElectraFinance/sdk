@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import type { CFDOrder } from '../types.js';
 
-const hashCFDOrder = (order: CFDOrder) => ethers.utils.solidityKeccak256(
+const hashIsolatedMarginCFDOrder = (order: CFDOrder) => ethers.utils.solidityKeccak256(
   [
     'uint8',
     'address',
@@ -28,4 +28,4 @@ const hashCFDOrder = (order: CFDOrder) => ethers.utils.solidityKeccak256(
   ],
 );
 
-export default hashCFDOrder;
+export default hashIsolatedMarginCFDOrder;

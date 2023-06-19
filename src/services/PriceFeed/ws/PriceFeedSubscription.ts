@@ -98,7 +98,11 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
     this.isClosedIntentionally = false;
 
     const { payload, url, type } = this;
-    this.ws = new WebSocket(`${url}/${type}${payload !== undefined ? `/${payload.toString()}` : ''}`);
+    this.ws = new WebSocket(
+      `${url}/${type}${payload !== undefined
+        ? `/${payload.toString()}`
+        : ''}`
+    );
 
     if (this.onOpen !== undefined) {
       this.ws.onopen = this.onOpen;

@@ -11,7 +11,7 @@ import {
 import UnsubscriptionType from './UnsubscriptionType.js';
 import type {
   AssetPairUpdate, OrderbookItem,
-  Balance, CFDBalance, FuturesTradeInfo, Json,
+  Balance, CFDBalance, FuturesTradeInfo, Json, BasicAuthCredentials,
 } from '../../../types.js';
 import unsubscriptionDoneSchema from './schemas/unsubscriptionDoneSchema.js';
 import assetPairConfigSchema from './schemas/assetPairConfigSchema.js';
@@ -195,13 +195,26 @@ class AggregatorWS {
   private isAlive = false;
 
   get api() {
-    return this.wsUrl;
+    const wsUrl = new URL(this.wsUrl);
+
+    if (this.basicAuth) {
+      wsUrl.username = this.basicAuth.username;
+      wsUrl.password = this.basicAuth.password;
+    }
+
+    return wsUrl;
   }
 
   readonly instanceId = uuidv4();
 
-  constructor(wsUrl: string) {
+  readonly basicAuth?: BasicAuthCredentials | undefined;
+
+  constructor(
+    wsUrl: string,
+    basicAuth?: BasicAuthCredentials
+  ) {
     this.wsUrl = wsUrl
+    this.basicAuth = basicAuth
   }
 
   private messageQueue: BufferLike[] = [];
@@ -418,7 +431,7 @@ class AggregatorWS {
 
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
-    this.ws = new WebSocket(this.wsUrl);
+    this.ws = new WebSocket(this.api);
     this.ws.onerror = (err) => {
       this.onError?.(`AggregatorWS error: ${err.message}`);
       this.logger?.(`AggregatorWS: ${err.message}`);

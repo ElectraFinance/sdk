@@ -1,4 +1,4 @@
-const CFD_ORDER_TYPES = {
+export const ISOLATED_MARGIN_CFD_ORDER_TYPES = {
   CFDOrder: [
     { name: 'senderAddress', type: 'address' },
     { name: 'matcherAddress', type: 'address' },
@@ -12,4 +12,15 @@ const CFD_ORDER_TYPES = {
   ],
 };
 
-export default CFD_ORDER_TYPES;
+export const CROSS_MARGIN_CFD_ORDER_TYPES = {
+  CrossMarginCFDOrder: [
+    { name: 'senderAddress', type: 'address' },
+    { name: 'matcherAddress', type: 'address' },
+    { name: 'instrumentIndex', type: 'uint16' },
+    { name: 'amount', type: 'uint96' },
+    { name: 'price', type: 'uint80' },
+    { name: 'matcherFee', type: 'uint64' },
+    { name: 'expiration', type: 'uint64' },
+    { name: 'buySide', type: 'uint8' },
+  ]
+};

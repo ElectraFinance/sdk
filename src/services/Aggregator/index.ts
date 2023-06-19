@@ -3,7 +3,9 @@ import exchangeInfoSchema from './schemas/exchangeInfoSchema.js';
 import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws/index.js';
-import type { Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginOrder, SignedOrder } from '../../types.js';
+import type {
+  BasicAuthCredentials, Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginOrder, SignedOrder
+} from '../../types.js';
 import { pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema } from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
 import httpToWS from '../../utils/httpToWS.js';
@@ -17,6 +19,8 @@ class Aggregator {
 
   readonly ws: AggregatorWS;
 
+  private readonly basicAuth?: BasicAuthCredentials | undefined;
+
   get api() {
     return this.apiUrl;
   }
@@ -24,9 +28,11 @@ class Aggregator {
   constructor(
     httpAPIUrl: string,
     wsAPIUrl: string,
+    basicAuth?: BasicAuthCredentials
   ) {
     this.apiUrl = httpAPIUrl;
     this.ws = new AggregatorWS(httpToWS(wsAPIUrl));
+    this.basicAuth = basicAuth;
 
     this.getPairConfig = this.getPairConfig.bind(this);
     this.getPairConfigs = this.getPairConfigs.bind(this);
@@ -41,6 +47,15 @@ class Aggregator {
     this.getExchangeOrderbook = this.getExchangeOrderbook.bind(this);
     this.getPoolReserves = this.getPoolReserves.bind(this);
     this.getVersion = this.getVersion.bind(this);
+  }
+
+  get basicAuthHeaders() {
+    if (this.basicAuth) {
+      return {
+        Authorization: `Basic ${btoa(`${this.basicAuth.username}:${this.basicAuth.password}`)}`,
+      };
+    }
+    return {};
   }
 
   getOrder = (orderId: string, owner?: string) => {
@@ -58,7 +73,7 @@ class Aggregator {
     return fetchWithValidation(
       url.toString(),
       orderSchema,
-      undefined,
+      { headers: this.basicAuthHeaders },
       errorSchema,
     );
   }
@@ -70,6 +85,7 @@ class Aggregator {
     return fetchWithValidation(
       url.toString(),
       z.array(z.string().toUpperCase()),
+      { headers: this.basicAuthHeaders },
     );
   };
 
@@ -80,7 +96,7 @@ class Aggregator {
     return fetchWithValidation(
       url.toString(),
       aggregatedOrderbookSchema,
-      undefined,
+      { headers: this.basicAuthHeaders },
       errorSchema,
     );
   };
@@ -105,7 +121,7 @@ class Aggregator {
     return fetchWithValidation(
       url.toString(),
       exchangeOrderbookSchema,
-      undefined,
+      { headers: this.basicAuthHeaders },
       errorSchema,
     );
   };
@@ -117,7 +133,7 @@ class Aggregator {
     return fetchWithValidation(
       url.toString(),
       exchangeInfoSchema,
-      undefined,
+      { headers: this.basicAuthHeaders },
       errorSchema,
     );
   }
@@ -130,7 +146,7 @@ class Aggregator {
     return fetchWithValidation(
       url.toString(),
       poolReservesSchema,
-      undefined,
+      { headers: this.basicAuthHeaders },
       errorSchema,
     );
   };
@@ -142,21 +158,21 @@ class Aggregator {
       version: z.string(),
       apiVersion: z.string(),
     }),
-    undefined,
+    { headers: this.basicAuthHeaders },
     errorSchema,
   );
 
   getPairConfig = (assetPair: string) => fetchWithValidation(
     `${this.apiUrl}/api/v1/pairs/exchangeInfo/${assetPair}`,
     pairConfigSchema,
-    undefined,
+    { headers: this.basicAuthHeaders },
     errorSchema,
   );
 
   checkWhitelisted = (address: string) => fetchWithValidation(
     `${this.apiUrl}/api/v1/whitelist/check?address=${address}`,
     z.boolean(),
-    undefined,
+    { headers: this.basicAuthHeaders },
     errorSchema,
   );
 
@@ -169,6 +185,7 @@ class Aggregator {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...(partnerId !== undefined) && { 'X-Partner-Id': partnerId },
+      ...this.basicAuthHeaders,
     };
 
     const url = new URL(`${this.apiUrl}/api/v1/order/${isCreateInternalOrder ? 'internal' : ''}`);
@@ -202,6 +219,7 @@ class Aggregator {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...this.basicAuthHeaders,
       },
       body: JSON.stringify({
         ...signedCancelOrderRequest,
@@ -221,6 +239,7 @@ class Aggregator {
       ...(isReversedOrder !== undefined) && {
         'X-Reverse-Order': isReversedOrder ? 'true' : 'false',
       },
+      ...this.basicAuthHeaders,
     };
 
     return fetchWithValidation(
@@ -250,6 +269,7 @@ class Aggregator {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...this.basicAuthHeaders,
     };
 
     return fetchWithValidation(
@@ -281,7 +301,7 @@ class Aggregator {
       z.object({
         [currency]: z.number(),
       }).partial(),
-      undefined,
+      { headers: this.basicAuthHeaders },
       errorSchema,
     );
   };

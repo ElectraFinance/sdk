@@ -105,10 +105,19 @@ export type CFDOrder = {
   instrumentAddress: string // address
 } & BaseFuturesOrder
 
+export type CrossMarginCFDOrder = {
+  instrumentIndex: number // uint16
+} & BaseFuturesOrder
+
 export type SignedCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
 } & CFDOrder
+
+export type SignedCrossMarginCFDOrder = {
+  id: string // hash of Order (it's not part of order structure in smart-contract)
+  signature: string // bytes
+} & CrossMarginCFDOrder
 
 export type CrossMarginOrder = {
   instrumentIndex: number // index
@@ -236,6 +245,11 @@ export enum HistoryTransactionStatus {
   CANCELLED = 'Cancelled',
 }
 
+export type BasicAuthCredentials = {
+  username: string
+  password: string
+}
+
 export type VerboseUnitConfig = {
   // env?: string;
   // api: string;
@@ -265,6 +279,7 @@ export type VerboseUnitConfig = {
       // https://price-feed:3003/
     }
   }
+  basicAuth?: BasicAuthCredentials
 }
 
 export type KnownEnv = typeof knownEnvs[number];

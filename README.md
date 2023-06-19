@@ -36,6 +36,7 @@ Electra’s SDK is free to use and does not require an API key or registration. 
   - [Get deposits and withdrawals](#get-deposits-and-withdrawals)
   - [Get available contracts](#get-available-contracts)
   - [Place order](#place-order)
+  - [Cancel order](#cancel-order)
   - [Aggregator WebSocket](#aggregator-websocket)
   - [Balances and order history stream](#balances-and-order-history-stream)
   - [Orderbook stream](#orderbook-stream)
@@ -177,30 +178,90 @@ console.log(contracts);
 
 ```ts
 import { simpleFetch } from "simple-typed-fetch";
-import { signCFDOrder } from "@electra.finance/sdk";
+import { signCFDOrder, Electra } from "@electra.finance/sdk";
+import { ethers } from 'ethers';
 
-const {
-  matcherAddress, // The address that will transfer funds to you during the exchange process
-} = await simpleFetch(unit.blockchainService.getInfo)();
+const walletPrivateKey = process.env['PRIVATE_KEY']
+if (privateKey === undefined) throw new Error('Private key is required');
 
-const signedOrder = signCFDOrder(
-  "0x0000000000000000000000000000000000000000", // instrumentAddress, you can retrieve list of available instruments from blockchainService.getCFDContracts()
-  'BUY', // side: 'BUY' | 'SELL'
-  "0.34543", // price
-  "245234.234", // amount
-  "matcherFee", // matcherFee
-  "0xfffffffffffffffffffffffffffffffffffffff", // senderAddress
-  matcherAddress,
-  false, // usePersonalSign
-  signer, // pass here ethers.Signer instance
-  chainId: SupportedChainId.BSC,
-  "0.34", // optional stopPrice
-  false // isFromDelegate — if true, then the order will be placed on behalf of the delegate
+const electra = new Electra('testing');
+const unit = electra.getUnit('bsc');
+
+// Defining wallet
+const wallet = new ethers.Wallet(
+  walletPrivateKey,
+  unit.provider
 );
 
+// Your order params
+const senderAddress = await wallet.getAddress();
+const amount = '23.12445313';
+const symbol = 'ETHUSDF';
+const side = 'BUY'
+const price = '0.34543';
+const stopPrice = '0.34'; // optional
+
+// Getting additional params required for order signing
+const contracts = await simpleFetch(unit.blockchainService.getCFDContracts)();
+const contract = contracts.find((c) => c.name === symbol);
+if (!contract) throw new Error(`Contract not found for symbol ${symbol}`);
+const { totalFee } = await unit.calculateFee(symbol, amount);
+const { matcherAddress } = await simpleFetch(unit.blockchainService.getInfo)();
+
+// Signing order
+const signedOrder = await signCFDOrder(
+   contract.address, // instrumentAddress, you can retrieve list of available instruments from blockchainService.getCFDContracts()
+   side, // side: 'BUY' | 'SELL'
+   price,
+   amount,
+   totalFee,
+   senderAddress,
+   matcherAddress,
+   false, // usePersonalSign
+   wallet, // pass here ethers.Signer instance
+   unit.chainId,
+   stopPrice,
+   false // isFromDelegate — if true, then the order will be placed on behalf of the delegate
+);
+
+// Placing order
 const { orderId } =  = await simpleFetch(unit.aggregator.placeCFDOrder)(signedOrder);
 console.log(`Order placed: ${orderId}`);
 
+```
+
+### Cancel order
+
+```ts
+import {Electra, SignedCancelOrderRequest, SupportedChainId, crypt} from "../src/index";
+import {ethers} from "ethers";
+import {simpleFetch} from "simple-typed-fetch";
+
+const walletPrivateKey = process.env['PRIVATE_KEY']
+if (privateKey === undefined) throw new Error('Private key is required');
+const electra = new Electra('testing');
+const unit = electra.getUnit(SupportedChainId.BSC_TESTNET);
+
+// Defining wallet
+const wallet = new ethers.Wallet(
+    walletPrivateKey,
+    unit.provider
+);
+
+const senderAddress = await wallet.getAddress();
+const orderIdToCancel = '0x000000...'; // orderId of the order you want to cancel
+
+const signedCancelOrderRequest: SignedCancelOrderRequest = await crypt.signCancelOrder(
+    senderAddress, // senderAddress
+    orderIdToCancel,
+    false, // usePersonalSign
+    wallet, // signer
+    unit.chainId,
+);
+
+// Cancel order
+const {orderId, remainingAmount} = await simpleFetch(unit.aggregator.cancelOrder)(signedCancelOrderRequest);
+console.log(`Order ${orderId} canceled. Remaining amount: ${remainingAmount}`);
 ```
 
 ### Aggregator WebSocket
