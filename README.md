@@ -36,6 +36,7 @@ Electra’s SDK is free to use and does not require an API key or registration. 
   - [Get deposits and withdrawals](#get-deposits-and-withdrawals)
   - [Get available contracts](#get-available-contracts)
   - [Place order](#place-order)
+  - [Cancel order](#cancel-order)
   - [Aggregator WebSocket](#aggregator-websocket)
   - [Balances and order history stream](#balances-and-order-history-stream)
   - [Orderbook stream](#orderbook-stream)
@@ -227,6 +228,40 @@ const signedOrder = await signCFDOrder(
 const { orderId } =  = await simpleFetch(unit.aggregator.placeCFDOrder)(signedOrder);
 console.log(`Order placed: ${orderId}`);
 
+```
+
+### Cancel order
+
+```ts
+import {Electra, SignedCancelOrderRequest, SupportedChainId, crypt} from "../src/index";
+import {ethers} from "ethers";
+import {simpleFetch} from "simple-typed-fetch";
+
+const walletPrivateKey = process.env['PRIVATE_KEY']
+if (privateKey === undefined) throw new Error('Private key is required');
+const electra = new Electra('testing');
+const unit = electra.getUnit(SupportedChainId.BSC_TESTNET);
+
+// Defining wallet
+const wallet = new ethers.Wallet(
+    walletPrivateKey,
+    unit.provider
+);
+
+const senderAddress = await wallet.getAddress();
+const orderIdToCancel = '0x000000...'; // orderId of the order you want to cancel
+
+const signedCancelOrderRequest: SignedCancelOrderRequest = await crypt.signCancelOrder(
+    senderAddress, // senderAddress
+    orderIdToCancel,
+    false, // usePersonalSign
+    wallet, // signer
+    unit.chainId,
+);
+
+// Cancel order
+const {orderId, remainingAmount} = await simpleFetch(unit.aggregator.cancelOrder)(signedCancelOrderRequest);
+console.log(`Order ${orderId} canceled. Remaining amount: ${remainingAmount}`);
 ```
 
 ### Aggregator WebSocket
