@@ -65,14 +65,11 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
 
   private readonly onOpen: ((event: WebSocket.Event) => void) | undefined;
 
-  private readonly headers?: Partial<Record<string, string>> | undefined;
-
   constructor(
     type: T,
     url: string,
     params: Subscription<T>,
     onOpen?: (event: WebSocket.Event) => void,
-    headers?: Partial<Record<string, string>>,
   ) {
     this.id = uuidv4();
     this.url = url;
@@ -80,7 +77,6 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
     if ('payload' in params) {
       this.payload = params.payload;
     }
-    this.headers = headers;
     this.callback = params.callback;
     this.errorCallback = params.errorCallback;
     this.onOpen = onOpen;
@@ -105,10 +101,7 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
     this.ws = new WebSocket(
       `${url}/${type}${payload !== undefined
         ? `/${payload.toString()}`
-        : ''}`,
-      {
-        headers: this.headers,
-      }
+        : ''}`
     );
 
     if (this.onOpen !== undefined) {

@@ -25,13 +25,15 @@ export class PriceFeedWS {
     this.basicAuth = basicAuth;
   }
 
-  get basicAuthHeaders() {
+  get api() {
+    const url = new URL(this.url);
+
     if (this.basicAuth) {
-      return {
-        Authorization: `Basic ${btoa(`${this.basicAuth.username}:${this.basicAuth.password}`)}`,
-      };
+      url.username = this.basicAuth.username;
+      url.password = this.basicAuth.password;
     }
-    return {};
+
+    return url.toString();
   }
 
   subscribe<S extends SubscriptionType>(
@@ -41,10 +43,9 @@ export class PriceFeedWS {
   ) {
     const sub = new PriceFeedSubscription(
       type,
-      this.url,
+      this.api,
       params,
       onOpen,
-      this.basicAuthHeaders,
     );
     this.subscriptions = {
       ...this.subscriptions,
