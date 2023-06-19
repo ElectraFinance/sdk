@@ -16,7 +16,7 @@ const crossMarginInfoSchema = z.object({
   fundingRateAccount: z.string().optional(),
   soLevel: z.number().optional(),
   delegateContractAddress: z.string().optional(),
-  instruments: z.record(z.string(), crossMarginCFDItemInfo.partial()),
+  instruments: z.record(z.string(), crossMarginCFDItemInfo),
   withdrawMarginLevel: z.number().optional(),
 });
 
