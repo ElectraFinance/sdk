@@ -9,6 +9,7 @@ const crossMarginCFDItemInfo = z.object({
   longFRStored: z.number(),
   shortFRStored: z.number(),
   lastFRPriceUpdateTime: z.number(),
+  feePercent: z.number(),
 });
 
 const crossMarginInfoSchema = z.object({

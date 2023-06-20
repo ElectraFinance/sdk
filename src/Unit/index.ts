@@ -87,21 +87,33 @@ export default class Unit {
     );
   }
 
-  async calculateFee(symbol: string, amount: BigNumber.Value) {
+  async calculateFee(symbol: string, amount: BigNumber.Value, type: 'cross' | 'isolated') {
     const feeAssetName = 'USDT';
     const { assetToAddress } = await simpleFetch(this.blockchainService.getInfo)();
-    const CFDContracts = await simpleFetch(this.blockchainService.getCFDContracts)();
-    const contractInfo = CFDContracts.find((c) => c.name === symbol);
-    if (contractInfo === undefined) {
-      throw new Error(`CFD contract ${symbol} not found`);
-    }
-    const { feePercent } = contractInfo;
     const CFDPrices = await simpleFetch(this.blockchainService.getCFDPrices)();
     const symbolPrice = CFDPrices[symbol];
     if (symbolPrice === undefined) throw new Error(`CFD price ${symbol} not found`);
     const {
       FILL_CFD_ORDERS_TRADE_GAS_LIMIT
     } = await simpleFetch(this.blockchainService.getBaseLimits)();
+
+    let feePercent: number;
+    if (type === 'isolated') {
+      const CFDContracts = await simpleFetch(this.blockchainService.getCFDContracts)();
+      const contractInfo = CFDContracts.find((c) => c.name === symbol);
+      if (contractInfo === undefined) {
+        throw new Error(`CFD contract ${symbol} not found`);
+      }
+      feePercent = contractInfo.feePercent;
+    } else {
+      const { instruments } = await simpleFetch(this.blockchainService.getCrossMarginInfo)();
+      const instrumentInfo = instruments[symbol];
+      if (instrumentInfo === undefined) {
+        throw new Error(`Instrument ${symbol} not found`);
+      }
+      feePercent = instrumentInfo.feePercent;
+    }
+
     const gasPriceWei = await simpleFetch(this.blockchainService.getGasPriceWei)();
     const gasPriceGwei = ethers.utils.formatUnits(gasPriceWei, 'gwei');
 
