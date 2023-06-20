@@ -531,14 +531,12 @@ class AggregatorWS {
             const [
               price,
               amount,
-              exchanges,
               vob,
             ] = item;
 
             acc.push({
               price,
               amount,
-              exchanges,
               vob: vob.map(([side, pairName]) => ({
                 side,
                 pairName,
