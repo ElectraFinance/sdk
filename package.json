@@ -1,6 +1,6 @@
 {
   "name": "@electra.finance/sdk",
-  "version": "0.1.35-rc9",
+  "version": "0.1.35-rc10",
   "description": "Electra finance SDK",
   "main": "./lib/index.cjs",
   "module": "./lib/index.js",

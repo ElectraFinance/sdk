@@ -107,7 +107,7 @@ export type CFDOrder = {
 
 export type CrossMarginCFDOrder = {
   instrumentIndex: number // uint16
-} & BaseFuturesOrder
+} & Omit<BaseFuturesOrder, 'nonce'>
 
 export type SignedCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
