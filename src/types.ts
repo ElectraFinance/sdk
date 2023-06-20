@@ -119,15 +119,6 @@ export type SignedCrossMarginCFDOrder = {
   signature: string // bytes
 } & CrossMarginCFDOrder
 
-export type CrossMarginOrder = {
-  instrumentIndex: number // index
-} & BaseFuturesOrder
-
-export type SignedCrossMarginOrder = {
-  id: string // hash of Order (it's not part of order structure in smart-contract)
-  signature: string // bytes
-} & CrossMarginOrder
-
 export type CancelOrderRequest = {
   id: number | string
   senderAddress: string

@@ -4,7 +4,7 @@ import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws/index.js';
 import type {
-  BasicAuthCredentials, Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginOrder, SignedOrder
+  BasicAuthCredentials, Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginCFDOrder, SignedOrder
 } from '../../types.js';
 import { pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema } from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
@@ -264,7 +264,7 @@ class Aggregator {
   };
 
   placeCrossMarginOrder = (
-    signedOrder: SignedCrossMarginOrder,
+    signedOrder: SignedCrossMarginCFDOrder,
   ) => {
     const headers = {
       'Content-Type': 'application/json',
