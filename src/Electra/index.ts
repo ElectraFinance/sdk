@@ -2,12 +2,13 @@ import { merge } from 'merge-anything';
 import { chains, envs } from '../config/index.js';
 import type { networkCodes } from '../constants/index.js';
 import Unit from '../Unit/index.js';
-import type { SupportedChainId, DeepPartial, VerboseUnitConfig, KnownEnv } from '../types.js';
+import type { SupportedChainId, DeepPartial, VerboseUnitConfig, KnownEnv, MarginMode } from '../types.js';
 import { isValidChainId } from '../utils/index.js';
 import { simpleFetch } from 'simple-typed-fetch';
 import { ReferralSystem } from '../services/ReferralSystem/index.js';
 
 type EnvConfig = {
+  marginMode: MarginMode
   referralAPI: string
   networks: Partial<
     Record<
@@ -36,6 +37,7 @@ export default class Electra {
       }
       this.env = envOrConfig;
       config = {
+        marginMode: envConfig.marginMode,
         referralAPI: envConfig.referralAPI,
         networks: Object.entries(envConfig.networks).map(([chainId, networkConfig]) => {
           if (!isValidChainId(chainId)) throw new Error(`Invalid chainId: ${chainId}`);

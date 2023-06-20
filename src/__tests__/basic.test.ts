@@ -154,6 +154,7 @@ describe('Electra', () => {
     const electraPriceFeedAPI = `http://localhost:${server2.port}`;
 
     const electra = new Electra({
+      marginMode: 'isolated',
       referralAPI: 'https://referral.electra.finance',
       networks: {
         1: {
