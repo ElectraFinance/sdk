@@ -205,7 +205,7 @@ const stopPrice = '0.34'; // optional
 const contracts = await simpleFetch(unit.blockchainService.getCFDContracts)();
 const contract = contracts.find((c) => c.name === symbol);
 if (!contract) throw new Error(`Contract not found for symbol ${symbol}`);
-const { totalFee } = await unit.calculateFee(symbol, amount);
+const { totalFee } = await unit.calculateFee(symbol, amount, 'isolated');
 const { matcherAddress } = await simpleFetch(unit.blockchainService.getInfo)();
 
 // Signing order

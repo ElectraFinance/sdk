@@ -29,7 +29,7 @@ describe('Electra Trading', () => {
     const contract = contracts.find((c) => c.name === symbol);
     if (!contract) throw new Error(`Contract not found for symbol ${symbol}`);
 
-    const { totalFee } = await unit.calculateFee(symbol, amount);
+    const { totalFee } = await unit.calculateFee(symbol, amount, 'isolated');
 
     const {
       matcherAddress,
