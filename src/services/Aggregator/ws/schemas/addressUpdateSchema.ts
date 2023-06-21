@@ -26,7 +26,7 @@ const subOrderSchema = z.object({
   e: z.enum(exchanges), // exchange
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
-  o: z.boolean() // internal only
+  o: z.boolean().optional() // internal only
 });
 
 type TSubOrder = z.infer<typeof subOrderSchema>
@@ -87,10 +87,10 @@ export const fullOrderSchema = z.object({
   f: z.number(), // fee
   o: z.boolean(), // internal only
   S: z.enum(orderStatuses), // status
+  ro: z.boolean(), // reversed order
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
   c: subOrderSchema.array(), // sub orders (content)
-  ro: z.boolean(), // reversed order
 
   // CFD only
   L: z.string().optional(), // stop limit price,
