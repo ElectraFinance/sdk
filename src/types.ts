@@ -59,6 +59,7 @@ export type CFDBalance = {
   fundingRate: string
   equity: string
   reserves: string
+  margin: string | undefined
   marginUSD: string
   freeMarginUSD: string
   availableWithdrawBalance: string
