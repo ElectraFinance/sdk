@@ -26,6 +26,7 @@ const subOrderSchema = z.object({
   e: z.enum(exchanges), // exchange
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
+  o: z.boolean() // internal only
 });
 
 type TSubOrder = z.infer<typeof subOrderSchema>
