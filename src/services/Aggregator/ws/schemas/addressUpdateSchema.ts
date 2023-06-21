@@ -90,6 +90,7 @@ export const fullOrderSchema = z.object({
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
   c: subOrderSchema.array(), // sub orders (content)
+  ro: z.boolean(), // reversed order
 
   // CFD only
   L: z.string().optional(), // stop limit price,
