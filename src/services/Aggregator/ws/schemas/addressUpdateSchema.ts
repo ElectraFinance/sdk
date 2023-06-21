@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { exchanges } from '../../../../constants/index.js';
 import orderStatuses from '../../../../constants/orderStatuses.js';
 import subOrderStatuses from '../../../../constants/subOrderStatuses.js';
 import MessageType from '../MessageType.js';
@@ -23,7 +22,6 @@ const subOrderSchema = z.object({
   a: z.number(), // amount
   A: z.number(), // settled amount
   p: z.number(), // price
-  e: z.enum(exchanges), // exchange
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
   o: z.boolean().optional() // internal only
@@ -41,7 +39,6 @@ const getTransformedSubOrder = (subOrders: TSubOrder[]) => {
     amount: so.a,
     settledAmount: so.A,
     price: so.p,
-    exchange: so.e,
     brokerAddress: so.b,
     status: so.S,
   }))
