@@ -87,7 +87,7 @@ export const fullOrderSchema = z.object({
   f: z.number(), // fee
   o: z.boolean(), // internal only
   S: z.enum(orderStatuses), // status
-  ro: z.boolean(), // reversed order
+  ro: z.boolean().optional(), // reversed order
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
   c: subOrderSchema.array(), // sub orders (content)
