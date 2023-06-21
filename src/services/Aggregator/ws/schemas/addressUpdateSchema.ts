@@ -90,7 +90,7 @@ export const fullOrderSchema = z.object({
   c: subOrderSchema.array(), // sub orders (content)
 
   // CFD only
-  L: z.string().optional(), // stop limit price,
+  L: z.number().optional(), // stop limit price,
   l: z.boolean().optional(), // is liquidation order
   rpnl: z.number().optional(), // realized PnL
 }).transform((val) => ({
