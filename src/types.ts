@@ -44,7 +44,6 @@ type StatesByInstrument = {
   position: string
   positionPrice: string
   marginUSD: string
-  freeMarginUSD: string
   leverage: string
   longFundingRatePerSecond: string
   longFundingRatePerDay: string

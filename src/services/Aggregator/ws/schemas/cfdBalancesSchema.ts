@@ -10,8 +10,8 @@ const sbiSchema = z
     fr: z.string(), // accumulated funding rate
     p: z.string(), // position
     pp: z.string(), // position price
+    m: z.string(), // margin
     mu: z.string(), // margin in USD
-    fmu: z.string(), // free margin in USD
     l: z.string(), // leverage
     lfrs: z.string(), // long funding rate per second
     lfrd: z.string(), // long funding rate per day
@@ -43,8 +43,8 @@ export const cfdBalanceSchema = z
         accumulatedFundingRate: state.fr,
         position: state.p,
         positionPrice: state.pp,
+        margin: state.m,
         marginUSD: state.mu,
-        freeMarginUSD: state.fmu,
         leverage: state.l,
         longFundingRatePerSecond: state.lfrs,
         longFundingRatePerDay: state.lfrd,
