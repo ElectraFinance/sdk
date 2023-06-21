@@ -1,5 +1,6 @@
 {
   "production": {
+    "marginMode": "isolated",
     "referralAPI": "https://electra.finance/referral-api",
     "networks": {
       "1": {
@@ -80,6 +81,7 @@
     }
   },
   "testing": {
+    "marginMode": "isolated",
     "referralAPI": "https://testing.electra.finance/referral-api",
     "networks": {
       "97": {
@@ -160,6 +162,7 @@
     }
   },
   "staging": {
+    "marginMode": "isolated",
     "referralAPI": "https://staging.electra.finance/referral-api",
     "networks": {
       "1": {
@@ -240,6 +243,7 @@
     }
   },
   "experimental": {
+    "marginMode": "isolated",
     "referralAPI": "https://exp.electra.finance/referral-api",
     "networks": {
       "97": {

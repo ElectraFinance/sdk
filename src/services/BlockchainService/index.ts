@@ -101,6 +101,12 @@ class BlockchainService {
     { headers: this.basicAuthHeaders }
   );
 
+  getCrossMarginCFDPrices = () => fetchWithValidation(
+    `${this.apiUrl}/api/cfd/cross-margin/prices`,
+    z.record(z.string()).transform(makePartial),
+    { headers: this.basicAuthHeaders }
+  );
+
   getGasPriceWei = () => fetchWithValidation(
     `${this.apiUrl}/api/gasPrice`,
     z.string(),

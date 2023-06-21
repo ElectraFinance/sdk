@@ -21,7 +21,6 @@ const hashCrossMarginCFDOrder = (order: CrossMarginCFDOrder) => ethers.utils.sol
     order.amount,
     order.price,
     order.matcherFee,
-    order.nonce,
     order.expiration,
     order.buySide === 1 ? '0x01' : '0x00',
   ],

@@ -5,6 +5,7 @@ import {simpleFetch} from "simple-typed-fetch";
 const walletPrivateKey = "";
 
 const electra = new Electra({
+    marginMode: 'isolated',
     referralAPI: '',
     networks: {
         97: {

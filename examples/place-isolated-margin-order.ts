@@ -6,6 +6,7 @@ const {signCFDOrder} = crypt;
 const walletPrivateKey = "";
 
 const electra = new Electra({
+    marginMode: 'isolated',
     referralAPI: '',
     networks: {
         97: {

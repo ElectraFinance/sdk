@@ -90,14 +90,12 @@ export default class Unit {
   async calculateFee(symbol: string, amount: BigNumber.Value, type: 'cross' | 'isolated') {
     const feeAssetName = 'USDT';
     const { assetToAddress } = await simpleFetch(this.blockchainService.getInfo)();
-    const CFDPrices = await simpleFetch(this.blockchainService.getCFDPrices)();
-    const symbolPrice = CFDPrices[symbol];
-    if (symbolPrice === undefined) throw new Error(`CFD price ${symbol} not found`);
     const {
       FILL_CFD_ORDERS_TRADE_GAS_LIMIT
     } = await simpleFetch(this.blockchainService.getBaseLimits)();
 
     let feePercent: number;
+    let symbolPrice: string | undefined;
     if (type === 'isolated') {
       const CFDContracts = await simpleFetch(this.blockchainService.getCFDContracts)();
       const contractInfo = CFDContracts.find((c) => c.name === symbol);
@@ -105,6 +103,10 @@ export default class Unit {
         throw new Error(`CFD contract ${symbol} not found`);
       }
       feePercent = contractInfo.feePercent;
+
+      const CFDPrices = await simpleFetch(this.blockchainService.getCFDPrices)();
+      if (!(symbol in CFDPrices)) throw new Error(`CFD price ${symbol} not found`);
+      symbolPrice = CFDPrices[symbol];
     } else {
       const { instruments } = await simpleFetch(this.blockchainService.getCrossMarginInfo)();
       const instrumentInfo = instruments[symbol];
@@ -112,7 +114,11 @@ export default class Unit {
         throw new Error(`Instrument ${symbol} not found`);
       }
       feePercent = instrumentInfo.feePercent;
+      const CFDPrices = await simpleFetch(this.blockchainService.getCrossMarginCFDPrices)();
+      if (!(symbol in CFDPrices)) throw new Error(`CFD price ${symbol} not found`);
+      symbolPrice = CFDPrices[symbol];
     }
+    if (symbolPrice === undefined) throw new Error(`Price for ${symbol} not found`);
 
     const gasPriceWei = await simpleFetch(this.blockchainService.getGasPriceWei)();
     const gasPriceGwei = ethers.utils.formatUnits(gasPriceWei, 'gwei');
