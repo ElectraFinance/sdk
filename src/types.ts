@@ -43,7 +43,9 @@ type StatesByInstrument = {
   accumulatedFundingRate: string
   position: string
   positionPrice: string
+  margin: string
   marginUSD: string
+  freeMarginUSD: string
   leverage: string
   longFundingRatePerSecond: string
   longFundingRatePerDay: string
