@@ -27,7 +27,6 @@ export const cfdBalanceSchema = z
     fr: z.string(), // total accumulated funding rate
     e: z.string(), // equity
     r: z.string(), // total reserves
-    m: z.string(), // total margin
     mu: z.string(), // total margin in USD
     fmu: z.string(), // total free margin in USD
     awb: z.string(), // available withdraw balance
@@ -60,7 +59,6 @@ export const cfdBalanceSchema = z
       fundingRate: obj.fr,
       equity: obj.e,
       reserves: obj.r,
-      margin: obj.m,
       marginUSD: obj.mu,
       freeMarginUSD: obj.fmu,
       availableWithdrawBalance: obj.awb,
