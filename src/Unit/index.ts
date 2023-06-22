@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { Aggregator } from '../services/Aggregator/index.js';
 import { BlockchainService } from '../services/BlockchainService/index.js';
 import { PriceFeed } from '../services/PriceFeed/index.js';
-import type { CrossMarginCFDOrder, KnownEnv, SupportedChainId, VerboseUnitConfig } from '../types.js';
+import type { KnownEnv, SupportedChainId, VerboseUnitConfig } from '../types.js';
 import { chains, envs } from '../config/index.js';
 import { DEFAULT_EXPIRATION, type networkCodes } from '../constants/index.js';
 import { simpleFetch } from 'simple-typed-fetch';
