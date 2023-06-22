@@ -2,15 +2,13 @@ import type { TypedDataSigner } from '@ethersproject/abstract-signer';
 import { BigNumber } from 'bignumber.js';
 import type { ethers } from 'ethers';
 import { joinSignature, splitSignature } from 'ethers/lib/utils.js';
-import { INTERNAL_PROTOCOL_PRECISION } from '../constants/index.js';
+import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants/index.js';
 import type { CrossMarginCFDOrder, SignedCrossMarginCFDOrder, SupportedChainId } from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
 import getDomainData from './getDomainData.js';
 import { CROSS_MARGIN_CFD_ORDER_TYPES } from '../constants/cfdOrderTypes.js';
 import signCrossMarginCFDOrderPersonal from './signCrossMarginCFDOrderPersonal.js';
 import hashCrossMarginCFDOrder from './hashCrossMarginCFDOrder.js';
-
-const DEFAULT_EXPIRATION = 29 * 24 * 60 * 60 * 1000; // 29 days
 
 type SignerWithTypedDataSign = ethers.Signer & TypedDataSigner;
 

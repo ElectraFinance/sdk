@@ -2,9 +2,9 @@ import { ethers } from 'ethers';
 import { Aggregator } from '../services/Aggregator/index.js';
 import { BlockchainService } from '../services/BlockchainService/index.js';
 import { PriceFeed } from '../services/PriceFeed/index.js';
-import type { KnownEnv, SupportedChainId, VerboseUnitConfig } from '../types.js';
+import type { CrossMarginCFDOrder, KnownEnv, SupportedChainId, VerboseUnitConfig } from '../types.js';
 import { chains, envs } from '../config/index.js';
-import type { networkCodes } from '../constants/index.js';
+import { DEFAULT_EXPIRATION, type networkCodes } from '../constants/index.js';
 import { simpleFetch } from 'simple-typed-fetch';
 import calculateNetworkFee from '../utils/calculateNetworkFee.js';
 import { BigNumber } from 'bignumber.js';
@@ -85,6 +85,43 @@ export default class Unit {
       this.config.services.priceFeed.api,
       this.config.basicAuth,
     );
+  }
+
+  // async makePositionCloseOrder(address: string, symbol: string, type: 'isolated'): Promise<CFDOrder>
+  async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder>
+  async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder> {
+    const { instruments } = await simpleFetch(this.blockchainService.getCrossMarginInfo)();
+    const instrumentInfo = instruments[symbol];
+    if (instrumentInfo === undefined) {
+      throw new Error(`Instrument ${symbol} not found. Available instruments: ${Object.keys(instruments).join(', ')}`);
+    }
+
+    const { statesByInstruments } = await simpleFetch(this.aggregator.getBalance)(address);
+    const instrumentState = statesByInstruments[symbol];
+    if (instrumentState === undefined) {
+      throw new Error(`Instrument state ${symbol} not found. Available instruments: ${Object.keys(statesByInstruments).join(', ')}`);
+    }
+    const { position, currentPrice } = instrumentState;
+    const { matcherAddress } = await simpleFetch(this.blockchainService.getInfo)();
+
+    const { totalFee } = await this.calculateFee(symbol, position, type);
+    const nonce = Date.now();
+    const expiration = nonce + DEFAULT_EXPIRATION;
+
+    const isShort = position < 0; // Sell
+
+    return {
+      senderAddress: address,
+      matcherAddress,
+      instrumentIndex: instrumentInfo.id,
+      amount: position,
+      price: currentPrice,
+      matcherFee: totalFee.toNumber(),
+      nonce,
+      expiration,
+      buySide: isShort ? 1 : 0,
+      isPersonalSign: false,
+    }
   }
 
   async calculateFee(symbol: string, amount: BigNumber.Value, type: 'cross' | 'isolated') {
