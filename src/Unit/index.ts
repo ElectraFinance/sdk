@@ -88,8 +88,8 @@ export default class Unit {
   }
 
   // async makePositionCloseOrder(address: string, symbol: string, type: 'isolated'): Promise<CFDOrder>
-  async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder>
-  async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder> {
+  // async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder>
+  async makePositionCloseOrder(address: string, symbol: string, type: 'cross') {
     const { instruments } = await simpleFetch(this.blockchainService.getCrossMarginInfo)();
     const instrumentInfo = instruments[symbol];
     if (instrumentInfo === undefined) {
@@ -119,7 +119,7 @@ export default class Unit {
       matcherFee: totalFee.toNumber(),
       nonce,
       expiration,
-      buySide: isShort ? 1 : 0,
+      side: isShort ? 'BUY' as const : 'SELL' as const,
       isPersonalSign: false,
     }
   }

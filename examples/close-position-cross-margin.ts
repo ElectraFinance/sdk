@@ -2,11 +2,10 @@ import {Electra, SupportedChainId, crypt} from "../src/index";
 import {ethers} from "ethers";
 import {simpleFetch} from "simple-typed-fetch";
 
-const {signCFDOrder} = crypt;
 const walletPrivateKey = "";
 
 const electra = new Electra({
-    marginMode: 'isolated',
+    marginMode: 'cross',
     referralAPI: '',
     networks: {
         97: {
@@ -36,37 +35,31 @@ const wallet = new ethers.Wallet(
     unit.provider
 );
 
-// Your order params
 const senderAddress = await wallet.getAddress();
-const amount = '23.124';
 const symbol = 'ETHUSDF';
-const side = 'BUY'
-const price = '40.86';
-const stopPrice = '0.34'; // optional
 
-// Getting additional params required for order signing
-const contracts = await simpleFetch(unit.blockchainService.getCFDContracts)();
-const contract = contracts.find((c) => c.name === symbol);
-if (!contract) throw new Error(`Contract not found for symbol ${symbol}`);
-const {totalFee} = await unit.calculateFee(symbol, amount, 'isolated');
-const {matcherAddress} = await simpleFetch(unit.blockchainService.getInfo)();
+const counterOrder = await unit.makePositionCloseOrder(
+    senderAddress,
+    symbol,
+    'cross'
+)
 
 // Signing order
-const signedOrder = await signCFDOrder(
-    contract.address, // instrumentAddress, you can retrieve list of available instruments from blockchainService.getCFDContracts()
-    side, // side: 'BUY' | 'SELL'
-    price,
-    amount,
-    totalFee,
-    senderAddress,
-    matcherAddress,
-    false, // usePersonalSign
+const signedOrder = await crypt.signCrossMarginCFDOrder(
+    counterOrder.instrumentIndex,
+    counterOrder.side,
+    counterOrder.price,
+    counterOrder.amount,
+    counterOrder.matcherFee,
+    counterOrder.senderAddress,
+    counterOrder.matcherAddress,
+    counterOrder.isPersonalSign,
     wallet, // pass here ethers.Signer instance
     unit.chainId,
-    stopPrice,
+    undefined,
     false // isFromDelegate — if true, then the order will be placed on behalf of the delegate
 );
 
-// Placing order
-const {orderId} = await simpleFetch(unit.aggregator.placeCFDOrder)(signedOrder);
+// Close position by placing order
+const {orderId} = await simpleFetch(unit.aggregator.placeCrossMarginOrder)(signedOrder);
 console.log(`Order placed: ${orderId}`);
