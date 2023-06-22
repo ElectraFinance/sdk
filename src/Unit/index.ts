@@ -117,7 +117,6 @@ export default class Unit {
       amount: position,
       price: currentPrice,
       matcherFee: totalFee.toNumber(),
-      nonce,
       expiration,
       buySide: isShort ? 1 : 0,
       isPersonalSign: false,
