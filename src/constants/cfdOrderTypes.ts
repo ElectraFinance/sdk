@@ -13,7 +13,7 @@ export const ISOLATED_MARGIN_CFD_ORDER_TYPES = {
 };
 
 export const CROSS_MARGIN_CFD_ORDER_TYPES = {
-  CrossMarginCFDOrder: [
+  CFDOrder: [
     { name: 'senderAddress', type: 'address' },
     { name: 'matcherAddress', type: 'address' },
     { name: 'instrumentIndex', type: 'uint16' },
