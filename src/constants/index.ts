@@ -7,3 +7,5 @@ export { default as exchanges } from './exchanges.js';
 export * from './chains.js';
 export * from './precisions.js';
 export * from './gasLimits.js';
+
+export const DEFAULT_EXPIRATION = 29 * 24 * 60 * 60 * 1000; // 29 days

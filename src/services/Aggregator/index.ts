@@ -6,7 +6,7 @@ import { AggregatorWS } from './ws/index.js';
 import type {
   BasicAuthCredentials, Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginCFDOrder, SignedOrder
 } from '../../types.js';
-import { pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema } from './schemas/index.js';
+import { pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema, futuresBalancesSchema } from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
 import httpToWS from '../../utils/httpToWS.js';
 import { ethers } from 'ethers';
@@ -292,6 +292,14 @@ class Aggregator {
       errorSchema,
     );
   };
+
+  getBalance = (address: string) => {
+    const url = new URL(`${this.apiUrl}/api/v1/address/futures/balance/${address}`);
+    return fetchWithValidation(
+      url.toString(),
+      futuresBalancesSchema,
+    );
+  }
 
   getLockedBalance = (address: string, currency: string) => {
     const url = new URL(`${this.apiUrl}/api/v1/address/balance/reserved/${currency}`);
