@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { Aggregator } from '../services/Aggregator/index.js';
 import { BlockchainService } from '../services/BlockchainService/index.js';
 import { PriceFeed } from '../services/PriceFeed/index.js';
-import type { CrossMarginCFDOrder, KnownEnv, SupportedChainId, VerboseUnitConfig } from '../types.js';
+import type { KnownEnv, SupportedChainId, VerboseUnitConfig } from '../types.js';
 import { chains, envs } from '../config/index.js';
 import { DEFAULT_EXPIRATION, type networkCodes } from '../constants/index.js';
 import { simpleFetch } from 'simple-typed-fetch';
@@ -88,8 +88,8 @@ export default class Unit {
   }
 
   // async makePositionCloseOrder(address: string, symbol: string, type: 'isolated'): Promise<CFDOrder>
-  async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder>
-  async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder> {
+  // async makePositionCloseOrder(address: string, symbol: string, type: 'cross'): Promise<CrossMarginCFDOrder>
+  async makePositionCloseOrder(address: string, symbol: string, type: 'cross') {
     const { instruments } = await simpleFetch(this.blockchainService.getCrossMarginInfo)();
     const instrumentInfo = instruments[symbol];
     if (instrumentInfo === undefined) {
@@ -118,7 +118,7 @@ export default class Unit {
       price: currentPrice,
       matcherFee: totalFee.toNumber(),
       expiration,
-      buySide: isShort ? 1 : 0,
+      side: isShort ? 'BUY' as const : 'SELL' as const,
       isPersonalSign: false,
     }
   }
