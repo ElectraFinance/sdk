@@ -66,6 +66,29 @@ export type CFDBalance = {
   statesByInstruments: StatesByInstrument[]
 }
 
+export type IsolatedCFDBalance = {
+  instrument: string
+  balance: string
+  profitLoss: string
+  fundingRate: string
+  equity: string
+  position: string
+  currentPrice: string
+  positionPrice: string
+  reserves: string
+  margin: string
+  marginUSD: string
+  freeMarginUSD: string
+  availableWithdrawBalance: string
+  leverage: string
+  status: PositionStatus
+  longFundingRatePerSecond: string
+  longFundingRatePerDay: string
+  shortFundingRatePerSecond: string
+  shortFundingRatePerDay: string
+  stopOutPrice: string | undefined
+}
+
 export type Order = {
   senderAddress: string // address
   matcherAddress: string // address
@@ -93,7 +116,6 @@ type BaseFuturesOrder = {
   amount: number // uint64
   price: number // uint64
   matcherFee: number // uint64
-  nonce: number // uint64
   expiration: number // uint64
   buySide: 0 | 1 // uint8, 1=buy, 0=sell
   stopPrice?: number | undefined // uint64
@@ -101,18 +123,19 @@ type BaseFuturesOrder = {
   isFromDelegate?: boolean | undefined // bool
 }
 
-export type CFDOrder = {
-  instrumentAddress: string // address
+export type IsolatedCFDOrder = {
+  instrumentAddress: string
+  nonce: number // uint64
 } & BaseFuturesOrder
 
 export type CrossMarginCFDOrder = {
   instrumentIndex: number // uint16
-} & Omit<BaseFuturesOrder, 'nonce'>
+} & BaseFuturesOrder
 
-export type SignedCFDOrder = {
+export type SignedIsolatedMarginCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
-} & CFDOrder
+} & IsolatedCFDOrder
 
 export type SignedCrossMarginCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)

@@ -7,16 +7,19 @@ import {
   pingPongMessageSchema, initMessageSchema,
   errorSchema, orderBookSchema,
   assetPairsConfigSchema, addressUpdateSchema,
+  isolatedAddressUpdateSchema
 } from './schemas/index.js';
 import UnsubscriptionType from './UnsubscriptionType.js';
 import type {
-  AssetPairUpdate, OrderbookItem,
-  Balance, CFDBalance, FuturesTradeInfo, Json, BasicAuthCredentials,
+  AssetPairUpdate, OrderbookItem, Balance, CFDBalance,
+  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance,
 } from '../../../types.js';
 import unsubscriptionDoneSchema from './schemas/unsubscriptionDoneSchema.js';
 import assetPairConfigSchema from './schemas/assetPairConfigSchema.js';
 import type { fullOrderSchema, orderUpdateSchema } from './schemas/addressUpdateSchema.js';
+import type { isolatedFullOrderSchema, isolatedOrderUpdateSchema } from './schemas/isolatedAddressUpdateSchema.js';
 import cfdAddressUpdateSchema from './schemas/cfdAddressUpdateSchema.js';
+import isolatedCFDAddressUpdateSchema from './schemas/isolatedCFDAddressUpdateSchema.js';
 import futuresTradeInfoSchema from './schemas/futuresTradeInfoSchema.js';
 import { objectKeys } from '../../../utils/objectKeys.js';
 // import assertError from '../../../utils/assertError.js';
@@ -30,7 +33,9 @@ const messageSchema = z.union([
   initMessageSchema,
   pingPongMessageSchema,
   addressUpdateSchema,
+  isolatedAddressUpdateSchema,
   cfdAddressUpdateSchema,
+  isolatedCFDAddressUpdateSchema,
   assetPairsConfigSchema,
   assetPairConfigSchema,
   orderBookSchema,
@@ -77,6 +82,17 @@ type FuturesTradeInfoSubscription = {
   errorCb?: (message: string) => void
 }
 
+type IsolatedAddressUpdateUpdate = {
+  kind: 'update'
+  balances: Partial<
+    Record<
+      string,
+      Balance
+    >
+  >
+  order?: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined
+}
+
 type AddressUpdateUpdate = {
   kind: 'update'
   balances: Partial<
@@ -86,6 +102,17 @@ type AddressUpdateUpdate = {
     >
   >
   order?: z.infer<typeof orderUpdateSchema> | z.infer<typeof fullOrderSchema> | undefined
+}
+
+type IsolatedAddressUpdateInitial = {
+  kind: 'initial'
+  balances: Partial<
+    Record<
+      string,
+      Balance
+    >
+  >
+  orders?: Array<z.infer<typeof isolatedFullOrderSchema>> | undefined // The field is not defined if the user has no orders
 }
 
 type AddressUpdateInitial = {
@@ -99,10 +126,22 @@ type AddressUpdateInitial = {
   orders?: Array<z.infer<typeof fullOrderSchema>> | undefined // The field is not defined if the user has no orders
 }
 
+type IsolatedCFDAddressUpdateUpdate = {
+  kind: 'update'
+  balances?: IsolatedCFDBalance[] | undefined
+  order?: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined
+}
+
 type CfdAddressUpdateUpdate = {
   kind: 'update'
   balance?: CFDBalance | undefined
   order?: z.infer<typeof orderUpdateSchema> | z.infer<typeof fullOrderSchema> | undefined
+}
+
+type IsolatedCFDAddressUpdateInitial = {
+  kind: 'initial'
+  balances: IsolatedCFDBalance[]
+  orders?: Array<z.infer<typeof isolatedFullOrderSchema>> | undefined // The field is not defined if the user has no orders
 }
 
 type CfdAddressUpdateInitial = {
@@ -111,10 +150,21 @@ type CfdAddressUpdateInitial = {
   orders?: Array<z.infer<typeof fullOrderSchema>> | undefined // The field is not defined if the user has no orders
 }
 
+type IsolatedAddressUpdateSubscription = {
+  payload: string
+  callback: (data: IsolatedAddressUpdateUpdate | IsolatedAddressUpdateInitial) => void
+  errorCb?: (message: string) => void
+}
+
 type AddressUpdateSubscription = {
   payload: string
   callback: (data: AddressUpdateUpdate | AddressUpdateInitial) => void
   errorCb?: (message: string) => void
+}
+
+type IsolatedCFDAddressUpdateSubscription = {
+  payload: string
+  callback: (data: IsolatedCFDAddressUpdateUpdate | IsolatedCFDAddressUpdateInitial) => void
 }
 
 type CfdAddressUpdateSubscription = {
@@ -124,7 +174,9 @@ type CfdAddressUpdateSubscription = {
 
 type Subscription = {
   [SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE]: AddressUpdateSubscription
+  [SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE]: IsolatedAddressUpdateSubscription
   [SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE]: CfdAddressUpdateSubscription
+  [SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE]: IsolatedCFDAddressUpdateSubscription
   [SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE]: AggregatedOrderbookSubscription
   [SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]: PairsConfigSubscription
   [SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]: PairConfigSubscription
@@ -629,6 +681,46 @@ class AggregatorWS {
               break;
           }
           break;
+        case MessageType.ISOLATED_CFD_ADDRESS_UPDATE:
+          switch (json.k) { // message kind
+            case 'i': { // initial
+              const isolatedFullOrders = (json.o)
+                ? json.o.reduce<Array<z.infer<typeof isolatedFullOrderSchema>>>((prev, o) => {
+                  prev.push(o);
+
+                  return prev;
+                }, [])
+                : undefined;
+
+              this.subscriptions[
+                SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE
+              ]?.[json.id]?.callback({
+                kind: 'initial',
+                orders: isolatedFullOrders,
+                balances: json.b,
+              });
+            }
+              break;
+            case 'u': { // update
+              let isolatedOrderUpdate: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined;
+              if (json.o) {
+                const isolatedFirstOrder = json.o[0];
+                isolatedOrderUpdate = isolatedFirstOrder;
+              }
+
+              this.subscriptions[
+                SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE
+              ]?.[json.id]?.callback({
+                kind: 'update',
+                order: isolatedOrderUpdate,
+                balances: json.b,
+              });
+            }
+              break;
+            default:
+              break;
+          }
+          break;
         case MessageType.ADDRESS_UPDATE: {
           const balances = (json.b)
             ? Object.entries(json.b)
@@ -674,6 +766,60 @@ class AggregatorWS {
               ]?.[json.id]?.callback({
                 kind: 'update',
                 order: orderUpdate,
+                balances,
+              });
+            }
+              break;
+            default:
+              break;
+          }
+        }
+          break;
+        case MessageType.ISOLATED_ADDRESS_UPDATE: {
+          const balances = (json.b)
+            ? Object.entries(json.b)
+              .reduce<Partial<Record<string, Balance>>>((prev, [asset, assetBalances]) => {
+                if (!assetBalances) return prev;
+                const [tradable, reserved, contract, wallet, allowance] = assetBalances;
+
+                prev[asset] = {
+                  tradable, reserved, contract, wallet, allowance,
+                };
+
+                return prev;
+              }, {})
+            : {};
+          switch (json.k) { // message kind
+            case 'i': { // initial
+              const isolatedFullOrders = json.o
+                ? json.o.reduce<Array<z.infer<typeof isolatedFullOrderSchema>>>((prev, o) => {
+                  prev.push(o);
+
+                  return prev;
+                }, [])
+                : undefined;
+
+              this.subscriptions[
+                SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE
+              ]?.[json.id]?.callback({
+                kind: 'initial',
+                orders: isolatedFullOrders,
+                balances,
+              });
+            }
+              break;
+            case 'u': { // update
+              let isolatedOrderUpdate: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined;
+              if (json.o) {
+                const isolatedFirstOrder = json.o[0];
+                isolatedOrderUpdate = isolatedFirstOrder;
+              }
+
+              this.subscriptions[
+                SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE
+              ]?.[json.id]?.callback({
+                kind: 'update',
+                order: isolatedOrderUpdate,
                 balances,
               });
             }
