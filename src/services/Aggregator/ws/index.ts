@@ -25,6 +25,7 @@ import { objectKeys } from '../../../utils/objectKeys.js';
 const UNSUBSCRIBE = 'u';
 const SERVER_PING_INTERVAL = 30000;
 const HEARBEAT_THRESHOLD = 5000;
+const HANDSHAKE_TIMEOUT = 5000;
 
 const messageSchema = z.union([
   initMessageSchema,
@@ -431,7 +432,7 @@ class AggregatorWS {
 
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
-    this.ws = new WebSocket(this.api);
+    this.ws = new WebSocket(this.api, { handshakeTimeout: HANDSHAKE_TIMEOUT });
     this.ws.onerror = (err) => {
       this.onError?.(`AggregatorWS error: ${err.message}`);
       this.logger?.(`AggregatorWS: ${err.message}`);
