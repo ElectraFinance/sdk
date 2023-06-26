@@ -4,9 +4,12 @@ import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws/index.js';
 import type {
-  BasicAuthCredentials, Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginCFDOrder, SignedOrder
+  BasicAuthCredentials, Exchange, IsolatedCFDOrder, SignedCancelOrderRequest, SignedCrossMarginCFDOrder, SignedOrder
 } from '../../types.js';
-import { pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema, futuresBalancesSchema } from './schemas/index.js';
+import {
+  pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema,
+  poolReservesSchema, futuresBalancesSchema,
+} from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
 import httpToWS from '../../utils/httpToWS.js';
 import { ethers } from 'ethers';
@@ -230,7 +233,7 @@ class Aggregator {
   );
 
   placeCFDOrder = (
-    signedOrder: SignedCFDOrder,
+    signedOrder: IsolatedCFDOrder,
     isReversedOrder?: boolean,
   ) => {
     const headers = {
