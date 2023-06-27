@@ -55,14 +55,17 @@ export class PriceFeedWS {
       type: sub.type,
       id: sub.id,
       unsubscribe: () => { this.unsubscribe(sub.type, sub.id); },
-      onOpen(openCallback: PriceFeedSubscriptionEvents['open']) {
+      onOpen(openCallback: PriceFeedSubscriptionEvents<S>['open']) {
         return sub.onOpen(openCallback);
       },
-      onClose(closeCallback: PriceFeedSubscriptionEvents['close']) {
+      onClose(closeCallback: PriceFeedSubscriptionEvents<S>['close']) {
         return sub.onClose(closeCallback);
       },
-      onError(errorCallback: PriceFeedSubscriptionEvents['error']) {
+      onError(errorCallback: PriceFeedSubscriptionEvents<S>['error']) {
         return sub.onError(errorCallback);
+      },
+      onMessage(messageCallback: PriceFeedSubscriptionEvents<S>['message']) {
+        return sub.onMessage(messageCallback);
       }
     };
   }

@@ -27,12 +27,6 @@ export const subscriptions = {
   },
 };
 
-export type PriceFeedSubscriptionEvents = {
-  open: (openEvent: WebSocket.Event) => void
-  error: (error: WebSocket.ErrorEvent) => void
-  close: (closeEvent: WebSocket.CloseEvent) => void
-}
-
 export type SubscriptionType = keyof typeof subscriptions;
 export type Subscription<
   T extends SubscriptionType,
@@ -46,6 +40,13 @@ export type Subscription<
     callback: (data: Schema) => void
     errorCallback?: (error: Error) => void
   }
+
+export type PriceFeedSubscriptionEvents<T extends SubscriptionType> = {
+  open: (openEvent: WebSocket.Event) => void
+  error: (error: WebSocket.ErrorEvent) => void
+  close: (closeEvent: WebSocket.CloseEvent) => void
+  message: <Schema = z.infer<typeof subscriptions[T]['schema']>>(data: Schema) => void
+}
 
 export default class PriceFeedSubscription<T extends SubscriptionType = SubscriptionType> {
   public readonly id: string;
@@ -69,7 +70,7 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
   // since sometimes it can be replaced with system one.
   // https://stackoverflow.com/questions/19304157/getting-the-reason-why-websockets-closed-with-close-code-1006
   private isClosedIntentionally = false;
-  private readonly emitter: Emitter<PriceFeedSubscriptionEvents>;
+  private readonly emitter: Emitter<PriceFeedSubscriptionEvents<T>>;
 
   constructor(
     type: T,
@@ -88,16 +89,20 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
     this.init();
   }
 
-  onOpen(openCallback: PriceFeedSubscriptionEvents['open']) {
+  onOpen(openCallback: PriceFeedSubscriptionEvents<T>['open']) {
     return this.emitter.on('open', openCallback);
   }
 
-  onClose(closeCallback: PriceFeedSubscriptionEvents['close']) {
+  onClose(closeCallback: PriceFeedSubscriptionEvents<T>['close']) {
     return this.emitter.on('close', closeCallback);
   }
 
-  onError(errorCallback: PriceFeedSubscriptionEvents['error']) {
+  onError(errorCallback: PriceFeedSubscriptionEvents<T>['error']) {
     return this.emitter.on('error', errorCallback);
+  }
+
+  onMessage(messageCallback: PriceFeedSubscriptionEvents<T>['message']) {
+    return this.emitter.on('message', messageCallback);
   }
 
   private send(jsonObject: Json) {
@@ -152,6 +157,7 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
         } else throw error;
       } else {
         this.callback(parseResult.data);
+        this.emitter.emit('message', parseResult.data);
       }
     };
 
