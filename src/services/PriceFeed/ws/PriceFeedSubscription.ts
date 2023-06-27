@@ -127,7 +127,6 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
     );
 
     this.ws.onopen = (event) => { this.emitter.emit('open', event); };
-    this.ws.onclose = (event) => { this.emitter.emit('close', event); }
     this.ws.onerror = (event) => { this.emitter.emit('error', event); }
     this.ws.onmessage = (e) => {
       const { data } = e;
@@ -161,7 +160,8 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
       }
     };
 
-    this.ws.onclose = () => {
+    this.ws.onclose = (event) => {
+      this.emitter.emit('close', event);
       if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
       if (!this.isClosedIntentionally) this.init();
     };
