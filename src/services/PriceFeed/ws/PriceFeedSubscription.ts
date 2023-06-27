@@ -6,6 +6,7 @@ import { tickerInfoSchema, candleSchema } from './schemas/index.js';
 import priceSchema from './schemas/priceSchema.js';
 import type { Json } from '../../../types.js';
 import allTickersSchema from './schemas/allTickersSchema.js';
+import { createNanoEvents, type Emitter } from 'nanoevents';
 
 export const subscriptions = {
   [priceFeedSubscriptions.ALL_TICKERS]: {
@@ -25,6 +26,12 @@ export const subscriptions = {
     payload: true as const,
   },
 };
+
+export type PriceFeedSubscriptionEvents = {
+  open: (openEvent: WebSocket.Event) => void
+  error: (error: WebSocket.ErrorEvent) => void
+  close: (closeEvent: WebSocket.CloseEvent) => void
+}
 
 export type SubscriptionType = keyof typeof subscriptions;
 export type Subscription<
@@ -62,25 +69,35 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
   // since sometimes it can be replaced with system one.
   // https://stackoverflow.com/questions/19304157/getting-the-reason-why-websockets-closed-with-close-code-1006
   private isClosedIntentionally = false;
-
-  private readonly onOpen: ((event: WebSocket.Event) => void) | undefined;
+  private readonly emitter: Emitter<PriceFeedSubscriptionEvents>;
 
   constructor(
     type: T,
     url: string,
     params: Subscription<T>,
-    onOpen?: (event: WebSocket.Event) => void,
   ) {
     this.id = uuidv4();
     this.url = url;
     this.type = type;
+    this.emitter = createNanoEvents();
     if ('payload' in params) {
       this.payload = params.payload;
     }
     this.callback = params.callback;
     this.errorCallback = params.errorCallback;
-    this.onOpen = onOpen;
     this.init();
+  }
+
+  onOpen(openCallback: PriceFeedSubscriptionEvents['open']) {
+    return this.emitter.on('open', openCallback);
+  }
+
+  onClose(closeCallback: PriceFeedSubscriptionEvents['close']) {
+    return this.emitter.on('close', closeCallback);
+  }
+
+  onError(errorCallback: PriceFeedSubscriptionEvents['error']) {
+    return this.emitter.on('error', errorCallback);
   }
 
   private send(jsonObject: Json) {
@@ -104,9 +121,9 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
         : ''}`
     );
 
-    if (this.onOpen !== undefined) {
-      this.ws.onopen = this.onOpen;
-    }
+    this.ws.onopen = (event) => { this.emitter.emit('open', event); };
+    this.ws.onclose = (event) => { this.emitter.emit('close', event); }
+    this.ws.onerror = (event) => { this.emitter.emit('error', event); }
     this.ws.onmessage = (e) => {
       const { data } = e;
 
