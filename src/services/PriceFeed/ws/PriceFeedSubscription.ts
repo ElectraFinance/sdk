@@ -33,11 +33,11 @@ export type Subscription<
   Schema = z.infer<typeof subscriptions[T]['schema']>
 > = typeof subscriptions[T] extends { payload: true }
   ? {
-    callback: (data: Schema) => void
+    callback?: (data: Schema) => void
     errorCallback?: (error: Error) => void
     payload: string
   } : {
-    callback: (data: Schema) => void
+    callback?: (data: Schema) => void
     errorCallback?: (error: Error) => void
   }
 
@@ -156,7 +156,7 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
           this.errorCallback(error);
         } else throw error;
       } else {
-        this.callback(parseResult.data);
+        this.callback?.(parseResult.data);
         this.emitter.emit('message', parseResult.data);
       }
     };
