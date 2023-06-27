@@ -373,7 +373,7 @@ class AggregatorWS {
 
   destroy() {
     this.isClosedIntentionally = true;
-    this.transport?.close();
+    this.transport?.destroy();
     delete this.transport;
   }
 
