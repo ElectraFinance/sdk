@@ -6,6 +6,7 @@ import { tickerInfoSchema, candleSchema } from './schemas/index.js';
 import priceSchema from './schemas/priceSchema.js';
 import type { Json } from '../../../types.js';
 import allTickersSchema from './schemas/allTickersSchema.js';
+import { createNanoEvents, type Emitter } from 'nanoevents';
 
 export const subscriptions = {
   [priceFeedSubscriptions.ALL_TICKERS]: {
@@ -32,13 +33,20 @@ export type Subscription<
   Schema = z.infer<typeof subscriptions[T]['schema']>
 > = typeof subscriptions[T] extends { payload: true }
   ? {
-    callback: (data: Schema) => void
+    callback?: (data: Schema) => void
     errorCallback?: (error: Error) => void
     payload: string
   } : {
-    callback: (data: Schema) => void
+    callback?: (data: Schema) => void
     errorCallback?: (error: Error) => void
   }
+
+export type PriceFeedSubscriptionEvents<T extends SubscriptionType> = {
+  open: (openEvent: WebSocket.Event) => void
+  error: (error: WebSocket.ErrorEvent) => void
+  close: (closeEvent: WebSocket.CloseEvent) => void
+  message: <Schema = z.infer<typeof subscriptions[T]['schema']>>(data: Schema) => void
+}
 
 export default class PriceFeedSubscription<T extends SubscriptionType = SubscriptionType> {
   public readonly id: string;
@@ -62,25 +70,39 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
   // since sometimes it can be replaced with system one.
   // https://stackoverflow.com/questions/19304157/getting-the-reason-why-websockets-closed-with-close-code-1006
   private isClosedIntentionally = false;
-
-  private readonly onOpen: ((event: WebSocket.Event) => void) | undefined;
+  private readonly emitter: Emitter<PriceFeedSubscriptionEvents<T>>;
 
   constructor(
     type: T,
     url: string,
     params: Subscription<T>,
-    onOpen?: (event: WebSocket.Event) => void,
   ) {
     this.id = uuidv4();
     this.url = url;
     this.type = type;
+    this.emitter = createNanoEvents();
     if ('payload' in params) {
       this.payload = params.payload;
     }
     this.callback = params.callback;
     this.errorCallback = params.errorCallback;
-    this.onOpen = onOpen;
     this.init();
+  }
+
+  onOpen(openCallback: PriceFeedSubscriptionEvents<T>['open']) {
+    return this.emitter.on('open', openCallback);
+  }
+
+  onClose(closeCallback: PriceFeedSubscriptionEvents<T>['close']) {
+    return this.emitter.on('close', closeCallback);
+  }
+
+  onError(errorCallback: PriceFeedSubscriptionEvents<T>['error']) {
+    return this.emitter.on('error', errorCallback);
+  }
+
+  onMessage(messageCallback: PriceFeedSubscriptionEvents<T>['message']) {
+    return this.emitter.on('message', messageCallback);
   }
 
   private send(jsonObject: Json) {
@@ -104,9 +126,8 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
         : ''}`
     );
 
-    if (this.onOpen !== undefined) {
-      this.ws.onopen = this.onOpen;
-    }
+    this.ws.onopen = (event) => { this.emitter.emit('open', event); };
+    this.ws.onerror = (event) => { this.emitter.emit('error', event); }
     this.ws.onmessage = (e) => {
       const { data } = e;
 
@@ -134,11 +155,13 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
           this.errorCallback(error);
         } else throw error;
       } else {
-        this.callback(parseResult.data);
+        this.callback?.(parseResult.data);
+        this.emitter.emit('message', parseResult.data);
       }
     };
 
-    this.ws.onclose = () => {
+    this.ws.onclose = (event) => {
+      this.emitter.emit('close', event);
       if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
       if (!this.isClosedIntentionally) this.init();
     };

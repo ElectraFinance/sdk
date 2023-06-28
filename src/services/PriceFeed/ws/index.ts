@@ -1,5 +1,4 @@
-import type WebSocket from 'ws';
-import PriceFeedSubscription, { type SubscriptionType, type Subscription } from './PriceFeedSubscription.js';
+import PriceFeedSubscription, { type SubscriptionType, type Subscription, type PriceFeedSubscriptionEvents } from './PriceFeedSubscription.js';
 import type { BasicAuthCredentials } from '../../../types.js';
 
 export * as schemas from './schemas/index.js';
@@ -39,13 +38,11 @@ export class PriceFeedWS {
   subscribe<S extends SubscriptionType>(
     type: S,
     params: Subscription<S>,
-    onOpen?: (event: WebSocket.Event) => void,
   ) {
     const sub = new PriceFeedSubscription(
       type,
       this.api,
       params,
-      onOpen,
     );
     this.subscriptions = {
       ...this.subscriptions,
@@ -58,6 +55,18 @@ export class PriceFeedWS {
       type: sub.type,
       id: sub.id,
       unsubscribe: () => { this.unsubscribe(sub.type, sub.id); },
+      onOpen(openCallback: PriceFeedSubscriptionEvents<S>['open']) {
+        return sub.onOpen(openCallback);
+      },
+      onClose(closeCallback: PriceFeedSubscriptionEvents<S>['close']) {
+        return sub.onClose(closeCallback);
+      },
+      onError(errorCallback: PriceFeedSubscriptionEvents<S>['error']) {
+        return sub.onError(errorCallback);
+      },
+      onMessage(messageCallback: PriceFeedSubscriptionEvents<S>['message']) {
+        return sub.onMessage(messageCallback);
+      }
     };
   }
 
