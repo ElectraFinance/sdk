@@ -404,17 +404,21 @@ class AggregatorWS {
 
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
-    this.transport = new WebsocketTransport(this.api);
-    this.transport.onError((err) => {
+    if (isReconnect) {
+      this.transport?.reconnect();
+    } else {
+      this.transport = new WebsocketTransport(this.api);
+    }
+    this.transport?.onError((err) => {
       this.onError?.(`AggregatorWS error: ${err.message}`);
       this.logger?.(`AggregatorWS: ${err.message}`);
     });
-    this.transport.onClose(() => {
+    this.transport?.onClose(() => {
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
       this.clearHeartbeat();
       if (!this.isClosedIntentionally) this.init(true);
     });
-    this.transport.onOpen(() => {
+    this.transport?.onOpen(() => {
       this.handleWsOpen();
       // Re-subscribe to all subscriptions
       if (isReconnect) {
@@ -433,7 +437,7 @@ class AggregatorWS {
       }
       this.logger?.(`AggregatorWS: connection opened${isReconnect ? ' (reconnect)' : ''}`);
     });
-    this.transport.onMessage((e) => {
+    this.transport?.onMessage((e) => {
       this.isAlive = true;
       const { data } = e;
       if (typeof data !== 'string') throw new Error('AggregatorWS: received non-string message');

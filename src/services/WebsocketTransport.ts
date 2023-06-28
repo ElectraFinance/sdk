@@ -29,12 +29,21 @@ export type WebsocketTransportEvents = {
 }
 
 export class WebsocketTransport {
-  private ws?: WebSocket | undefined;
+  private ws?: WebSocket;
   private readonly emitter: Emitter<WebsocketTransportEvents>;
+  private readonly address: URL | string;
+  private readonly options: WebSocket.ClientOptions | ClientRequestArgs | undefined;
 
   constructor(address: URL | string, options?: WebSocket.ClientOptions | ClientRequestArgs) {
-    this.ws = new WebSocket(address, options);
+    this.address = address;
+    this.options = options;
     this.emitter = createNanoEvents<WebsocketTransportEvents>();
+    this.connect();
+  }
+
+  private connect() {
+    this.ws = new WebSocket(this.address, this.options);
+
     this.ws.onerror = (error) => {
       this.emitter.emit('error', error);
     }
@@ -48,6 +57,11 @@ export class WebsocketTransport {
       this.emitter.emit('open', openEvent);
       this.flushMessageQueue();
     }
+  }
+
+  reconnect() {
+    this.destroy(4000);
+    this.connect();
   }
 
   onError(errorCallback: WebsocketTransportEvents['error']) {
