@@ -48,6 +48,7 @@ type FuturesTradeInfoPayload = {
   s: string // wallet address
   i: string // pair
   a: number // amount
+  l?: number // leverage
   p?: number // price
 }
 
