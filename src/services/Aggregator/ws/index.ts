@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import WebSocket from 'isomorphic-ws';
 import { validate as uuidValidate, v4 as uuidv4 } from 'uuid';
 import MessageType from './MessageType.js';
 import SubscriptionType from './SubscriptionType.js';
@@ -19,6 +18,7 @@ import type { fullOrderSchema, orderUpdateSchema } from './schemas/addressUpdate
 import cfdAddressUpdateSchema from './schemas/cfdAddressUpdateSchema.js';
 import futuresTradeInfoSchema from './schemas/futuresTradeInfoSchema.js';
 import { objectKeys } from '../../../utils/objectKeys.js';
+import { WebsocketTransport, type BufferLike, type WebsocketTransportEvents } from '../../WebsocketTransport.js';
 // import assertError from '../../../utils/assertError.js';
 // import errorSchema from './schemas/errorSchema';
 
@@ -136,24 +136,6 @@ const exclusiveSubscriptions = [
   SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE,
 ] as const;
 
-type BufferLike =
-  | string
-  | Buffer
-  | DataView
-  | number
-  | ArrayBufferView
-  | Uint8Array
-  | ArrayBuffer
-  | SharedArrayBuffer
-  | readonly unknown[]
-  | readonly number[]
-  | { valueOf: () => ArrayBuffer }
-  | { valueOf: () => SharedArrayBuffer }
-  | { valueOf: () => Uint8Array }
-  | { valueOf: () => readonly number[] }
-  | { valueOf: () => string }
-  | { [Symbol.toPrimitive]: (hint: string) => string };
-
 const isSubType = (subType: string): subType is keyof Subscription => Object.values(SubscriptionType).some((t) => t === subType);
 
 const unknownMessageTypeRegex = /An unknown message type: '(.*)', json: (.*)/;
@@ -167,7 +149,7 @@ const nonExistentMessageRegex = /Could not cancel nonexistent subscription: (.*)
 const FUTURES_SUFFIX = 'USDF';
 
 class AggregatorWS {
-  private ws?: WebSocket | undefined;
+  private transport?: WebsocketTransport | undefined;
 
   // is used to make sure we do not need to renew ws subscription
   // we can not be sure that onclose event will recieve our code when we do `ws.close(4000)`
@@ -180,10 +162,6 @@ class AggregatorWS {
   }> = {};
 
   public onInit: (() => void) | undefined
-
-  public onWSOpen: ((event: WebSocket.Event) => void) | undefined
-
-  public onWSClose: ((event: WebSocket.CloseEvent) => void) | undefined
 
   public onError: ((err: string) => void) | undefined
 
@@ -218,30 +196,17 @@ class AggregatorWS {
     this.basicAuth = basicAuth
   }
 
-  private messageQueue: BufferLike[] = [];
-  private sendWsMessage(message: BufferLike) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(message);
-    } else {
-      this.messageQueue.push(message);
-    }
-  }
-
   private readonly handleWsOpen = () => {
-    for (const message of this.messageQueue) {
-      this.ws?.send(message);
-    }
-    this.messageQueue = [];
     this.setupHeartbeat();
   }
 
   private sendRaw(data: BufferLike) {
-    this.sendWsMessage(data);
+    this.transport?.sendMessage(data);
   }
 
   private send(jsonObject: Json) {
     const jsonData = JSON.stringify(jsonObject);
-    this.sendWsMessage(jsonData);
+    this.transport?.sendMessage(jsonData);
     this.logger?.(`Sent: ${jsonData}`);
   }
 
@@ -253,7 +218,7 @@ class AggregatorWS {
       } else {
         this.logger?.('Heartbeat timeout');
         this.isClosedIntentionally = false;
-        this.ws?.close(4000);
+        this.transport?.close(4000);
       }
     };
 
@@ -333,7 +298,7 @@ class AggregatorWS {
     //     });
     // } else makeSubscription();
 
-    if (!this.ws) {
+    if (!this.transport) {
       this.init();
       console.log(`Aggregator WS ${this.instanceId} is initialized`);
     }
@@ -409,8 +374,8 @@ class AggregatorWS {
 
   destroy() {
     this.isClosedIntentionally = true;
-    this.ws?.close();
-    delete this.ws;
+    this.transport?.destroy();
+    delete this.transport;
   }
 
   // private initPromise: Promise<void> | null = null;
@@ -430,21 +395,31 @@ class AggregatorWS {
   //   return this.initPromise;
   // }
 
+  public onWsOpen(openCallback: WebsocketTransportEvents['open']) {
+    return this.transport?.onOpen(openCallback);
+  }
+
+  public onWsClose(closeCallback: WebsocketTransportEvents['close']) {
+    return this.transport?.onClose(closeCallback);
+  }
+
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
-    this.ws = new WebSocket(this.api);
-    this.ws.onerror = (err) => {
+    if (isReconnect) {
+      this.transport?.reconnect();
+    } else {
+      this.transport = new WebsocketTransport(this.api);
+    }
+    this.transport?.onError((err) => {
       this.onError?.(`AggregatorWS error: ${err.message}`);
       this.logger?.(`AggregatorWS: ${err.message}`);
-    };
-    this.ws.onclose = (event) => {
-      this.onWSClose?.(event);
+    });
+    this.transport?.onClose(() => {
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
       this.clearHeartbeat();
       if (!this.isClosedIntentionally) this.init(true);
-    };
-    this.ws.onopen = (e) => {
-      this.onWSOpen?.(e);
+    });
+    this.transport?.onOpen(() => {
       this.handleWsOpen();
       // Re-subscribe to all subscriptions
       if (isReconnect) {
@@ -462,8 +437,8 @@ class AggregatorWS {
           });
       }
       this.logger?.(`AggregatorWS: connection opened${isReconnect ? ' (reconnect)' : ''}`);
-    };
-    this.ws.onmessage = (e) => {
+    });
+    this.transport?.onMessage((e) => {
       this.isAlive = true;
       const { data } = e;
       if (typeof data !== 'string') throw new Error('AggregatorWS: received non-string message');
@@ -689,7 +664,7 @@ class AggregatorWS {
         default:
           break;
       }
-    };
+    });
   }
 }
 
