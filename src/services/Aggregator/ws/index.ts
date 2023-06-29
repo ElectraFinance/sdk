@@ -417,7 +417,11 @@ class AggregatorWS {
     this.transport?.onClose(() => {
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
       this.clearHeartbeat();
-      if (!this.isClosedIntentionally) this.init(true);
+      if (!this.isClosedIntentionally) {
+        setTimeout(() => {
+          this.init(true)
+        }, 1000)
+      }
     });
     this.transport?.onOpen(() => {
       this.handleWsOpen();
