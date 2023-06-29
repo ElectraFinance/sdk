@@ -218,6 +218,7 @@ class AggregatorWS {
       } else {
         this.logger?.('Heartbeat timeout');
         this.isClosedIntentionally = false;
+        this.clearHeartbeat();
         this.transport?.close(4000);
       }
     };
@@ -416,7 +417,6 @@ class AggregatorWS {
     });
     this.transport?.onClose(() => {
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
-      this.clearHeartbeat();
       if (!this.isClosedIntentionally) {
         setTimeout(() => {
           this.init(true)
