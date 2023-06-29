@@ -416,6 +416,7 @@ class AggregatorWS {
       this.logger?.(`AggregatorWS: ${err.message}`);
     });
     this.transport?.onClose(() => {
+      this.clearHeartbeat();
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
       if (!this.isClosedIntentionally) {
         setTimeout(() => {
