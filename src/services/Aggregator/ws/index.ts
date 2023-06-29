@@ -19,6 +19,7 @@ import cfdAddressUpdateSchema from './schemas/cfdAddressUpdateSchema.js';
 import futuresTradeInfoSchema from './schemas/futuresTradeInfoSchema.js';
 import { objectKeys } from '../../../utils/objectKeys.js';
 import { WebsocketTransport, type BufferLike, type WebsocketTransportEvents } from '../../WebsocketTransport.js';
+import { createNanoEvents, type Emitter } from 'nanoevents';
 // import assertError from '../../../utils/assertError.js';
 // import errorSchema from './schemas/errorSchema';
 
@@ -148,6 +149,11 @@ const nonExistentMessageRegex = /Could not cancel nonexistent subscription: (.*)
 
 const FUTURES_SUFFIX = 'USDF';
 
+export type AggregatorWsEvents = {
+  open: WebsocketTransportEvents['open']
+  close: WebsocketTransportEvents['close']
+}
+
 class AggregatorWS {
   private transport?: WebsocketTransport | undefined;
 
@@ -188,12 +194,15 @@ class AggregatorWS {
 
   readonly basicAuth?: BasicAuthCredentials | undefined;
 
+  readonly emitter: Emitter<AggregatorWsEvents>
+
   constructor(
     wsUrl: string,
     basicAuth?: BasicAuthCredentials
   ) {
     this.wsUrl = wsUrl
     this.basicAuth = basicAuth
+    this.emitter = createNanoEvents()
   }
 
   private readonly handleWsOpen = () => {
@@ -397,25 +406,23 @@ class AggregatorWS {
   // }
 
   public onWsOpen(openCallback: WebsocketTransportEvents['open']) {
-    return this.transport?.onOpen(openCallback);
+    return this.emitter.on('open', openCallback);
   }
 
   public onWsClose(closeCallback: WebsocketTransportEvents['close']) {
-    return this.transport?.onClose(closeCallback);
+    return this.emitter.on('close', closeCallback);
   }
 
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
-    if (isReconnect) {
-      this.transport?.reconnect();
-    } else {
-      this.transport = new WebsocketTransport(this.api);
-    }
-    this.transport?.onError((err) => {
+    this.transport?.unsubscribe();
+    this.transport = new WebsocketTransport(this.api);
+    this.transport.onError((err) => {
       this.onError?.(`AggregatorWS error: ${err.message}`);
       this.logger?.(`AggregatorWS: ${err.message}`);
     });
-    this.transport?.onClose(() => {
+    this.transport.onClose((e) => {
+      this.emitter.emit('close', e);
       this.clearHeartbeat();
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
       if (!this.isClosedIntentionally) {
@@ -424,7 +431,8 @@ class AggregatorWS {
         }, 5000)
       }
     });
-    this.transport?.onOpen(() => {
+    this.transport.onOpen((e) => {
+      this.emitter.emit('open', e);
       this.handleWsOpen();
       // Re-subscribe to all subscriptions
       if (isReconnect) {
@@ -443,7 +451,7 @@ class AggregatorWS {
       }
       this.logger?.(`AggregatorWS: connection opened${isReconnect ? ' (reconnect)' : ''}`);
     });
-    this.transport?.onMessage((e) => {
+    this.transport.onMessage((e) => {
       this.isAlive = true;
       const { data } = e;
       if (typeof data !== 'string') throw new Error('AggregatorWS: received non-string message');

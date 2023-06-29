@@ -41,6 +41,10 @@ export class WebsocketTransport {
     this.connect();
   }
 
+  unsubscribe() {
+    this.emitter.events = {};
+  }
+
   private connect() {
     this.ws = new WebSocket(this.address, this.options);
 
