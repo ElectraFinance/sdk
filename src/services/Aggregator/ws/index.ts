@@ -23,7 +23,7 @@ import { WebsocketTransport, type BufferLike, type WebsocketTransportEvents } fr
 // import errorSchema from './schemas/errorSchema';
 
 const UNSUBSCRIBE = 'u';
-const SERVER_PING_INTERVAL = 30000;
+const SERVER_PING_INTERVAL = 10000;
 const HEARBEAT_THRESHOLD = 5000;
 // const HANDSHAKE_TIMEOUT = 5000;
 
@@ -420,7 +420,7 @@ class AggregatorWS {
       if (!this.isClosedIntentionally) {
         setTimeout(() => {
           this.init(true)
-        }, 1000)
+        }, 5000)
       }
     });
     this.transport?.onOpen(() => {
