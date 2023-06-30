@@ -432,7 +432,7 @@ class AggregatorWS {
 
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
-    this.ws = new WebSocket(this.api, { handshakeTimeout: HANDSHAKE_TIMEOUT });
+    this.ws = new WebSocket(this.api);
     this.ws.onerror = (err) => {
       this.onError?.(`AggregatorWS error: ${err.message}`);
       this.logger?.(`AggregatorWS: ${err.message}`);
