@@ -25,7 +25,7 @@ import { objectKeys } from '../../../utils/objectKeys.js';
 const UNSUBSCRIBE = 'u';
 const SERVER_PING_INTERVAL = 30000;
 const HEARBEAT_THRESHOLD = 5000;
-const HANDSHAKE_TIMEOUT = 5000;
+// const HANDSHAKE_TIMEOUT = 5000;
 
 const messageSchema = z.union([
   initMessageSchema,
