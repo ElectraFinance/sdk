@@ -78,7 +78,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.21.0",
-    "@electra.finance/contracts": "0.1.4",
+    "@electra.finance/contracts": "0.1.15",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "bignumber.js": "^9.1.1",
