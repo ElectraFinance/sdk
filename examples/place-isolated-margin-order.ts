@@ -5,23 +5,25 @@ import {simpleFetch} from "simple-typed-fetch";
 const {signCFDOrder} = crypt;
 const walletPrivateKey = "";
 
+const hostURL = "https://test.electra.finance/bsc-testnet";
+
 const electra = new Electra({
     marginMode: 'isolated',
     referralAPI: '',
     networks: {
         97: {
             chainId: SupportedChainId.BSC_TESTNET,
-            nodeJsonRpc: "https://test.electra.finance/bsc-testnet/rpc",
+            nodeJsonRpc: hostURL + "/rpc",
             services: {
                 blockchainService: {
-                    http: "https://test.electra.finance/bsc-testnet",
+                    http: hostURL,
                 },
                 aggregator: {
-                    http: "https://test.electra.finance/bsc-testnet/backend",
-                    ws: "https://test.electra.finance/bsc-testnet/v1",
+                    http: hostURL + "/backend",
+                    ws: hostURL + "/v1",
                 },
                 priceFeed: {
-                    api: "https://test.electra.finance/bsc-testnet2/price-feed",
+                    api: hostURL + "/price-feed",
                 },
             }
         },
