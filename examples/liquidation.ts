@@ -146,13 +146,19 @@ const waitPositionOpen = (address: string, instrument: string) => {
     const subId = unit.aggregator.ws.subscribe('ausf', {
       payload: address,
       callback: data => {
-        const position = data.balances?.find(p => p.instrument === instrument);
-        if (position && parseFloat(position.position) !== 0) {
-          const marginLevel = new BigNumber(position.equity).div(position.marginUSD).multipliedBy(100).toNumber();
+        const { balance } = data;
+        if (balance) {
+          const position = balance.statesByInstruments.find((s) => s.instrument === instrument);
+          if (position && parseFloat(position.position) !== 0) {
+            const marginLevel = new BigNumber(balance.equity)
+              .div(position.marginUSD)
+              .multipliedBy(100)
+              .toNumber();
 
-          unit.aggregator.ws.unsubscribe(subId);
-          unit.aggregator.ws.destroy();
-          resolve(marginLevel);
+            unit.aggregator.ws.unsubscribe(subId);
+            unit.aggregator.ws.destroy();
+            resolve(marginLevel);
+          }
         }
       }
     })
@@ -169,7 +175,7 @@ const waitLiquidationOrder = (address: string, instrument: string) => {
         payload: address,
         callback: data => {
           if (data.kind === 'initial') {
-            const isLiquidationOrder = data.orders?.find(o => o.pair === instrument && o.liquidated);
+            const isLiquidationOrder = data.orders?.find(o => o.instrument === instrument && o.liquidated);
             if (isLiquidationOrder) {
               unit.aggregator.ws.unsubscribe(subId);
               unit.aggregator.ws.destroy();
@@ -202,7 +208,7 @@ const waitUntilPositionZeroed = (address: string, instrument: string) => {
     const subId = unit.aggregator.ws.subscribe('ausf', {
       payload: address,
       callback: data => {
-        const position = data.balances?.find(p => p.instrument === instrument);
+        const position = data.balance?.statesByInstruments.find(p => p.instrument === instrument);
         if (position && parseFloat(position.position) === 0) {
           unit.aggregator.ws.unsubscribe(subId);
           unit.aggregator.ws.destroy();
@@ -263,6 +269,8 @@ const side: 'BUY' | 'SELL' = priceChange24h < 0 ? 'BUY' : 'SELL';
 const amount = side === 'BUY'
   ? new BigNumber(buyPower).decimalPlaces(qtyPrecision).toNumber()
   : new BigNumber(sellPower).decimalPlaces(qtyPrecision).toNumber();
+
+if (amount === 0) throw new Error(`Order amount is zero. Buy power: ${buyPower}, sell power: ${sellPower}`);
 
 const price = side === 'BUY' ? buyPrice : sellPrice;
 if (price === undefined) throw new TypeError(`Price is undefined. Expected number. Side: ${side}`);
