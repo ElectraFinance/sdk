@@ -11,6 +11,9 @@ const futuresTradeInfoSchema = z.object({
   bpw: z.number(), // buy power
   spw: z.number(), // sell power
   ma: z.number(), // min amount
+  sl: z.number(), // slippage
+  f: z.number(), // blockchain fee (USDF)
+  F: z.number() // volume fee
 });
 
 export default futuresTradeInfoSchema;
