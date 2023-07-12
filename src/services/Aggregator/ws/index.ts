@@ -52,6 +52,9 @@ type FuturesTradeInfoPayload = {
   a: number // amount
   l?: number // leverage
   p?: number // price
+  sl?: number // slippage
+  f?: number // blockchain fee (USDF)
+  F?: number // volume fee
 }
 
 type PairsConfigSubscription = {
