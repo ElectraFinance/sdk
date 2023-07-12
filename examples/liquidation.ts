@@ -226,6 +226,7 @@ const wallet = new ethers.Wallet(
   unit.provider
 );
 const walletAddress = await wallet.getAddress();
+console.log(`Wallet address: ${walletAddress}`);
 
 const crossMarginCFDContract = CrossMarginCFD__factory.connect(address, wallet);
 const collateralAddress = await crossMarginCFDContract.collateral();
@@ -234,6 +235,7 @@ const collateralContract = ERC20__factory.connect(collateralAddress, wallet);
 const decimals = await collateralContract.decimals();
 const allowance = await collateralContract.allowance(walletAddress, address);
 
+const SLIPPAGE_PERCENT = 1;
 const DEPOSIT_AMOUNT = '20';
 const instrument = 'BTCUSDF';
 const stopPrice = undefined; // optional
@@ -254,21 +256,32 @@ const { buyPower, buyPrice, sellPower, sellPrice } = await getFuturesInfo(wallet
 const priceChange24h = await getPriceChange24h(instrument);
 console.log(`Price change 24h: ${priceChange24h > 0 ? '+' : ''}${priceChange24h}%`);
 
+const { pricePrecision, qtyPrecision } = await simpleFetch(unit.aggregator.getPairConfig)(instrument);
+
 // First order params
 const side: 'BUY' | 'SELL' = priceChange24h < 0 ? 'BUY' : 'SELL';
-const amount = side === 'BUY' ? buyPower : sellPower;
+const amount = side === 'BUY'
+  ? new BigNumber(buyPower).decimalPlaces(qtyPrecision).toNumber()
+  : new BigNumber(sellPower).decimalPlaces(qtyPrecision).toNumber();
+
 const price = side === 'BUY' ? buyPrice : sellPrice;
 if (price === undefined) throw new TypeError(`Price is undefined. Expected number. Side: ${side}`);
 
+const priceWIthSlippage = side === 'BUY'
+  ? new BigNumber(price).multipliedBy(1 + SLIPPAGE_PERCENT / 100).decimalPlaces(pricePrecision).toNumber()
+  : new BigNumber(price).multipliedBy(1 - SLIPPAGE_PERCENT / 100).decimalPlaces(pricePrecision).toNumber();
+
+console.log(`Original price: ${price}, price with slippage: ${priceWIthSlippage}`);
+
 const { totalFee } = await unit.calculateFee(instrument, amount, 'cross');
-console.log(`Open position order: ${side} ${amount} ${instrument} at price ${price} with fee ${totalFee.toString()}`);
+console.log(`Open position order: ${side} ${amount} ${instrument} at price ${priceWIthSlippage} with fee ${totalFee.toString()}`);
 const { matcherAddress } = await simpleFetch(unit.blockchainService.getInfo)();
 
 // Signing order
 const signedOrder = await crypt.signCrossMarginCFDOrder(
   instrumentInfo.id, // instrumentIndex
   side, // side: 'BUY' | 'SELL'
-  price,
+  priceWIthSlippage,
   amount,
   totalFee,
   walletAddress,
