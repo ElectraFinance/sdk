@@ -7,6 +7,8 @@ import { CrossMarginCFD__factory, ERC20__factory } from '@electra.finance/contra
 import type { FuturesTradeInfo } from '../src/index.js';
 import { Electra, SupportedChainId, crypt } from '../src/index.js';
 import { BigNumber } from 'bignumber.js';
+import type { fullOrderSchema } from '../src/services/Aggregator/ws/schemas/addressUpdateSchema.js';
+import type { z } from 'zod';
 
 // HOW TO EXECUTE THIS EXAMPLE
 
@@ -71,7 +73,12 @@ const getFuturesInfo = (walletAddress: string, instrument: string, amount: numbe
         resolve(data);
       }
     })
-    setTimeout(() => { reject(new Error('Timeout')); }, 10000);
+    setTimeout(() => {
+      unit.aggregator.ws.unsubscribe(subId);
+      unit.aggregator.ws.destroy();
+
+      reject(new Error('Futures info timeout'));
+    }, 10000);
   })
 }
 
@@ -90,7 +97,10 @@ const getPriceChange24h = (s: string) => {
             .toNumber());
       }
     })
-    setTimeout(() => { reject(new Error('Timeout')); }, 10000);
+    setTimeout(() => {
+      unsubscribe();
+      reject(new Error(`Price feed timeout for ${s}`));
+    }, 10000);
   })
 }
 
@@ -135,6 +145,7 @@ const waitOrderSettlement = (address: string, orderId: string) => {
       }
     })
     setTimeout(() => {
+      unit.aggregator.ws.destroy();
       reject(new Error('Order settlement timeout'));
     }, 30000);
   })
@@ -163,43 +174,61 @@ const waitPositionOpen = (address: string, instrument: string) => {
       }
     })
     setTimeout(() => {
+      unit.aggregator.ws.unsubscribe(subId);
+      unit.aggregator.ws.destroy();
+
       reject(new Error('Position open timeout'));
     }, 30000);
   })
 }
 
 const waitLiquidationOrder = (address: string, instrument: string) => {
-  const check = () => {
-    return new Promise<string | undefined>((resolve, reject) => {
-      const subId = unit.aggregator.ws.subscribe('ausf', {
-        payload: address,
-        callback: data => {
-          if (data.kind === 'initial') {
-            const isLiquidationOrder = data.orders?.find(o => o.instrument === instrument && o.liquidated);
-            if (isLiquidationOrder) {
-              unit.aggregator.ws.unsubscribe(subId);
-              unit.aggregator.ws.destroy();
-              resolve(isLiquidationOrder.id);
+  let orders: Array<z.infer<typeof fullOrderSchema>> = [];
+
+  return new Promise<string>((resolve, reject) => {
+    const subId = unit.aggregator.ws.subscribe('ausf', {
+      payload: address,
+      callback: data => {
+        if (data.kind === 'initial') {
+          orders = data.orders ?? [];
+        } else {
+          const { order } = data;
+          if (order) {
+            if (order.kind === 'full') {
+              orders.push(order);
             } else {
-              resolve(undefined)
+              orders = orders.map(o => o.id === order.id
+                ? {
+                  ...o,
+                  status: order.status,
+                  liquidated: order.liquidated,
+                  subOrders: order.subOrders,
+                  settledAmount: order.settledAmount,
+                  executionType: order.executionType,
+                  realizedPnL: order.realizedPnL,
+                  triggerCondition: order.triggerCondition,
+                }
+                : o);
             }
           }
         }
-      })
-      setTimeout(() => {
-        reject(new Error('Liquidation order timeout'));
-      }, 5000);
+
+        const liquidationOrder = orders.find(o => o.instrument === instrument && o.liquidated);
+        if (liquidationOrder) {
+          unit.aggregator.ws.unsubscribe(subId);
+          unit.aggregator.ws.destroy();
+          resolve(liquidationOrder.id);
+        }
+      }
     })
-  }
 
-  return new Promise<string>(async (resolve, reject) => {
-    setTimeout(() => { reject(new Error('Timeout')); }, 30000);
+    setTimeout(() => {
+      unit.aggregator.ws.unsubscribe(subId);
+      unit.aggregator.ws.destroy();
 
-    let orderId = await check();
-    while (orderId === undefined) {
-      orderId = await check();
+      reject(new Error('Liquidation order timeout'));
     }
-    resolve(orderId);
+    , 30000);
   })
 }
 
@@ -216,7 +245,10 @@ const waitUntilPositionZeroed = (address: string, instrument: string) => {
         }
       }
     })
-    setTimeout(() => { reject(new Error('Timeout')); }, 30000);
+    setTimeout(() => {
+      unit.aggregator.ws.destroy();
+      reject(new Error('Timeout'));
+    }, 30000);
   })
 }
 
