@@ -249,9 +249,6 @@ export type FuturesTradeInfo = {
   buyPower: number
   sellPower: number
   minAmount: number
-  slippage: number
-  fee: number
-  volumeFee: number
 }
 
 export enum HistoryTransactionStatus {

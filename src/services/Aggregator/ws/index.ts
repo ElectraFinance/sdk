@@ -52,6 +52,9 @@ type FuturesTradeInfoPayload = {
   a: number // amount
   l?: number // leverage
   p?: number // price
+  sl?: number // slippage
+  f?: number // blockchain fee (USDF)
+  F?: number // volume fee
 }
 
 type PairsConfigSubscription = {
@@ -562,9 +565,6 @@ class AggregatorWS {
             buyPower: json.bpw,
             sellPower: json.spw,
             minAmount: json.ma,
-            slippage: json.sl,
-            fee: json.f,
-            volumeFee: json.F
           });
           break;
         case MessageType.INITIALIZATION:
