@@ -134,12 +134,20 @@ const waitOrderSettlement = (address: string, orderId: string) => {
             unit.aggregator.ws.unsubscribe(subId);
             unit.aggregator.ws.destroy();
             resolve();
+          } else if (order?.status === 'FAILED') {
+            unit.aggregator.ws.unsubscribe(subId);
+            unit.aggregator.ws.destroy();
+            reject(new Error('Order failed'));
           }
         } else {
           if (data.order && data.order.id === orderId && data.order.status === 'SETTLED') {
             unit.aggregator.ws.unsubscribe(subId);
             unit.aggregator.ws.destroy();
             resolve();
+          } else if (data.order && data.order.id === orderId && data.order.status === 'FAILED') {
+            unit.aggregator.ws.unsubscribe(subId);
+            unit.aggregator.ws.destroy();
+            reject(new Error('Order failed'));
           }
         }
       }
@@ -228,7 +236,7 @@ const waitLiquidationOrder = (address: string, instrument: string) => {
 
       reject(new Error('Liquidation order timeout'));
     }
-    , 30000);
+    , 5 * 60 * 1000); // 5 minutes
   })
 }
 
@@ -273,7 +281,7 @@ const collateralContract = ERC20__factory.connect(collateralAddress, wallet);
 const decimals = await collateralContract.decimals();
 const allowance = await collateralContract.allowance(walletAddress, address);
 
-const SLIPPAGE_PERCENT = 1;
+const SLIPPAGE_PERCENT = 5;
 const DEPOSIT_AMOUNT = '20';
 const instrument = 'BTCUSDF';
 const stopPrice = undefined; // optional
@@ -284,7 +292,7 @@ if (allowance.lt(bnAmount)) {
 }
 
 // 2. Make deposit to Cross CFD contract
-await crossMarginCFDContract.depositAsset(bnAmount);
+// await crossMarginCFDContract.depositAsset(bnAmount);
 
 const { instruments } = await simpleFetch(unit.blockchainService.getCrossMarginInfo)();
 const instrumentInfo = instruments[instrument];
@@ -335,23 +343,25 @@ const signedOrder = await crypt.signCrossMarginCFDOrder(
 
 // 3. Make order: open position
 const { orderId } = await simpleFetch(unit.aggregator.placeCrossMarginOrder)(signedOrder);
-console.log(`Order ${orderId} placed`);
+console.log(`Order ${orderId} placed. Waiting for settlement...`);
 
 // 4. Wait order until Settled status. Timeout 30 seconds.
 await waitOrderSettlement(walletAddress, orderId);
-console.log(`Order ${orderId} settled`);
+console.log(`Order ${orderId} settled. Waiting for position open...`);
 
 // 5. Wait open position. Timeout 30 seconds.
 // 6. Take current margin level.
 const marginLevel = await waitPositionOpen(walletAddress, instrument);
 console.log(`Position by instrument ${instrument} opened. Margin level: ${marginLevel}`);
 
-// 7. Wait liquidation order. Timeout 30 seconds.
+// 7. Wait liquidation order. Timeout 300 seconds.
+console.log('Waiting for liquidation order...');
 const liquidationOrderId = await waitLiquidationOrder(walletAddress, instrument);
+console.log(`Liquidation order ${liquidationOrderId} created. Waiting for settlement...`);
 
 // 8. Wait liquidation order until Settled status. Timeout 30 seconds.
 await waitOrderSettlement(walletAddress, liquidationOrderId);
-console.log(`Liquidation order ${liquidationOrderId} settled`);
+console.log(`Liquidation order ${liquidationOrderId} settled. Waiting for position zeroing...`);
 
 // 9. Check that position by instrument is zeroed.
 await waitUntilPositionZeroed(walletAddress, instrument);

@@ -363,7 +363,6 @@ class AggregatorWS {
 
     if (!this.transport) {
       this.init();
-      console.log(`Aggregator WS ${this.instanceId} is initialized`);
     }
     makeSubscription();
 
