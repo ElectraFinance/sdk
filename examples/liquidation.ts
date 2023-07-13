@@ -58,14 +58,26 @@ const electra = new Electra({
 const unit = electra.getUnit(SupportedChainId.BSC_TESTNET);
 
 // const MARGIN_LEVEL_THRESHOLD = 80;
+const SLIPPAGE_PERCENT = 1;
+const LEVERAGE = 100;
 
-const getFuturesInfo = (walletAddress: string, instrument: string, amount: number) => {
+const getFuturesInfo = (
+  walletAddress: string,
+  instrument: string,
+  amount: number,
+  feePercent: number, // 0.01 / 100
+  networkFee: number,
+) => {
   return new Promise<FuturesTradeInfo>((resolve, reject) => {
     const subId = unit.aggregator.ws.subscribe('fts', {
       payload: {
         s: walletAddress,
         i: instrument,
-        a: amount
+        a: amount,
+        sl: SLIPPAGE_PERCENT / 100,
+        l: LEVERAGE,
+        F: feePercent,
+        f: networkFee,
       },
       callback: data => {
         unit.aggregator.ws.unsubscribe(subId);
@@ -281,7 +293,6 @@ const collateralContract = ERC20__factory.connect(collateralAddress, wallet);
 const decimals = await collateralContract.decimals();
 const allowance = await collateralContract.allowance(walletAddress, address);
 
-const SLIPPAGE_PERCENT = 5;
 const DEPOSIT_AMOUNT = '20';
 const instrument = 'BTCUSDF';
 const stopPrice = undefined; // optional
@@ -294,11 +305,25 @@ if (allowance.lt(bnAmount)) {
 // 2. Make deposit to Cross CFD contract
 // await crossMarginCFDContract.depositAsset(bnAmount);
 
-const { instruments } = await simpleFetch(unit.blockchainService.getCrossMarginInfo)();
+const { instruments, oracleAddress } = await simpleFetch(unit.blockchainService.getCrossMarginInfo)();
+if (oracleAddress === undefined) throw new TypeError('oracleAddress is undefined');
 const instrumentInfo = instruments[instrument];
 if (!instrumentInfo) throw new Error(`Instrument not found for symbol ${instrument}`);
 
-const { buyPower, buyPrice, sellPower, sellPrice } = await getFuturesInfo(walletAddress, instrument, 0.1);
+const { networkFeeInFeeAsset } = await unit.calculateFee(instrument, '0', 'cross');
+
+const futuresInfo = await getFuturesInfo(
+  walletAddress,
+  instrument,
+  0.1,
+  instrumentInfo.feePercent / 100,
+  parseFloat(networkFeeInFeeAsset),
+);
+const { buyPower, buyPrice, sellPower, sellPrice } = futuresInfo;
+console.log(`
+FTS. INPUT: ${walletAddress}, ${instrument}, 0.1, ${instrumentInfo.feePercent / 100}, ${networkFeeInFeeAsset}
+FTS. OUTPUT: ${JSON.stringify(futuresInfo, null, 2)}
+`)
 const priceChange24h = await getPriceChange24h(instrument);
 console.log(`Price change 24h: ${priceChange24h > 0 ? '+' : ''}${priceChange24h}%`);
 
@@ -323,7 +348,6 @@ console.log(`Original price: ${price}, price with slippage: ${priceWIthSlippage}
 
 const { totalFee } = await unit.calculateFee(instrument, amount, 'cross');
 console.log(`Open position order: ${side} ${amount} ${instrument} at price ${priceWIthSlippage} with fee ${totalFee.toString()}`);
-const { matcherAddress } = await simpleFetch(unit.blockchainService.getInfo)();
 
 // Signing order
 const signedOrder = await crypt.signCrossMarginCFDOrder(
@@ -333,7 +357,7 @@ const signedOrder = await crypt.signCrossMarginCFDOrder(
   amount,
   totalFee,
   walletAddress,
-  matcherAddress,
+  oracleAddress,
   false, // usePersonalSign
   wallet, // pass here ethers.Signer instance
   unit.chainId,
