@@ -81,13 +81,11 @@ const getFuturesInfo = (
       },
       callback: data => {
         unit.aggregator.ws.unsubscribe(subId);
-        unit.aggregator.ws.destroy();
         resolve(data);
       }
     })
     setTimeout(() => {
       unit.aggregator.ws.unsubscribe(subId);
-      unit.aggregator.ws.destroy();
 
       reject(new Error('Futures info timeout'));
     }, 10000);
@@ -136,43 +134,51 @@ const getPriceChange24h = (s: string) => {
 // }
 
 const waitOrderSettlement = (address: string, orderId: string) => {
+  let timeout: ReturnType<typeof setTimeout>;
+
   return new Promise<void>((resolve, reject) => {
     const subId = unit.aggregator.ws.subscribe('ausf', {
       payload: address,
       callback: data => {
         if (data.kind === 'initial') {
+          console.log(`Connected to WS. Total orders: ${data.orders?.length ?? 0}. Waiting for order ${orderId} settlement...`);
           const order = data.orders?.find(o => o.id === orderId);
           if (order?.status === 'SETTLED') {
+            clearTimeout(timeout);
             unit.aggregator.ws.unsubscribe(subId);
-            unit.aggregator.ws.destroy();
             resolve();
           } else if (order?.status === 'FAILED') {
+            clearTimeout(timeout);
             unit.aggregator.ws.unsubscribe(subId);
-            unit.aggregator.ws.destroy();
             reject(new Error('Order failed'));
           }
         } else {
-          if (data.order && data.order.id === orderId && data.order.status === 'SETTLED') {
-            unit.aggregator.ws.unsubscribe(subId);
-            unit.aggregator.ws.destroy();
-            resolve();
-          } else if (data.order && data.order.id === orderId && data.order.status === 'FAILED') {
-            unit.aggregator.ws.unsubscribe(subId);
-            unit.aggregator.ws.destroy();
-            reject(new Error('Order failed'));
+          if (data.order) {
+            console.log(`Got order ${data.order.id} status: ${data.order.status}`);
+            if (data.order.id === orderId && data.order.status === 'SETTLED') {
+              clearTimeout(timeout);
+              unit.aggregator.ws.unsubscribe(subId);
+              resolve();
+            } else if (data.order.id === orderId && data.order.status === 'FAILED') {
+              clearTimeout(timeout);
+              unit.aggregator.ws.unsubscribe(subId);
+              reject(new Error('Order failed'));
+            }
           }
         }
       }
     })
-    setTimeout(() => {
-      unit.aggregator.ws.destroy();
+    timeout = setTimeout(() => {
+      unit.aggregator.ws.unsubscribe(subId);
       reject(new Error('Order settlement timeout'));
-    }, 30000);
+    }, 60 * 1000);
   })
 }
 
 // Returns margin level
 const waitPositionOpen = (address: string, instrument: string) => {
+  let timeout: ReturnType<typeof setTimeout>;
+
   return new Promise<number>((resolve, reject) => {
     const subId = unit.aggregator.ws.subscribe('ausf', {
       payload: address,
@@ -186,16 +192,15 @@ const waitPositionOpen = (address: string, instrument: string) => {
               .multipliedBy(100)
               .toNumber();
 
+            clearTimeout(timeout);
             unit.aggregator.ws.unsubscribe(subId);
-            unit.aggregator.ws.destroy();
             resolve(marginLevel);
           }
         }
       }
     })
-    setTimeout(() => {
+    timeout = setTimeout(() => {
       unit.aggregator.ws.unsubscribe(subId);
-      unit.aggregator.ws.destroy();
 
       reject(new Error('Position open timeout'));
     }, 30000);
@@ -203,6 +208,8 @@ const waitPositionOpen = (address: string, instrument: string) => {
 }
 
 const waitLiquidationOrder = (address: string, instrument: string) => {
+  let timeout: ReturnType<typeof setTimeout>;
+
   let orders: Array<z.infer<typeof fullOrderSchema>> = [];
 
   return new Promise<string>((resolve, reject) => {
@@ -233,18 +240,20 @@ const waitLiquidationOrder = (address: string, instrument: string) => {
           }
         }
 
-        const liquidationOrder = orders.find(o => o.instrument === instrument && o.liquidated);
+        const liquidationOrder = orders.find(o => o.instrument === instrument &&
+          o.status === 'FILLED' &&
+          o.liquidated
+        );
         if (liquidationOrder) {
+          clearTimeout(timeout);
           unit.aggregator.ws.unsubscribe(subId);
-          unit.aggregator.ws.destroy();
           resolve(liquidationOrder.id);
         }
       }
     })
 
-    setTimeout(() => {
+    timeout = setTimeout(() => {
       unit.aggregator.ws.unsubscribe(subId);
-      unit.aggregator.ws.destroy();
 
       reject(new Error('Liquidation order timeout'));
     }
@@ -253,21 +262,22 @@ const waitLiquidationOrder = (address: string, instrument: string) => {
 }
 
 const waitUntilPositionZeroed = (address: string, instrument: string) => {
+  let timeout: ReturnType<typeof setTimeout>;
+
   return new Promise<void>((resolve, reject) => {
     const subId = unit.aggregator.ws.subscribe('ausf', {
       payload: address,
       callback: data => {
         const position = data.balance?.statesByInstruments.find(p => p.instrument === instrument);
         if (position && parseFloat(position.position) === 0) {
+          clearTimeout(timeout);
           unit.aggregator.ws.unsubscribe(subId);
-          unit.aggregator.ws.destroy();
           resolve();
         }
       }
     })
-    setTimeout(() => {
-      unit.aggregator.ws.destroy();
-      reject(new Error('Timeout'));
+    timeout = setTimeout(() => {
+      reject(new Error('Timeout waiting for position zeroed'));
     }, 30000);
   })
 }
@@ -283,7 +293,7 @@ const wallet = new ethers.Wallet(
   PRIVATE_KEY,
   unit.provider
 );
-const walletAddress = await wallet.getAddress();
+const walletAddress = (await wallet.getAddress()).toLowerCase();
 console.log(`Wallet address: ${walletAddress}`);
 
 const crossMarginCFDContract = CrossMarginCFD__factory.connect(address, wallet);
