@@ -415,13 +415,14 @@ class AggregatorWS {
 
   private init(isReconnect = false) {
     this.isClosedIntentionally = false;
-    this.transport?.unsubscribe();
+    this.transport?.destroy();
     this.transport = new WebsocketTransport(this.api);
     this.transport.onError((err) => {
       this.onError?.(`AggregatorWS error: ${err.message}`);
       this.logger?.(`AggregatorWS: ${err.message}`);
     });
     this.transport.onClose((e) => {
+      this.transport?.unsubscribe();
       this.emitter.emit('close', e);
       this.clearHeartbeat();
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);

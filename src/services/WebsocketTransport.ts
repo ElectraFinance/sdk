@@ -58,8 +58,8 @@ export class WebsocketTransport {
       this.emitter.emit('close', closeEvent);
     }
     this.ws.onopen = (openEvent) => {
-      this.emitter.emit('open', openEvent);
       this.flushMessageQueue();
+      this.emitter.emit('open', openEvent);
     }
   }
 
