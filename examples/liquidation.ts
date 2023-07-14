@@ -232,7 +232,17 @@ const waitLiquidationOrder = (address: string, instrument: string) => {
         if (data.kind === 'initial') {
           orders = data.orders ?? [];
         } else {
-          const { order } = data;
+          const { order, balance } = data;
+          const instrumentPosition = balance?.statesByInstruments.find((s) => s.instrument === instrument);
+
+          if (balance && instrumentPosition) {
+            const marginLevel = new BigNumber(balance.equity)
+              .div(instrumentPosition.marginUSD)
+              .multipliedBy(100)
+              .toNumber();
+
+            console.log(`Margin level: ${marginLevel}`);
+          }
           if (order) {
             if (order.kind === 'full') {
               orders.push(order);
@@ -423,3 +433,8 @@ await delay(2000);
 // 9. Check that position by instrument is zeroed.
 await waitUntilPositionZeroed(walletAddress, instrument);
 console.log(`Position by instrument ${instrument} zeroed`);
+
+// close all connections
+unit.aggregator.ws.destroy();
+
+process.exit(0);
