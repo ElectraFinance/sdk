@@ -272,7 +272,7 @@ class AggregatorWS {
   private send(jsonObject: Json) {
     const jsonData = JSON.stringify(jsonObject);
     this.transport?.sendMessage(jsonData);
-    this.logger?.(`Sent: ${jsonData}`);
+    this.logger?.(`Sent (${Date.now()}) : ${jsonData}`);
   }
 
   private hearbeatIntervalId: NodeJS.Timer | undefined;
@@ -349,6 +349,7 @@ class AggregatorWS {
         }
       }
 
+      this.logger?.(`Sending subscription request: ${JSON.stringify(subRequest)}`);
       this.send(subRequest);
     }
 
@@ -468,7 +469,7 @@ class AggregatorWS {
     return this.emitter.on('close', closeCallback);
   }
 
-  private init(isReconnect = false) {
+  public init(isReconnect = false) {
     this.isClosedIntentionally = false;
     this.transport?.unsubscribe();
     this.transport = new WebsocketTransport(this.api);
