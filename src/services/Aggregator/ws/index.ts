@@ -383,6 +383,7 @@ class AggregatorWS {
   }
 
   destroy() {
+    this.clearHeartbeat();
     this.isClosedIntentionally = true;
     this.transport?.destroy();
     delete this.transport;
@@ -422,6 +423,7 @@ class AggregatorWS {
       this.logger?.(`AggregatorWS: ${err.message}`);
     });
     this.transport.onClose((e) => {
+      this.clearHeartbeat();
       this.transport?.unsubscribe();
       this.emitter.emit('close', e);
       this.clearHeartbeat();
