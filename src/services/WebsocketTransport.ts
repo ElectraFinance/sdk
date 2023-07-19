@@ -101,7 +101,6 @@ export class WebsocketTransport {
 
   close(code?: number, data?: Buffer) {
     try {
-      this.ws?.removeAllListeners();
       this.ws?.close(code, data);
     } catch (e) {
       console.error(e)
@@ -110,7 +109,6 @@ export class WebsocketTransport {
 
   destroy(code?: number, data?: Buffer) {
     try {
-      this.ws?.removeAllListeners();
       this.ws?.close(code, data);
     } catch (e) {
       console.error(e)
