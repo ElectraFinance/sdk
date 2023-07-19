@@ -168,7 +168,11 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
 
     this.ws.onclose = () => {
       if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-      if (!this.isClosedIntentionally) this.init();
+      if (!this.isClosedIntentionally) {
+        setTimeout(() => {
+          this.init()
+        }, 5000);
+      }
     };
 
     this.heartbeatInterval = setInterval(() => {
