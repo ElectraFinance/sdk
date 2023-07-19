@@ -94,6 +94,27 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
     }
   }
 
+  private isAlive = false;
+  private hearbeatIntervalId: NodeJS.Timer | undefined;
+  private setupHeartbeat() {
+    const heartbeat = () => {
+      if (this.isAlive) {
+        this.isAlive = false;
+      } else {
+        this.isClosedIntentionally = false;
+        this.clearHeartbeat();
+        this.ws?.close(4000);
+      }
+    };
+
+    this.hearbeatIntervalId = setInterval(heartbeat, 15000);
+  }
+
+  private clearHeartbeat() {
+    this.isAlive = false;
+    clearInterval(this.hearbeatIntervalId);
+  }
+
   init() {
     this.isClosedIntentionally = false;
 
@@ -104,10 +125,16 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
         : ''}`
     );
 
-    if (this.onOpen !== undefined) {
-      this.ws.onopen = this.onOpen;
+    this.ws.onopen = (e) => {
+      this.isAlive = true;
+      this.setupHeartbeat();
+      if (this.onOpen !== undefined) {
+        this.onOpen(e);
+      }
     }
+
     this.ws.onmessage = (e) => {
+      this.isAlive = true;
       const { data } = e;
 
       // Convert data to string
@@ -140,7 +167,11 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
 
     this.ws.onclose = () => {
       if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-      if (!this.isClosedIntentionally) this.init();
+      if (!this.isClosedIntentionally) {
+        setTimeout(() => {
+          this.init()
+        }, 5000);
+      }
     };
 
     this.heartbeatInterval = setInterval(() => {
