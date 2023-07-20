@@ -9,6 +9,7 @@ import { Electra, SupportedChainId, crypt } from '../src/index.js';
 import { BigNumber } from 'bignumber.js';
 import type { fullOrderSchema } from '../src/services/Aggregator/ws/schemas/addressUpdateSchema.js';
 import type { z } from 'zod';
+import assertError from '../src/utils/assertError.js';
 
 // HOW TO EXECUTE THIS EXAMPLE
 
@@ -32,36 +33,33 @@ if (HOST === undefined) {
   throw new Error('HOST is not defined');
 }
 
+let depositsCount = 0;
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // const MARGIN_LEVEL_THRESHOLD = 80;
 const SLIPPAGE_PERCENT = 1;
 const LEVERAGE = 100;
-const DEPOSIT_AMOUNT = '20';
+const DEPOSIT_AMOUNT = 20;
 
 const instrumentsToTest = [
-  {
-    name: 'BTCUSDF',
-    minAmount: 0.01,
-  }, {
-    name: 'ETHUSDF',
-    minAmount: 0.1,
-  }, {
-    name: 'XRPUSDF',
-    minAmount: 20,
-  },
-  {
-    name: 'FTMUSDF',
-    minAmount: 50,
-  },
-  {
-    name: 'BNBUSDF',
-    minAmount: 0.1,
-  },
+  'BTCUSDF',
+  'ETHUSDF',
+  'FTMUSDF',
+  'XRPUSDF',
+  'BNBUSDF',
+  'ARBUSDF',
+  'CTSIUSDF',
+  'DOGEUSDF',
+  'LINKUSDF',
+  'LTCUSDF',
+  'SOLUSDF'
 ];
 const stopPrice = undefined; // optional
 
-const testLiquidation = async (instrumentName: string, amnt: number) => {
+const testLiquidation = async (instrumentName: string) => {
+  let amnt = 1;
+
   console.log(`Testing ${instrumentName}...`);
   const electra = new Electra({
     marginMode: 'cross',
@@ -342,30 +340,34 @@ const testLiquidation = async (instrumentName: string, amnt: number) => {
     })
   }
 
-  const waitDeposit = (address: string) => {
+  const waitBalance = (address: string) => {
     let timeout: ReturnType<typeof setTimeout>;
 
     return new Promise<void>((resolve, reject) => {
       unit.aggregator.ws.subscribe('ausf', {
         payload: address,
         callback: data => {
-          if (data.balance) {
-            console.log(`${instrumentName}: Free margin USD: ${data.balance.freeMarginUSD}`);
-            // const balanceIsReady = new BigNumber(data.balance.balance).isGreaterThanOrEqualTo(amount);
-            const balanceIsReady = new BigNumber(data.balance.freeMarginUSD).isGreaterThan(0);
-
-            if (balanceIsReady) {
-              clearTimeout(timeout);
-              unit.aggregator.ws.unsubscribe(address, 'FUTURES');
-              resolve();
-            }
+          if (data.kind === 'update') {
+            clearTimeout(timeout);
+            unit.aggregator.ws.unsubscribe(address, 'FUTURES');
+            resolve();
           }
+          // if (data.balance) {
+          //   // const balanceIsReady = new BigNumber(data.balance.balance).isGreaterThanOrEqualTo(amount);
+          //   const balanceIsReady = new BigNumber(data.balance.balance).isGreaterThan(requiredBalance);
+
+          //   if (balanceIsReady) {
+          //     clearTimeout(timeout);
+          //     unit.aggregator.ws.unsubscribe(address, 'FUTURES');
+          //     resolve();
+          //   }
+          // }
         }
       })
       timeout = setTimeout(() => {
         unit.aggregator.ws.unsubscribe(address, 'FUTURES');
         reject(new Error(`${instrumentName}: Deposit timeout`));
-      }, 30000);
+      }, 60000);
     })
   }
 
@@ -390,18 +392,13 @@ const testLiquidation = async (instrumentName: string, amnt: number) => {
   const decimals = await collateralContract.decimals();
   const allowance = await collateralContract.allowance(walletAddress, address);
 
-  const bnAmount = ethers.utils.parseUnits(DEPOSIT_AMOUNT, decimals);
+  const depositAmount = DEPOSIT_AMOUNT + (depositsCount * 10);
+  const bnAmount = ethers.utils.parseUnits(depositAmount.toString(), decimals);
   if (allowance.lt(bnAmount)) {
-    console.log(`${instrumentName}: Approving ${DEPOSIT_AMOUNT} ${collateralAddress} to ${address}`);
+    console.log(`${instrumentName}: Approving ${depositAmount} ${collateralAddress} to ${address}`);
     await collateralContract.approve(address, ethers.constants.MaxUint256); // Sometimes before approve you need to call approve(0)
+    await delay(2000);
   }
-
-  // 2. Make deposit to Cross CFD contract
-  console.log(`${instrumentName}: Depositing ${DEPOSIT_AMOUNT} ${collateralAddress} to ${address}`);
-  await crossMarginCFDContract.depositAsset(bnAmount);
-  console.log(`${instrumentName}: Waiting for deposit...`);
-  await waitDeposit(walletAddress);
-  console.log(`${instrumentName}: Deposit done`);
 
   const { instruments, oracleAddress } = await simpleFetch(unit.blockchainService.getCrossMarginInfo)();
   if (oracleAddress === undefined) throw new TypeError('oracleAddress is undefined');
@@ -409,35 +406,68 @@ const testLiquidation = async (instrumentName: string, amnt: number) => {
   if (!instrumentInfo) throw new Error(`${instrumentName}: Instrument info not found`);
 
   const { networkFeeInFeeAsset } = await unit.calculateFee(instrumentName, '0', 'cross');
-
-  const futuresInfo = await getFuturesInfo(
-    walletAddress,
-    instrumentName,
-    amnt,
-    instrumentInfo.feePercent / 100,
-    parseFloat(networkFeeInFeeAsset),
-  );
-  const { buyPower, buyPrice, sellPower, sellPrice } = futuresInfo;
-  console.log(`
-  FTS. INPUT: ${JSON.stringify({
-    s: walletAddress,
-    i: instrumentName,
-    a: amnt,
-    sl: SLIPPAGE_PERCENT / 100,
-    l: LEVERAGE,
-    F: instrumentInfo.feePercent / 100,
-    f: networkFeeInFeeAsset
-  })}
-  FTS. OUTPUT: ${JSON.stringify(futuresInfo, null, 2)}
-  `)
   const priceChange24h = await getPriceChange24h(instrumentName);
   console.log(`${instrumentName}: Price change 24h: ${priceChange24h > 0 ? '+' : ''}${priceChange24h}%`);
 
   const { pricePrecision, qtyPrecision } = await simpleFetch(unit.aggregator.getPairConfig)(instrumentName);
 
+  let futuresInfo: FuturesTradeInfo | undefined;
+
+  while (!futuresInfo) {
+    futuresInfo = await getFuturesInfo(
+      walletAddress,
+      instrumentName,
+      amnt,
+      instrumentInfo.feePercent / 100,
+      parseFloat(networkFeeInFeeAsset),
+    );
+    if (amnt === 1) { // First iteration
+      amnt = futuresInfo.minAmount; // Set min amount
+      console.log(`${instrumentName}: Min amount: ${amnt}`);
+      futuresInfo = undefined;
+      continue;
+    }
+    const { buyPower, sellPower } = futuresInfo;
+    console.log(
+      `${instrumentName}: Got futures info` +
+      `FTS. INPUT: ${JSON.stringify({
+        s: walletAddress,
+        i: instrumentName,
+        a: amnt,
+        sl: SLIPPAGE_PERCENT / 100,
+        l: LEVERAGE,
+        F: instrumentInfo.feePercent / 100,
+        f: networkFeeInFeeAsset
+      })}` +
+      `FTS. OUTPUT: ${JSON.stringify(futuresInfo, null, 2)}`
+    )
+
+    if (buyPower === 0 && sellPower === 0) { // Need deposit more
+      futuresInfo = undefined; // Reset futures info to get new one in next iteration
+      const dpAmount = (DEPOSIT_AMOUNT + (depositsCount * 15));
+      console.log(`${instrumentName}: Got zero buy and sell power. Depositing ${dpAmount} ${collateralAddress} to ${address}`);
+      // 2. Make deposit to Cross CFD contract
+      console.log(`${instrumentName}: Depositing ${dpAmount} ${collateralAddress} to ${address}`);
+
+      await crossMarginCFDContract.depositAsset(
+        ethers.utils.parseUnits(
+          dpAmount.toString(),
+          decimals
+        )
+      );
+      depositsCount++;
+      await delay(15000);
+      console.log(`${instrumentName}: Waiting for deposit...`);
+      await waitBalance(walletAddress);
+      console.log(`${instrumentName}: Deposit done`);
+    }
+  }
+
+  const { buyPower, buyPrice, sellPower, sellPrice } = futuresInfo;
+
   // First order params
   const side: 'BUY' | 'SELL' = priceChange24h < 0 ? 'BUY' : 'SELL';
-  const amount = side === 'BUY'
+  let amount = side === 'BUY'
     ? new BigNumber(buyPower).decimalPlaces(qtyPrecision).toNumber()
     : new BigNumber(sellPower).decimalPlaces(qtyPrecision).toNumber();
 
@@ -455,25 +485,41 @@ const testLiquidation = async (instrumentName: string, amnt: number) => {
   const { totalFee } = await unit.calculateFee(instrumentName, amount, 'cross');
   console.log(`${instrumentName}: Open position order: ${side} ${amount} at price ${priceWIthSlippage} with fee ${totalFee.toString()}`);
 
-  // Signing order
-  const signedOrder = await crypt.signCrossMarginCFDOrder(
-    instrumentInfo.id, // instrumentIndex
-    side, // side: 'BUY' | 'SELL'
-    priceWIthSlippage,
-    amount,
-    totalFee,
-    walletAddress,
-    oracleAddress,
-    false, // usePersonalSign
-    wallet, // pass here ethers.Signer instance
-    unit.chainId,
-    stopPrice,
-    false // isFromDelegate — if true, then the order will be placed on behalf of the delegate
-  );
+  let orderId: string | undefined;
+  while (orderId === undefined) {
+    // Signing order
+    const signedOrder = await crypt.signCrossMarginCFDOrder(
+      instrumentInfo.id, // instrumentIndex
+      side, // side: 'BUY' | 'SELL'
+      priceWIthSlippage,
+      amount,
+      totalFee,
+      walletAddress,
+      oracleAddress,
+      false, // usePersonalSign
+      wallet, // pass here ethers.Signer instance
+      unit.chainId,
+      stopPrice,
+      false // isFromDelegate — if true, then the order will be placed on behalf of the delegate
+    );
 
-  // 3. Make order: open position
-  const { orderId } = await simpleFetch(unit.aggregator.placeCrossMarginOrder)(signedOrder);
-  console.log(`${instrumentName}: Order ${orderId} placed. Waiting for settlement...`);
+    // 3. Make order: open position
+
+    try {
+      const placedOrderInfo = await simpleFetch(unit.aggregator.placeCrossMarginOrder)(signedOrder);
+      orderId = placedOrderInfo.orderId;
+      console.log(`${instrumentName}: Order ${orderId} placed. Waiting for settlement...`);
+    } catch (e) {
+      assertError(e);
+      if (e.message.includes('exceeds max available')) {
+        console.log(`${instrumentName}: Order amount exceeds max available. Decrease amount by 5% and try again`);
+        // Decrease amount by 5% and try again
+        amount = new BigNumber(amount).multipliedBy(0.95).decimalPlaces(qtyPrecision).toNumber();
+      } else {
+        throw e;
+      }
+    }
+  }
 
   // 4. Wait order until Settled status. Timeout 30 seconds.
   await waitOrderSettlement(walletAddress, orderId);
@@ -515,8 +561,8 @@ const testLiquidation = async (instrumentName: string, amnt: number) => {
 
 // Chained launch of async tests
 
-for (const { name, minAmount } of instrumentsToTest) {
-  await testLiquidation(name, minAmount);
+for (const name of instrumentsToTest) {
+  await testLiquidation(name);
 }
 
 // process.exit(0);
