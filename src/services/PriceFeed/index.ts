@@ -1,6 +1,5 @@
 import { fetchWithValidation } from 'simple-typed-fetch';
-import type { BasicAuthCredentials, Exchange } from '../../types.js';
-import { statisticsOverviewSchema, topPairsStatisticsSchema } from './schemas/index.js';
+import type { BasicAuthCredentials } from '../../types.js';
 import candlesSchema from './schemas/candlesSchema.js';
 import { PriceFeedWS } from './ws/index.js';
 
@@ -24,8 +23,6 @@ class PriceFeed {
     this.basicAuth = basicAuth;
 
     this.getCandles = this.getCandles.bind(this);
-    this.getStatisticsOverview = this.getStatisticsOverview.bind(this);
-    this.getTopPairStatistics = this.getTopPairStatistics.bind(this);
   }
 
   get basicAuthHeaders() {
@@ -57,28 +54,6 @@ class PriceFeed {
       { headers: this.basicAuthHeaders }
     );
   };
-
-  getStatisticsOverview = (exchange: Exchange | 'ALL' = 'ALL') => {
-    const url = new URL(`${this.statisticsUrl}/overview`);
-    url.searchParams.append('exchange', exchange);
-
-    return fetchWithValidation(
-      url.toString(),
-      statisticsOverviewSchema,
-      { headers: this.basicAuthHeaders }
-    );
-  }
-
-  getTopPairStatistics = (exchange: Exchange | 'ALL' = 'ALL') => {
-    const url = new URL(`${this.statisticsUrl}/top-pairs`);
-    url.searchParams.append('exchange', exchange);
-
-    return fetchWithValidation(
-      url.toString(),
-      topPairsStatisticsSchema,
-      { headers: this.basicAuthHeaders }
-    );
-  }
 
   get wsUrl() {
     const url = new URL(this.apiUrl);

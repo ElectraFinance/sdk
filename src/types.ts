@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import type { BigNumber } from 'bignumber.js';
-import type exchanges from './constants/exchanges.js';
 import type subOrderStatuses from './constants/subOrderStatuses.js';
 import type positionStatuses from './constants/positionStatuses.js';
 import type { knownEnvs } from './config/schemas/index.js';
@@ -228,8 +227,6 @@ export type BalanceIssue = {
   readonly sources: Source[]
   readonly fixes?: Fix[]
 }
-
-export type Exchange = typeof exchanges[number];
 
 export type OrderbookItem = {
   price: string
