@@ -81,7 +81,7 @@ export const fullOrderSchema = z.object({
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
   F: z.string().toUpperCase(), // fee asset
-  f: z.number(), // fee
+  f: z.number().optional(), // fee
   o: z.boolean(), // internal only
   S: z.enum(orderStatuses), // status
   ro: z.boolean().optional(), // reversed order
