@@ -158,6 +158,21 @@
             "all": "/price-feed"
           }
         }
+      },
+      "56303": {
+        "api": "https://testing.electra.finance/drip-testnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
       }
     }
   },
