@@ -75,6 +75,7 @@ export const fullOrderSchema = z.object({
   O: z.string(), // sender (owner)
   P: z.string().toUpperCase(), // asset pair
   s: z.enum(['BUY', 'SELL']), // side
+  sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
   a: z.number(), // amount
   A: z.number(), // settled amount
   p: z.number(), // signed price
@@ -102,6 +103,7 @@ export const fullOrderSchema = z.object({
   clientOrdId: o.O,
   instrument: o.P,
   side: o.s,
+  sltp: o.sltp,
   amount: o.a,
   settledAmount: o.A,
   price: o.p,
