@@ -12,6 +12,7 @@ import {
   governanceChainsInfoSchema,
   crossMarginInfoSchema,
   baseLimitsSchema,
+  pricesWithQuoteAssetSchema,
 } from './schemas/index.js';
 import type { BasicAuthCredentials } from '../../types.js';
 
@@ -39,6 +40,7 @@ class BlockchainService {
     this.getInfo = this.getInfo.bind(this);
     this.getHistory = this.getHistory.bind(this);
     this.getPrices = this.getPrices.bind(this);
+    this.getPricesWithQuoteAsset = this.getPricesWithQuoteAsset.bind(this);
     this.getGasPriceWei = this.getGasPriceWei.bind(this);
     this.getBlockNumber = this.getBlockNumber.bind(this);
     this.getCFDContracts = this.getCFDContracts.bind(this);
@@ -95,15 +97,21 @@ class BlockchainService {
     { headers: this.basicAuthHeaders }
   );
 
+  getPricesWithQuoteAsset = () => fetchWithValidation(
+    `${this.apiUrl}/api/quotedPrices`,
+    pricesWithQuoteAssetSchema,
+    { headers: this.basicAuthHeaders }
+  );
+
   getCFDPrices = () => fetchWithValidation(
     `${this.apiUrl}/api/cfd/prices`,
-    z.record(z.string()).transform(makePartial),
+    pricesWithQuoteAssetSchema,
     { headers: this.basicAuthHeaders }
   );
 
   getCrossMarginCFDPrices = () => fetchWithValidation(
     `${this.apiUrl}/api/cfd/cross-margin/prices`,
-    z.record(z.string()).transform(makePartial),
+    pricesWithQuoteAssetSchema,
     { headers: this.basicAuthHeaders }
   );
 
