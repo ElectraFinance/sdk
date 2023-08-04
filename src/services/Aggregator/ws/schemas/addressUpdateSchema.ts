@@ -53,6 +53,7 @@ export const orderUpdateSchema = z.object({
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
   rpnl: z.number().optional(), // realized PnL
+  sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
   c: subOrderSchema.array(), // sub orders (content)
 })
   .transform((val) => ({
@@ -67,6 +68,7 @@ export const orderUpdateSchema = z.object({
     executionType: o.E,
     triggerCondition: o.C,
     realizedPnL: o.rpnl,
+    sltp: o.sltp,
     subOrders: getTransformedSubOrders(o.c),
   }));
 
