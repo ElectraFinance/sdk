@@ -14,11 +14,12 @@ const crossMarginCFDItemInfo = z.object({
 
 const crossMarginInfoSchema = z.object({
   address: z.string().optional(),
+  oracleAddress: z.string().optional(),
+  withdrawMarginLevel: z.number().optional(),
   fundingRateAccount: z.string().optional(),
   soLevel: z.number().optional(),
   delegateContractAddress: z.string().optional(),
   instruments: z.record(z.string(), crossMarginCFDItemInfo),
-  withdrawMarginLevel: z.number().optional(),
 });
 
 export default crossMarginInfoSchema;

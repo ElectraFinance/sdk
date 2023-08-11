@@ -48,7 +48,6 @@ export const signCrossMarginCFDOrder = async (
       INTERNAL_PROTOCOL_PRECISION,
       BigNumber.ROUND_CEIL, // ROUND_CEIL because we don't want get "not enough fee" error
     ).toNumber(),
-    nonce,
     expiration,
     buySide: side === 'BUY' ? 1 : 0,
     stopPrice: stopPrice !== undefined

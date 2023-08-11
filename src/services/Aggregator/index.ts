@@ -4,14 +4,13 @@ import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws/index.js';
 import type {
-  BasicAuthCredentials, Exchange, SignedCancelOrderRequest, SignedCFDOrder, SignedCrossMarginOrder, SignedOrder
+  BasicAuthCredentials, IsolatedCFDOrder, SignedCancelOrderRequest, SignedCrossMarginCFDOrder, SignedOrder
 } from '../../types.js';
-import { pairConfigSchema, aggregatedOrderbookSchema, exchangeOrderbookSchema, poolReservesSchema, futuresBalancesSchema } from './schemas/index.js';
+import { pairConfigSchema, futuresBalancesSchema } from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
 import httpToWS from '../../utils/httpToWS.js';
 import { ethers } from 'ethers';
 import orderSchema from './schemas/orderSchema.js';
-import { exchanges } from '../../constants/index.js';
 import { fetchWithValidation } from 'simple-typed-fetch';
 
 class Aggregator {
@@ -43,9 +42,6 @@ class Aggregator {
     this.cancelOrder = this.cancelOrder.bind(this);
     this.checkWhitelisted = this.checkWhitelisted.bind(this);
     this.getLockedBalance = this.getLockedBalance.bind(this);
-    this.getAggregatedOrderbook = this.getAggregatedOrderbook.bind(this);
-    this.getExchangeOrderbook = this.getExchangeOrderbook.bind(this);
-    this.getPoolReserves = this.getPoolReserves.bind(this);
     this.getVersion = this.getVersion.bind(this);
   }
 
@@ -89,43 +85,6 @@ class Aggregator {
     );
   };
 
-  getAggregatedOrderbook = (pair: string, depth = 20) => {
-    const url = new URL(`${this.apiUrl}/api/v1/orderbook`);
-    url.searchParams.append('pair', pair);
-    url.searchParams.append('depth', depth.toString());
-    return fetchWithValidation(
-      url.toString(),
-      aggregatedOrderbookSchema,
-      { headers: this.basicAuthHeaders },
-      errorSchema,
-    );
-  };
-
-  getAvailableExchanges = () => fetchWithValidation(
-    `${this.apiUrl}/api/v1/exchange/list`,
-    z.enum(exchanges).array(),
-  );
-
-  getExchangeOrderbook = (
-    pair: string,
-    exchange: Exchange,
-    depth = 20,
-    filterByBrokerBalances: boolean | null = null,
-  ) => {
-    const url = new URL(`${this.apiUrl}/api/v1/orderbook/${exchange}/${pair}`);
-    url.searchParams.append('pair', pair);
-    url.searchParams.append('depth', depth.toString());
-    if (filterByBrokerBalances !== null) {
-      url.searchParams.append('filterByBrokerBalances', filterByBrokerBalances.toString());
-    }
-    return fetchWithValidation(
-      url.toString(),
-      exchangeOrderbookSchema,
-      { headers: this.basicAuthHeaders },
-      errorSchema,
-    );
-  };
-
   getPairConfigs = (market: 'spot' | 'futures') => {
     const url = new URL(`${this.apiUrl}/api/v1/pairs/exchangeInfo`);
     url.searchParams.append('market', toUpperCase(market));
@@ -137,19 +96,6 @@ class Aggregator {
       errorSchema,
     );
   }
-
-  getPoolReserves = (
-    pair: string,
-    exchange: Exchange,
-  ) => {
-    const url = new URL(`${this.apiUrl}/api/v1/pools/reserves/${exchange}/${pair}`);
-    return fetchWithValidation(
-      url.toString(),
-      poolReservesSchema,
-      { headers: this.basicAuthHeaders },
-      errorSchema,
-    );
-  };
 
   getVersion = () => fetchWithValidation(
     `${this.apiUrl}/api/v1/version`,
@@ -230,7 +176,7 @@ class Aggregator {
   );
 
   placeCFDOrder = (
-    signedOrder: SignedCFDOrder,
+    signedOrder: IsolatedCFDOrder,
     isReversedOrder?: boolean,
   ) => {
     const headers = {
@@ -264,7 +210,7 @@ class Aggregator {
   };
 
   placeCrossMarginOrder = (
-    signedOrder: SignedCrossMarginOrder,
+    signedOrder: SignedCrossMarginCFDOrder,
   ) => {
     const headers = {
       'Content-Type': 'application/json',

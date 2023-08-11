@@ -117,7 +117,6 @@ export default class Unit {
       amount: position,
       price: currentPrice,
       matcherFee: totalFee.toNumber(),
-      nonce,
       expiration,
       side: isShort ? 'BUY' as const : 'SELL' as const,
       isPersonalSign: false,
@@ -143,7 +142,7 @@ export default class Unit {
 
       const CFDPrices = await simpleFetch(this.blockchainService.getCFDPrices)();
       if (!(symbol in CFDPrices)) throw new Error(`CFD price ${symbol} not found`);
-      symbolPrice = CFDPrices[symbol];
+      symbolPrice = CFDPrices.prices[symbol];
     } else {
       const { instruments } = await simpleFetch(this.blockchainService.getCrossMarginInfo)();
       const instrumentInfo = instruments[symbol];
@@ -153,20 +152,20 @@ export default class Unit {
       feePercent = instrumentInfo.feePercent;
       const CFDPrices = await simpleFetch(this.blockchainService.getCrossMarginCFDPrices)();
       if (!(symbol in CFDPrices)) throw new Error(`CFD price ${symbol} not found`);
-      symbolPrice = CFDPrices[symbol];
+      symbolPrice = CFDPrices.prices[symbol];
     }
     if (symbolPrice === undefined) throw new Error(`Price for ${symbol} not found`);
 
     const gasPriceWei = await simpleFetch(this.blockchainService.getGasPriceWei)();
     const gasPriceGwei = ethers.utils.formatUnits(gasPriceWei, 'gwei');
 
-    const prices = await simpleFetch(this.blockchainService.getPrices)();
-    const baseCurrencyPriceInELT = prices[ethers.constants.AddressZero];
-    if (baseCurrencyPriceInELT === undefined) throw new Error(`Base currency ${this.baseCurrencyName} price not found. Available: ${Object.keys(prices).join(', ')}`);
+    const pricesWithQuoteAsset = await simpleFetch(this.blockchainService.getPricesWithQuoteAsset)();
+    const baseCurrencyPriceInQuoteAsset = pricesWithQuoteAsset.prices[ethers.constants.AddressZero];
+    if (baseCurrencyPriceInQuoteAsset === undefined) throw new Error(`Base currency ${this.baseCurrencyName} price not found. Available: ${Object.keys(pricesWithQuoteAsset).join(', ')}`);
     const feeAssetAddress = assetToAddress[feeAssetName];
     if (feeAssetAddress === undefined) throw new Error(`Fee asset ${feeAssetName} address not found`);
-    const feeAssetPriceInELT = prices[feeAssetAddress];
-    if (feeAssetPriceInELT === undefined) throw new Error(`Fee asset ${feeAssetName} not found. Available: ${Object.keys(prices).join(', ')}`);
+    const feeAssetPriceInQuoteAsset = pricesWithQuoteAsset.prices[feeAssetAddress];
+    if (feeAssetPriceInQuoteAsset === undefined) throw new Error(`Fee asset ${feeAssetName} not found. Available: ${Object.keys(pricesWithQuoteAsset).join(', ')}`);
 
     const networkFee = calculateNetworkFee(
       gasPriceGwei.toString(),
@@ -176,14 +175,14 @@ export default class Unit {
     const amountBN = new BigNumber(amount);
     const priceForFee = new BigNumber(symbolPrice);
 
-    const networkFeeInElt = new BigNumber(networkFee)
-      .multipliedBy(baseCurrencyPriceInELT)
+    const networkFeeInQuoteAsset = new BigNumber(networkFee)
+      .multipliedBy(baseCurrencyPriceInQuoteAsset)
       .toString();
 
-    const networkFeeInFeeAsset = new BigNumber(networkFeeInElt)
+    const networkFeeInFeeAsset = new BigNumber(networkFeeInQuoteAsset)
       .multipliedBy(
         new BigNumber(1)
-          .div(feeAssetPriceInELT),
+          .div(feeAssetPriceInQuoteAsset),
       ).toString();
 
     const fee = new BigNumber(priceForFee)
@@ -195,7 +194,7 @@ export default class Unit {
 
     return {
       networkFee,
-      networkFeeInElt,
+      networkFeeInElt: networkFeeInQuoteAsset,
       networkFeeInFeeAsset,
       fee,
       totalFee

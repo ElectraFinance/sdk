@@ -3,7 +3,11 @@ import { BigNumber } from 'bignumber.js';
 import type { ethers } from 'ethers';
 import { joinSignature, splitSignature } from 'ethers/lib/utils.js';
 import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants/index.js';
-import type { CFDOrder, SignedCFDOrder, SupportedChainId } from '../types.js';
+import type {
+  IsolatedCFDOrder,
+  SignedIsolatedMarginCFDOrder,
+  SupportedChainId
+} from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
 import getDomainData from './getDomainData.js';
 import signIsolatedMarginCFDOrderPersonal from './signIsolatedMarginCFDOrderPersonal.js';
@@ -29,7 +33,7 @@ export const signIsolatedMarginCFDOrder = async (
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
 
-  const order: CFDOrder = {
+  const order: IsolatedCFDOrder = {
     senderAddress,
     matcherAddress,
     instrumentAddress,
@@ -74,7 +78,7 @@ export const signIsolatedMarginCFDOrder = async (
 
   // if (!fixedSignature) throw new Error("Can't sign order");
 
-  const signedOrder: SignedCFDOrder = {
+  const signedOrder: SignedIsolatedMarginCFDOrder = {
     ...order,
     id: hashIsolatedMarginCFDOrder(order),
     signature: fixedSignature,

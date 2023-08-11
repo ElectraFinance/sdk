@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import type { BigNumber } from 'bignumber.js';
-import type exchanges from './constants/exchanges.js';
 import type subOrderStatuses from './constants/subOrderStatuses.js';
 import type positionStatuses from './constants/positionStatuses.js';
 import type { knownEnvs } from './config/schemas/index.js';
@@ -35,7 +34,38 @@ export type Balance = {
 
 export type PositionStatus = typeof positionStatuses[number];
 
+type StatesByInstrument = {
+  instrument: string
+  positionStatus: PositionStatus
+  currentPrice: string
+  floatingProfitLoss: string
+  accumulatedFundingRate: string
+  position: string
+  positionPrice: string
+  margin: string
+  marginUSD: string
+  leverage: string
+  longFundingRatePerSecond: string
+  longFundingRatePerDay: string
+  shortFundingRatePerSecond: string
+  shortFundingRatePerDay: string
+  stopOutPrice: string | undefined
+}
+
 export type CFDBalance = {
+  balance: string
+  profitLoss: string
+  fundingRate: string
+  equity: string
+  reserves: string
+  margin: string | undefined
+  marginUSD: string
+  freeMarginUSD: string
+  availableWithdrawBalance: string
+  statesByInstruments: StatesByInstrument[]
+}
+
+export type IsolatedCFDBalance = {
   instrument: string
   balance: string
   profitLoss: string
@@ -85,7 +115,6 @@ type BaseFuturesOrder = {
   amount: number // uint64
   price: number // uint64
   matcherFee: number // uint64
-  nonce: number // uint64
   expiration: number // uint64
   buySide: 0 | 1 // uint8, 1=buy, 0=sell
   stopPrice?: number | undefined // uint64
@@ -93,32 +122,24 @@ type BaseFuturesOrder = {
   isFromDelegate?: boolean | undefined // bool
 }
 
-export type CFDOrder = {
-  instrumentAddress: string // address
+export type IsolatedCFDOrder = {
+  instrumentAddress: string
+  nonce: number // uint64
 } & BaseFuturesOrder
 
 export type CrossMarginCFDOrder = {
   instrumentIndex: number // uint16
 } & BaseFuturesOrder
 
-export type SignedCFDOrder = {
+export type SignedIsolatedMarginCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
-} & CFDOrder
+} & IsolatedCFDOrder
 
 export type SignedCrossMarginCFDOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
 } & CrossMarginCFDOrder
-
-export type CrossMarginOrder = {
-  instrumentIndex: number // index
-} & BaseFuturesOrder
-
-export type SignedCrossMarginOrder = {
-  id: string // hash of Order (it's not part of order structure in smart-contract)
-  signature: string // bytes
-} & CrossMarginOrder
 
 export type CancelOrderRequest = {
   id: number | string
@@ -208,12 +229,9 @@ export type BalanceIssue = {
   readonly fixes?: Fix[]
 }
 
-export type Exchange = typeof exchanges[number];
-
 export type OrderbookItem = {
   price: string
   amount: string
-  exchanges: Exchange[]
   vob: Array<{
     side: 'BUY' | 'SELL'
     pairName: string

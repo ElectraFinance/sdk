@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { z } from 'zod';
-import { exchanges, orderStatuses, subOrderStatuses } from '../../../constants/index.js';
+import { orderStatuses, subOrderStatuses } from '../../../constants/index.js';
 
 const blockchainOrderSchema = z.object({
   id: z.string().refine(ethers.utils.isHexString, (value) => ({
@@ -60,18 +60,7 @@ const baseOrderSchema = z.object({
   internalOnly: z.boolean(),
 })
 
-const selfBrokers = exchanges.map((exchange) => `SELF_BROKER_${exchange}` as const);
-type SelfBroker = typeof selfBrokers[number];
-const isSelfBroker = (value: string): value is SelfBroker => selfBrokers.some((broker) => broker === value);
-const selfBrokerSchema = z.custom<SelfBroker>((value) => {
-  if (typeof value === 'string' && isSelfBroker(value)) {
-    return true;
-  }
-  return false;
-});
-
 const brokerAddressSchema = z.enum(['INTERNAL_BROKER', 'SELF_BROKER'])
-  .or(selfBrokerSchema)
   .or(z.string().refine(ethers.utils.isAddress, (value) => ({
     message: `subOrder.subOrders.[n].brokerAddress must be an address, got ${value}`,
   })));
@@ -81,7 +70,6 @@ const subOrderSchema = baseOrderSchema.extend({
   parentOrderId: z.string().refine(ethers.utils.isHexString, (value) => ({
     message: `subOrder.parentOrderId must be a hex string, got ${value}`,
   })),
-  exchange: z.enum(exchanges),
   brokerAddress: brokerAddressSchema,
   tradesInfo: z.record(
     z.string().uuid(),

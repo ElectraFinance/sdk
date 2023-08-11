@@ -2,49 +2,47 @@ import { z } from 'zod';
 import orderStatuses from '../../../../constants/orderStatuses.js';
 import subOrderStatuses from '../../../../constants/subOrderStatuses.js';
 import MessageType from '../MessageType.js';
-import balancesSchema from './balancesSchema.js';
 import baseMessageSchema from './baseMessageSchema.js';
 import executionTypes from '../../../../constants/cfdExecutionTypes.js';
+import balancesSchema from './balancesSchema.js';
 
 const baseAddressUpdate = baseMessageSchema.extend({
   id: z.string(),
-  T: z.literal(MessageType.ADDRESS_UPDATE),
+  T: z.literal(MessageType.ISOLATED_ADDRESS_UPDATE),
   S: z.string(), // subscription
   uc: z.array(z.enum(['b', 'o'])), // update content
 });
 
-const subOrderSchema = z.object({
+const isolatedSubOrderSchema = z.object({
   i: z.number(), // id
   I: z.string(), // parent order id
   O: z.string(), // sender (owner)
-  P: z.string().toUpperCase(), // instrument
+  P: z.string().toUpperCase(), // asset pair
   s: z.enum(['BUY', 'SELL']), // side
   a: z.number(), // amount
   A: z.number(), // settled amount
-  p: z.number(), // price
+  p: z.number(), // avg weighed settlement price
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
-  o: z.boolean().optional() // internal only
+  o: z.boolean(), // internal only
 });
 
-type TSubOrder = z.infer<typeof subOrderSchema>
+type TIsolatedSubOrder = z.infer<typeof isolatedSubOrderSchema>
 
-const getTransformedSubOrders = (subOrders: TSubOrder[]) => {
+const getTransformedIsolatedSubOrders = (subOrders: TIsolatedSubOrder[]) => {
   return subOrders.map((so) => ({
+    pair: so.P,
     id: so.i,
-    parentId: so.I,
-    sender: so.O,
-    instrument: so.P,
-    side: so.s,
     amount: so.a,
     settledAmount: so.A,
     price: so.p,
-    brokerAddress: so.b,
     status: so.S,
+    side: so.s,
+    subOrdQty: so.A,
   }))
 }
 
-export const orderUpdateSchema = z.object({
+export const isolatedOrderUpdateSchema = z.object({
   I: z.string(), // id
   A: z.number(), // settled amount
   S: z.enum(orderStatuses), // status
@@ -53,8 +51,7 @@ export const orderUpdateSchema = z.object({
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
   rpnl: z.number().optional(), // realized PnL
-  sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
-  c: subOrderSchema.array(), // sub orders (content)
+  c: isolatedSubOrderSchema.array(), // sub orders (content)
 })
   .transform((val) => ({
     ...val,
@@ -68,29 +65,26 @@ export const orderUpdateSchema = z.object({
     executionType: o.E,
     triggerCondition: o.C,
     realizedPnL: o.rpnl,
-    sltp: o.sltp,
-    subOrders: getTransformedSubOrders(o.c),
+    subOrders: getTransformedIsolatedSubOrders(o.c),
   }));
 
-export const fullOrderSchema = z.object({
+export const isolatedFullOrderSchema = z.object({
   I: z.string(), // id
   O: z.string(), // sender (owner)
   P: z.string().toUpperCase(), // asset pair
   s: z.enum(['BUY', 'SELL']), // side
-  sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
   a: z.number(), // amount
   A: z.number(), // settled amount
   p: z.number(), // signed price
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
   F: z.string().toUpperCase(), // fee asset
-  f: z.number().optional(), // fee
+  f: z.number(), // fee
   o: z.boolean(), // internal only
   S: z.enum(orderStatuses), // status
-  ro: z.boolean().optional(), // reversed order
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
-  c: subOrderSchema.array(), // sub orders (content)
+  c: isolatedSubOrderSchema.array(), // sub orders (content)
 
   // CFD only
   L: z.number().optional(), // stop limit price,
@@ -105,7 +99,6 @@ export const fullOrderSchema = z.object({
   clientOrdId: o.O,
   instrument: o.P,
   side: o.s,
-  sltp: o.sltp,
   amount: o.a,
   settledAmount: o.A,
   price: o.p,
@@ -113,33 +106,31 @@ export const fullOrderSchema = z.object({
   triggerCondition: o.C,
   feeAsset: o.F,
   fee: o.f,
-  internalOnly: o.o,
   status: o.S,
   date: o.T,
-  updateDate: o.t,
   stopPrice: o.L,
   liquidated: o.l,
   realizedPnL: o.rpnl,
-  subOrders: getTransformedSubOrders(o.c),
+  subOrders: getTransformedIsolatedSubOrders(o.c),
 }));
 
 const updateMessageSchema = baseAddressUpdate.extend({
   k: z.literal('u'), // kind of message: "u" - updates
   uc: z.array(z.enum(['b', 'o'])), // update content: "o" - orders updates, "b" - balance updates
   b: balancesSchema.optional(),
-  o: z.tuple([fullOrderSchema.or(orderUpdateSchema)]).optional(),
+  o: z.tuple([isolatedFullOrderSchema.or(isolatedOrderUpdateSchema)]).optional(),
 });
 
 const initialMessageSchema = baseAddressUpdate.extend({
   k: z.literal('i'), // kind of message: "i" - initial
   b: balancesSchema,
-  o: z.array(fullOrderSchema)
+  o: z.array(isolatedFullOrderSchema)
     .optional(), // When no orders — no field
 });
 
-const addressUpdateSchema = z.union([
+const isolatedAddressUpdateSchema = z.union([
   initialMessageSchema,
   updateMessageSchema,
 ]);
 
-export default addressUpdateSchema;
+export default isolatedAddressUpdateSchema;

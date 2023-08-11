@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { fullOrderSchema, orderUpdateSchema } from './addressUpdateSchema.js';
 import baseMessageSchema from './baseMessageSchema.js';
 import MessageType from '../MessageType.js';
-import { cfdBalanceSchema } from './cfdBalancesSchema.js';
+import { isolatedFullOrderSchema, isolatedOrderUpdateSchema } from './isolatedAddressUpdateSchema.js';
+import isolatedCFDBalancesSchema from './isolatedCFDBalancesSchema.js';
 
 const baseCfdAddressUpdate = baseMessageSchema.extend({
   id: z.string(),
-  T: z.literal(MessageType.CFD_ADDRESS_UPDATE),
+  T: z.literal(MessageType.ISOLATED_CFD_ADDRESS_UPDATE),
   S: z.string(), // subscription
   uc: z.array(z.enum(['b', 'o'])), // update content
 });
@@ -14,20 +14,20 @@ const baseCfdAddressUpdate = baseMessageSchema.extend({
 const updateMessageSchema = baseCfdAddressUpdate.extend({
   k: z.literal('u'), // kind of message: "u" - updates
   uc: z.array(z.enum(['b', 'o'])), // update content: "o" - orders updates, "b" - balance updates
-  b: cfdBalanceSchema.optional(),
-  o: z.tuple([fullOrderSchema.or(orderUpdateSchema)]).optional(),
+  b: isolatedCFDBalancesSchema.optional(),
+  o: z.tuple([isolatedFullOrderSchema.or(isolatedOrderUpdateSchema)]).optional(),
 });
 
 const initialMessageSchema = baseCfdAddressUpdate.extend({
   k: z.literal('i'), // kind of message: "i" - initial
-  b: cfdBalanceSchema,
-  o: z.array(fullOrderSchema)
+  b: isolatedCFDBalancesSchema,
+  o: z.array(isolatedFullOrderSchema)
     .optional(), // When no orders — no field
 });
 
-const cfdAddressUpdateSchema = z.union([
+const isolatedCFDAddressUpdateSchema = z.union([
   initialMessageSchema,
   updateMessageSchema,
 ]);
 
-export default cfdAddressUpdateSchema
+export default isolatedCFDAddressUpdateSchema

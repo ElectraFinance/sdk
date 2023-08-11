@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
-import type { CFDOrder } from '../types.js';
+import type { IsolatedCFDOrder } from '../types.js';
 
 const { arrayify, joinSignature, splitSignature } = ethers.utils;
 
-const signIsolatedMarginCFDOrderPersonal = async (order: CFDOrder, signer: ethers.Signer) => {
+const signIsolatedMarginCFDOrderPersonal = async (order: IsolatedCFDOrder, signer: ethers.Signer) => {
   const message = ethers.utils.solidityKeccak256(
     [
       'string', 'address', 'address', 'address', 'uint64', 'uint64', 'uint64', 'uint64', 'uint64', 'uint8',
