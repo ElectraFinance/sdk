@@ -462,6 +462,10 @@ class AggregatorWS {
   //   return this.initPromise;
   // }
 
+  public isOpen(): boolean {
+    return this.transport?.isOpen === true;
+  }
+
   public onWsOpen(openCallback: WebsocketTransportEvents['open']) {
     return this.emitter.on('open', openCallback);
   }
@@ -482,7 +486,6 @@ class AggregatorWS {
       this.clearHeartbeat();
       this.transport?.unsubscribe();
       this.emitter.emit('close', e);
-      this.clearHeartbeat();
       this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
       if (!this.isClosedIntentionally) {
         setTimeout(() => {
