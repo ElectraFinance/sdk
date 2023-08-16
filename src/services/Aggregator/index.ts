@@ -43,6 +43,7 @@ class Aggregator {
     this.checkWhitelisted = this.checkWhitelisted.bind(this);
     this.getLockedBalance = this.getLockedBalance.bind(this);
     this.getVersion = this.getVersion.bind(this);
+    this.getPrices = this.getPrices.bind(this);
   }
 
   get basicAuthHeaders() {
@@ -73,6 +74,17 @@ class Aggregator {
       errorSchema,
     );
   }
+
+  getPrices = (assetPair: string) => {
+    const url = new URL(`${this.apiUrl}/api/v1/prices/`);
+    url.searchParams.append('assetPair', assetPair);
+    return fetchWithValidation(
+      url.toString(),
+      z.number(),
+      { headers: this.basicAuthHeaders },
+      errorSchema,
+    );
+  };
 
   getPairsList = (market: 'futures') => {
     const url = new URL(`${this.apiUrl}/api/v1/pairs/list`);
