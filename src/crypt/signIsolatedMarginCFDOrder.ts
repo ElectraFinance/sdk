@@ -1,7 +1,6 @@
 import type { TypedDataSigner } from '@ethersproject/abstract-signer';
 import { BigNumber } from 'bignumber.js';
-import type { ethers } from 'ethers';
-import { joinSignature, splitSignature } from 'ethers/lib/utils.js';
+import { ethers } from 'ethers';
 import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants/index.js';
 import type {
   IsolatedCFDOrder,
@@ -37,21 +36,21 @@ export const signIsolatedMarginCFDOrder = async (
     senderAddress,
     matcherAddress,
     instrumentAddress,
-    amount: normalizeNumber(
+    amount: Number(normalizeNumber(
       amount,
       INTERNAL_PROTOCOL_PRECISION,
       BigNumber.ROUND_FLOOR,
-    ).toNumber(),
-    price: normalizeNumber(
+    )),
+    price: Number(normalizeNumber(
       price,
       INTERNAL_PROTOCOL_PRECISION,
       BigNumber.ROUND_FLOOR,
-    ).toNumber(),
-    matcherFee: normalizeNumber(
+    )),
+    matcherFee: Number(normalizeNumber(
       matcherFee,
       INTERNAL_PROTOCOL_PRECISION,
       BigNumber.ROUND_CEIL, // ROUND_CEIL because we don't want get "not enough fee" error
-    ).toNumber(),
+    )),
     nonce,
     expiration,
     buySide: side === 'BUY' ? 1 : 0,
@@ -74,7 +73,7 @@ export const signIsolatedMarginCFDOrder = async (
 
   // https://github.com/poap-xyz/poap-fun/pull/62#issue-928290265
   // "Signature's v was always send as 27 or 28, but from Ledger was 0 or 1"
-  const fixedSignature = joinSignature(splitSignature(signature));
+  const fixedSignature = ethers.Signature.from(signature).serialized;
 
   // if (!fixedSignature) throw new Error("Can't sign order");
 

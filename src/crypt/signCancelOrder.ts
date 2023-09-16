@@ -1,6 +1,5 @@
 import type { TypedDataSigner } from '@ethersproject/abstract-signer';
-import type { ethers } from 'ethers';
-import { joinSignature, splitSignature } from 'ethers/lib/utils.js';
+import { ethers } from 'ethers';
 import CANCEL_ORDER_TYPES from '../constants/cancelOrderTypes.js';
 import type { CancelOrderRequest, SignedCancelOrderRequest, SupportedChainId } from '../types.js';
 import getDomainData from './getDomainData.js';
@@ -36,7 +35,7 @@ const signCancelOrder = async (
 
   // https://github.com/poap-xyz/poap-fun/pull/62#issue-928290265
   // "Signature's v was always send as 27 or 28, but from Ledger was 0 or 1"
-  const fixedSignature = joinSignature(splitSignature(signature));
+  const fixedSignature = ethers.Signature.from(signature).serialized;
 
   // if (!fixedSignature) throw new Error("Can't sign order cancel");
 
