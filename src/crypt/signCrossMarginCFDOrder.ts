@@ -60,7 +60,7 @@ export const signCrossMarginCFDOrder = async (
   const typedDataSigner = signer as SignerWithTypedDataSign;
   const signature = usePersonalSign
     ? await signCrossMarginCFDOrderPersonal(order, signer)
-    : await typedDataSigner._signTypedData(
+    : await typedDataSigner.signTypedData(
       getDomainData(chainId),
       CROSS_MARGIN_CFD_ORDER_TYPES,
       order,

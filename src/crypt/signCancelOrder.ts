@@ -27,7 +27,7 @@ const signCancelOrder = async (
   const signature = usePersonalSign
     ? await signCancelOrderPersonal(cancelOrderRequest, signer)
   // https://docs.ethers.io/v5/api/signer/#Signer-signTypedData
-    : await typedDataSigner._signTypedData(
+    : await typedDataSigner.signTypedData(
       getDomainData(chainId),
       CANCEL_ORDER_TYPES,
       cancelOrderRequest,

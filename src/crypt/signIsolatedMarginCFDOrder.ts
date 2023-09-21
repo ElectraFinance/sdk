@@ -65,7 +65,7 @@ export const signIsolatedMarginCFDOrder = async (
   const typedDataSigner = signer as SignerWithTypedDataSign;
   const signature = usePersonalSign
     ? await signIsolatedMarginCFDOrderPersonal(order, signer)
-    : await typedDataSigner._signTypedData(
+    : await typedDataSigner.signTypedData(
       getDomainData(chainId),
       ISOLATED_MARGIN_CFD_ORDER_TYPES,
       order,
