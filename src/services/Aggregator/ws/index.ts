@@ -203,11 +203,15 @@ const nonExistentMessageRegex = /Could not cancel nonexistent subscription: (.*)
 //   resolve: () => void
 // };
 
-const FUTURES_SUFFIX = 'USDF';
+const FUTURES_SUFFIX = 'USD';
 
 export type AggregatorWsEvents = {
   open: WebsocketTransportEvents['open']
   close: WebsocketTransportEvents['close']
+}
+
+function isAllUpperCase(str: string) {
+  return str === str.toUpperCase();
 }
 
 class AggregatorWS {
@@ -399,9 +403,7 @@ class AggregatorWS {
     });
 
     const isOrderBooksSubscription = (subId: string) => {
-      const isSpotPairName = subId.includes('-') && subId.split('-').length === 2;
-      const isFuturesPairName = subId.endsWith(FUTURES_SUFFIX);
-      return isSpotPairName || isFuturesPairName;
+      return subId.endsWith(FUTURES_SUFFIX) && !subId.includes('-') && isAllUpperCase(subId);
     }
 
     if (newestSubId.includes('0x')) { // is wallet address (ADDRESS_UPDATE)
