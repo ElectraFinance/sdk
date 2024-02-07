@@ -6,12 +6,12 @@ import {
   pingPongMessageSchema, initMessageSchema,
   errorSchema, orderBookSchema,
   assetPairsConfigSchema, addressUpdateSchema,
-  isolatedAddressUpdateSchema
+  isolatedAddressUpdateSchema, futuresTradesStreamSchema
 } from './schemas/index.js';
 import UnsubscriptionType from './UnsubscriptionType.js';
 import type {
   AssetPairUpdate, OrderbookItem, Balance, CFDBalance,
-  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance,
+  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance, FuturesTradesStream, PositionSide, NetworkShortName,
 } from '../../../types.js';
 import unsubscriptionDoneSchema from './schemas/unsubscriptionDoneSchema.js';
 import assetPairConfigSchema from './schemas/assetPairConfigSchema.js';
@@ -42,6 +42,7 @@ const messageSchema = z.union([
   assetPairConfigSchema,
   orderBookSchema,
   futuresTradeInfoSchema,
+  futuresTradesStreamSchema,
   errorSchema,
   unsubscriptionDoneSchema,
 ]);
@@ -86,6 +87,10 @@ type FuturesTradeInfoSubscription = {
   payload: FuturesTradeInfoPayload
   callback: (futuresTradeInfo: FuturesTradeInfo) => void
   errorCb?: (message: string) => void
+}
+
+type FuturesTradesStreamSubscription = {
+  callback: (futuresTrades: FuturesTradesStream) => void
 }
 
 type IsolatedAddressUpdateUpdate = {
@@ -187,6 +192,7 @@ type Subscription = {
   [SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]: PairsConfigSubscription
   [SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]: PairConfigSubscription
   [SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]: FuturesTradeInfoSubscription
+  [SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]: FuturesTradesStreamSubscription
 }
 
 const exclusiveSubscriptions = [
@@ -577,6 +583,24 @@ class AggregatorWS {
             sellPower: json.spw,
             minAmount: json.ma,
           });
+          break;
+        case MessageType.FUTURES_TRADES_STREAM_UPDATE:
+          this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.[json.id]?.callback(
+            {
+              timestamp: json._,
+              sender: json.S,
+              id: json.id,
+              instrument: json.i,
+              side: json.s,
+              amount: json.a,
+              leverage: json.l,
+              price: json.p,
+              txHash: json.h,
+              network: json.n,
+              realizedPnL: json.rpnl,
+              roi: json.r,
+            }
+          );
           break;
         case MessageType.INITIALIZATION:
           this.onInit?.();

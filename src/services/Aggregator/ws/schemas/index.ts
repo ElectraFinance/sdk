@@ -8,5 +8,6 @@ export { default as pingPongMessageSchema } from './pingPongMessageSchema.js';
 export { default as balancesSchema } from './balancesSchema.js';
 export { default as cfdBalancesSchema } from './cfdBalancesSchema.js';
 export { default as isolatedCFDBalancesSchema } from './isolatedCFDBalancesSchema.js';
+export { futuresTradesStreamSchema } from './futuresTradesStreamSchema';
 
 export * from './orderBookSchema.js';
