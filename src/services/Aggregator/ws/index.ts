@@ -11,7 +11,7 @@ import {
 import UnsubscriptionType from './UnsubscriptionType.js';
 import type {
   AssetPairUpdate, OrderbookItem, Balance, CFDBalance,
-  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance, FuturesTradesStream, PositionSide, NetworkShortName,
+  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance, FuturesTradesStream,
 } from '../../../types.js';
 import unsubscriptionDoneSchema from './schemas/unsubscriptionDoneSchema.js';
 import assetPairConfigSchema from './schemas/assetPairConfigSchema.js';
@@ -286,6 +286,7 @@ class AggregatorWS {
   }
 
   private hearbeatIntervalId: NodeJS.Timer | undefined;
+
   private setupHeartbeat() {
     const heartbeat = () => {
       if (this.isAlive) {
