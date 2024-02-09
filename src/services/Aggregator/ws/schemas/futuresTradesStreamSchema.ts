@@ -2,12 +2,12 @@ import { z } from 'zod';
 import MessageType from '../MessageType.js';
 import { positionSides } from '../../../../constants/positionStatuses';
 import { networkCodes } from '../../../../constants';
-import addressSchema from '../../../../addressSchema';
+// import addressSchema from '../../../../addressSchema';
 
 export const futuresTradesStreamSchema = z.object({
   T: z.literal(MessageType.FUTURES_TRADES_STREAM_UPDATE), // futures trades stream update
   _: z.number(), // timestamp
-  S: addressSchema, // sender
+  S: z.string(), // sender // TODO: change to addressSchema
   id: z.string(), // request id
   i: z.string(), // instrument
   s: z.enum(positionSides), // trade side (LONG/SHORT)

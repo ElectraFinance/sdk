@@ -90,9 +90,6 @@ type FuturesTradeInfoSubscription = {
 }
 
 type FuturesTradesStreamSubscription = {
-  payload: {
-    id: string
-  }
   callback: (futuresTrades: FuturesTradesStream) => void
 }
 
@@ -450,6 +447,8 @@ class AggregatorWS {
       }
     } else if (newestSubId === UnsubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_UNSUBSCRIBE) {
       delete this.subscriptions[SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]?.['default'];
+    } else if (newestSubId === UnsubscriptionType.FUTURES_TRADES_STREAM_UNSUBSCRIBE) {
+      delete this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.['default'];
     }
   }
 
