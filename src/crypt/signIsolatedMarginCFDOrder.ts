@@ -1,4 +1,3 @@
-import type { TypedDataSigner } from '@ethersproject/abstract-signer';
 import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants/index.js';
@@ -12,8 +11,6 @@ import getDomainData from './getDomainData.js';
 import signIsolatedMarginCFDOrderPersonal from './signIsolatedMarginCFDOrderPersonal.js';
 import hashIsolatedMarginCFDOrder from './hashIsolatedMarginCFDOrder.js';
 import { ISOLATED_MARGIN_CFD_ORDER_TYPES } from '../constants/cfdOrderTypes.js';
-
-type SignerWithTypedDataSign = ethers.Signer & TypedDataSigner;
 
 export const signIsolatedMarginCFDOrder = async (
   instrumentAddress: string,
@@ -61,11 +58,9 @@ export const signIsolatedMarginCFDOrder = async (
     isFromDelegate,
   };
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const typedDataSigner = signer as SignerWithTypedDataSign;
   const signature = usePersonalSign
     ? await signIsolatedMarginCFDOrderPersonal(order, signer)
-    : await typedDataSigner.signTypedData(
+    : await signer.signTypedData(
       getDomainData(chainId),
       ISOLATED_MARGIN_CFD_ORDER_TYPES,
       order,

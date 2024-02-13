@@ -1,11 +1,8 @@
-import type { TypedDataSigner } from '@ethersproject/abstract-signer';
 import { ethers } from 'ethers';
 import CANCEL_ORDER_TYPES from '../constants/cancelOrderTypes.js';
 import type { CancelOrderRequest, SignedCancelOrderRequest, SupportedChainId } from '../types.js';
 import getDomainData from './getDomainData.js';
 import signCancelOrderPersonal from './signCancelOrderPersonal.js';
-
-type SignerWithTypedDataSign = ethers.Signer & TypedDataSigner;
 
 const signCancelOrder = async (
   senderAddress: string,
@@ -21,13 +18,11 @@ const signCancelOrder = async (
     isPersonalSign: usePersonalSign,
     isFromDelegate,
   };
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const typedDataSigner = signer as SignerWithTypedDataSign;
 
   const signature = usePersonalSign
     ? await signCancelOrderPersonal(cancelOrderRequest, signer)
   // https://docs.ethers.io/v5/api/signer/#Signer-signTypedData
-    : await typedDataSigner.signTypedData(
+    : await signer.signTypedData(
       getDomainData(chainId),
       CANCEL_ORDER_TYPES,
       cancelOrderRequest,
