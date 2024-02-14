@@ -90,6 +90,8 @@ export const fullOrderSchema = z.object({
   ro: z.boolean().optional(), // reversed order
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
+  lv: z.string().optional(), // leverage
+  roi: z.string().optional(), // ROI%
   c: subOrderSchema.array(), // sub orders (content)
 
   // CFD only
@@ -120,6 +122,8 @@ export const fullOrderSchema = z.object({
   stopPrice: o.L,
   liquidated: o.l,
   realizedPnL: o.rpnl,
+  leverage: o.lv,
+  roi: o.roi,
   subOrders: getTransformedSubOrders(o.c),
 }));
 
