@@ -2,7 +2,7 @@ import { z } from 'zod';
 import exchangeInfoSchema from './schemas/exchangeInfoSchema.js';
 import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
-import { AggregatorWS } from './ws/index.js';
+import { AggregatorWS } from './ws';
 import type {
   BasicAuthCredentials, IsolatedCFDOrder, SignedCancelOrderRequest, SignedCrossMarginCFDOrder, SignedOrder
 } from '../../types.js';
@@ -223,14 +223,12 @@ class Aggregator {
 
   placeCrossMarginOrder = (
     signedOrder: SignedCrossMarginCFDOrder,
-    logger: ({ log: (...props: any[]) => void }),
   ) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...this.basicAuthHeaders,
     };
-    logger.log('🤬', signedOrder) // TODO: remove me
 
     return fetchWithValidation(
       `${this.apiUrl}/api/v1/order/futures`,
