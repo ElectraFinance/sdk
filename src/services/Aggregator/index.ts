@@ -223,12 +223,14 @@ class Aggregator {
 
   placeCrossMarginOrder = (
     signedOrder: SignedCrossMarginCFDOrder,
+    logger: ({ log: (...props: any[]) => void }),
   ) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...this.basicAuthHeaders,
     };
+    logger.log('🤬', signedOrder) // TODO: remove me
 
     return fetchWithValidation(
       `${this.apiUrl}/api/v1/order/futures`,
@@ -272,6 +274,7 @@ class Aggregator {
     );
   };
 }
+
 export * as schemas from './schemas/index.js';
 export * as ws from './ws/index.js';
 export { Aggregator };
