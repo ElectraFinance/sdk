@@ -1,6 +1,6 @@
 import { fetchWithValidation } from 'simple-typed-fetch';
 import type { BasicAuthCredentials } from '../../types.js';
-import { allTickersSchema, candlesSchema } from './schemas/';
+import { allTickersSchema, candlesSchema, leaderboardSchema, statisticsOverviewSchema, topPairsSchema, winnersSchema } from './schemas/';
 import { PriceFeedWS } from './ws/index.js';
 
 class PriceFeed {
@@ -24,6 +24,10 @@ class PriceFeed {
 
     this.getCandles = this.getCandles.bind(this);
     this.getAllTickers = this.getAllTickers.bind(this);
+    this.getLeaderboard = this.getLeaderboard.bind(this);
+    this.getStatisticsOverview = this.getStatisticsOverview.bind(this);
+    this.getTopPairs = this.getTopPairs.bind(this);
+    this.getWinners = this.getWinners.bind(this);
   }
 
   get basicAuthHeaders() {
@@ -60,6 +64,38 @@ class PriceFeed {
     return fetchWithValidation(
       `${this.tickersUrl}/all`,
       allTickersSchema,
+      { headers: this.basicAuthHeaders }
+    );
+  }
+
+  getLeaderboard = () => {
+    return fetchWithValidation(
+      `${this.statisticsUrl}/futures/addresses`,
+      leaderboardSchema,
+      { headers: this.basicAuthHeaders }
+    );
+  }
+
+  getStatisticsOverview = () => {
+    return fetchWithValidation(
+      `${this.statisticsUrl}/overview?exchange=ALL`,
+      statisticsOverviewSchema,
+      { headers: this.basicAuthHeaders }
+    );
+  }
+
+  getTopPairs = () => {
+    return fetchWithValidation(
+      `${this.statisticsUrl}/top-pairs?exchange=ALL`,
+      topPairsSchema,
+      { headers: this.basicAuthHeaders }
+    );
+  }
+
+  getWinners = () => {
+    return fetchWithValidation(
+      `${this.statisticsUrl}/futures/winners`,
+      winnersSchema,
       { headers: this.basicAuthHeaders }
     );
   }
