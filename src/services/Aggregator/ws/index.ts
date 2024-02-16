@@ -436,6 +436,7 @@ class AggregatorWS {
       // is swap info subscription (contains hyphen)
       delete this.subscriptions[SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]?.[newestSubId];
       delete this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[newestSubId];
+      delete this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.[newestSubId];
       // !!! swap info subscription is uuid that contains hyphen
     } else if (isOrderBooksSubscription(newestSubId)) { // is pair name(AGGREGATED_ORDER_BOOK_UPDATE)
       const aobSubscriptions = this.subscriptions[SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE];
@@ -448,8 +449,6 @@ class AggregatorWS {
       }
     } else if (newestSubId === UnsubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_UNSUBSCRIBE) {
       delete this.subscriptions[SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]?.['default'];
-    } else if (newestSubId === UnsubscriptionType.FUTURES_TRADES_STREAM_UNSUBSCRIBE) {
-      delete this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.['default'];
     }
   }
 
