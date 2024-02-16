@@ -90,7 +90,6 @@ type FuturesTradeInfoSubscription = {
 }
 
 type FuturesTradesStreamSubscription = {
-  payload: string
   callback: (futuresTrades: FuturesTradesStream) => void
 }
 
