@@ -2,7 +2,7 @@
 import type { BigNumber } from 'bignumber.js';
 import type subOrderStatuses from './constants/subOrderStatuses.js';
 import type positionStatuses from './constants/positionStatuses.js';
-import type { knownEnvs } from './config/schemas/index.js';
+import type { knownEnvs } from './config/schemas';
 
 export type DeepPartial<T> = T extends object ? {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -118,6 +118,7 @@ type BaseFuturesOrder = {
   expiration: number // uint64
   buySide: 0 | 1 // uint8, 1=buy, 0=sell
   stopPrice?: number | undefined // uint64
+  leverage?: string | undefined // string
   isPersonalSign: boolean // bool
   isFromDelegate?: boolean | undefined // bool
 }

@@ -1,15 +1,12 @@
-import type { TypedDataSigner } from '@ethersproject/abstract-signer';
 import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
-import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants/index.js';
+import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants';
 import type { CrossMarginCFDOrder, SignedCrossMarginCFDOrder, SupportedChainId } from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
 import getDomainData from './getDomainData.js';
 import { CROSS_MARGIN_CFD_ORDER_TYPES } from '../constants/cfdOrderTypes.js';
 import signCrossMarginCFDOrderPersonal from './signCrossMarginCFDOrderPersonal.js';
 import hashCrossMarginCFDOrder from './hashCrossMarginCFDOrder.js';
-
-type SignerWithTypedDataSign = ethers.Signer & TypedDataSigner;
 
 export const signCrossMarginCFDOrder = async (
   instrumentIndex: number,
@@ -23,6 +20,7 @@ export const signCrossMarginCFDOrder = async (
   signer: ethers.Signer,
   chainId: SupportedChainId,
   stopPrice: BigNumber.Value | undefined,
+  leverage: string | undefined,
   isFromDelegate?: boolean,
 ) => {
   const nonce = Date.now();
@@ -52,15 +50,16 @@ export const signCrossMarginCFDOrder = async (
     stopPrice: stopPrice !== undefined
       ? new BigNumber(stopPrice).toNumber()
       : undefined,
+    leverage: leverage !== undefined
+      ? leverage
+      : undefined,
     isPersonalSign: usePersonalSign,
     isFromDelegate,
   };
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const typedDataSigner = signer as SignerWithTypedDataSign;
   const signature = usePersonalSign
     ? await signCrossMarginCFDOrderPersonal(order, signer)
-    : await typedDataSigner.signTypedData(
+    : await signer.signTypedData(
       getDomainData(chainId),
       CROSS_MARGIN_CFD_ORDER_TYPES,
       order,
