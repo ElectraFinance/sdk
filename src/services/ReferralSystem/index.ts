@@ -17,6 +17,8 @@ import {
 import type { SupportedChainId } from '../../types.js';
 import contractsAddressesSchema from './schemas/contractsAddressesSchema.js';
 
+export type { AccountDetails, AccountReferrals, Leaderboard } from './schemas';
+
 type CreateLinkPayloadType = {
   referer: string
   link_option: number
