@@ -9,6 +9,8 @@ export { default as ratingSchema } from './ratingSchema';
 export { default as claimInfoSchema } from './claimInfoSchema';
 export { default as aggregatedHistorySchema } from './aggregatedHistorySchema';
 export { default as contractsAddressesSchema } from './contractsAddressesSchema';
-export * from './accountDetailsSchema';
-export * from './accountReferralsSchema';
-export * from './leaderboardSchema';
+export {
+  type AccountDetails, accountDetailsSchema
+} from './accountDetailsSchema';
+export { type AccountReferrals, accountReferralsSchema } from './accountReferralsSchema';
+export { leaderboardSchema, type Leaderboard } from './leaderboardSchema';
