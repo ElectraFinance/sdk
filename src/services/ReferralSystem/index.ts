@@ -236,34 +236,26 @@ class ReferralSystem {
     );
   }
 
-  getLeaderboard = () => {
+  getLeaderboard = ({
+    page = 1
+  }: { page: number }) => {
     return fetchWithValidation(
-      `${this.apiUrl}/referral-api/referer/futures/leaderboard`,
+      `${this.apiUrl}/referral-api/referer/futures/leaderboard?page=${page}`,
       leaderboardSchema
     );
   }
 
   getAccountDetails = ({ address }: AddressType) => {
     return fetchWithValidation(
-      `${this.apiUrl}/referral-api/referer/futures/account-details`,
+      `${this.apiUrl}/referral-api/referer/futures/account-details?address=${address}`,
       accountDetailsSchema,
-      {
-        headers: {
-          address,
-        },
-      },
     );
   }
 
-  getAccountReferrals = ({ address }: AddressType) => {
+  getAccountReferrals = ({ address, page = 1 }: AddressType & { page: number }) => {
     return fetchWithValidation(
-      `${this.apiUrl}/referral-api/referer/futures/account-referrals`,
+      `${this.apiUrl}/referral-api/referer/futures/account-referrals?address=${address}&page=${page}`,
       accountReferralsSchema,
-      {
-        headers: {
-          address,
-        },
-      },
     );
   }
 }
