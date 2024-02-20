@@ -10,6 +10,9 @@ import {
   ratingSchema,
   claimInfoSchema,
   aggregatedHistorySchema,
+  leaderboardSchema,
+  accountDetailsSchema,
+  accountReferralsSchema,
 } from './schemas/index.js';
 import type { SupportedChainId } from '../../types.js';
 import contractsAddressesSchema from './schemas/contractsAddressesSchema.js';
@@ -32,6 +35,10 @@ type SubscribePayloadType = {
 type SignatureType = {
   signature: string
 };
+
+type AddressType = {
+  address: string
+}
 
 class ReferralSystem {
   private readonly apiUrl: string;
@@ -92,8 +99,8 @@ class ReferralSystem {
     );
 
   /**
-   * @param refererAddress Address without 0x prefix
-   */
+     * @param refererAddress Address without 0x prefix
+     */
   getMiniStats = (refererAddress: string) =>
     fetchWithValidation(
       `${this.apiUrl}/referer/view/mini-latest-stats`,
@@ -223,6 +230,37 @@ class ReferralSystem {
         },
       },
       errorSchema
+    );
+  }
+
+  getLeaderboard = () => {
+    return fetchWithValidation(
+      `${this.apiUrl}/referral-api/referer/futures/leaderboard`,
+      leaderboardSchema
+    );
+  }
+
+  getAccountDetails = ({ address }: AddressType) => {
+    return fetchWithValidation(
+      `${this.apiUrl}/referral-api/referer/futures/account-details`,
+      accountDetailsSchema,
+      {
+        headers: {
+          address,
+        },
+      },
+    );
+  }
+
+  getAccountReferrals = ({ address }: AddressType) => {
+    return fetchWithValidation(
+      `${this.apiUrl}/referral-api/referer/futures/account-referrals`,
+      accountReferralsSchema,
+      {
+        headers: {
+          address,
+        },
+      },
     );
   }
 }
