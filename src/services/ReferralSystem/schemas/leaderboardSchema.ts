@@ -13,3 +13,5 @@ export const leaderboardSchema = z.object({
   pagination_info: paginationInfoSchema,
   data: z.array(dataSchema),
 });
+
+export type Leaderboard = z.infer<typeof leaderboardSchema>;

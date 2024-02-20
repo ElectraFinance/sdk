@@ -64,6 +64,9 @@ class ReferralSystem {
     this.getContractsAddresses = this.getContractsAddresses.bind(this);
     this.getClaimInfo = this.getClaimInfo.bind(this);
     this.getAggregatedHistory = this.getAggregatedHistory.bind(this);
+    this.getLeaderboard = this.getLeaderboard.bind(this);
+    this.getAccountDetails = this.getAccountDetails.bind(this);
+    this.getAccountReferrals = this.getAccountReferrals.bind(this);
   }
 
   getLink = (refererAddress: string) =>

@@ -12,3 +12,5 @@ export const accountReferralsSchema = z.object({
   data: z.array(dataSchema),
   pagination_info: paginationInfoSchema
 })
+
+export type AccountReferrals = z.infer<typeof accountReferralsSchema>;

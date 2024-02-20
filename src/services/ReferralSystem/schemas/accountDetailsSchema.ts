@@ -16,3 +16,5 @@ export const accountDetailsSchema = z.object({
   network_trading_volume: z.number(),
   points_additional: z.array(pointsAdditionalSchema),
 });
+
+export type AccountDetails = z.infer<typeof accountDetailsSchema>;
