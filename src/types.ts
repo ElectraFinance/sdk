@@ -121,6 +121,7 @@ type BaseFuturesOrder = {
   expiration: number // uint64
   buySide: 0 | 1 // uint8, 1=buy, 0=sell
   stopPrice?: number | undefined // uint64
+  leverage?: string | undefined // string
   isPersonalSign: boolean // bool
   isFromDelegate?: boolean | undefined // bool
 }
