@@ -37,34 +37,6 @@ class ReferralSystem {
     this.getAccountReferrals = this.getAccountReferrals.bind(this);
   }
 
-  /* getRewardsMapping = (
-    referralAddress: string,
-    page = 1,
-    positionsPerPage = 10
-  ) =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/view/rewards-mapping?n_per_page=${positionsPerPage}&page=${page}`,
-      rewardsMappingSchema,
-      {
-        headers: {
-          referral: referralAddress,
-        },
-      }
-    ); */
-
-  /* claimRewards = (payload: ClaimRewardsPayload, signature: SignatureType) =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/governance/claim-rewards`,
-      rewardsClaimedSchema,
-      {
-        headers: {
-          'Content-type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({ payload, signature }),
-      }
-    ); */
-
   subscribeToReferral = (
     payload: SubscribePayloadType
   ) =>
@@ -80,26 +52,6 @@ class ReferralSystem {
       },
       errorSchema
     );
-
-  /* getContractsAddresses = () =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/view/contracts`,
-      contractsAddressesSchema,
-      undefined,
-      errorSchema
-    ); */
-
-  /* getClaimInfo = (refererAddress: string) =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/view/claim-info-with-stats?&suppress_error=1`,
-      claimInfoSchema,
-      {
-        headers: {
-          'referer-address': refererAddress,
-        },
-      },
-      errorSchema
-    ); */
 
   getAggregatedHistory = (
     refererAddress: string,
