@@ -2,7 +2,9 @@
 import type { BigNumber } from 'bignumber.js';
 import type subOrderStatuses from './constants/subOrderStatuses.js';
 import type positionStatuses from './constants/positionStatuses.js';
+import type { positionSides } from './constants/positionStatuses.js';
 import type { knownEnvs } from './config/schemas';
+import type { networkCodes } from './constants';
 
 export type DeepPartial<T> = T extends object ? {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -32,6 +34,7 @@ export type Balance = {
   allowance: string
 }
 
+export type PositionSide = typeof positionSides[number];
 export type PositionStatus = typeof positionStatuses[number];
 
 type StatesByInstrument = {
@@ -187,6 +190,8 @@ export enum SupportedChainId {
   // BROKEN = '0',
 }
 
+export type NetworkShortName = typeof networkCodes[number];
+
 const balanceTypes = ['exchange', 'wallet'] as const;
 
 export type Source = typeof balanceTypes[number];
@@ -248,6 +253,21 @@ export type FuturesTradeInfo = {
   buyPower: number
   sellPower: number
   minAmount: number
+}
+
+export type FuturesTradesStream = {
+  timestamp: number
+  sender: string
+  id: string
+  instrument: string
+  side: PositionSide
+  amount: string
+  leverage: string
+  price: string
+  txHash: string
+  network: NetworkShortName
+  realizedPnL: string | undefined
+  roi: string | undefined
 }
 
 export enum HistoryTransactionStatus {

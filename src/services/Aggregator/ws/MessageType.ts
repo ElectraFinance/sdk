@@ -10,6 +10,7 @@ const MessageType = {
   CFD_ADDRESS_UPDATE: 'auf',
   ISOLATED_CFD_ADDRESS_UPDATE: 'iauf',
   FUTURES_TRADE_INFO_UPDATE: 'fti',
+  FUTURES_TRADES_STREAM_UPDATE: 'ftsu',
   UNSUBSCRIPTION_DONE: 'ud',
 } as const;
 
