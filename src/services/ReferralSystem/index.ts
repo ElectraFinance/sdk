@@ -1,41 +1,19 @@
 import { fetchWithValidation } from 'simple-typed-fetch';
 import {
   errorSchema,
-  miniStatsSchema,
-  rewardsMappingSchema,
-  distinctAnalyticsSchema,
-  globalAnalyticsSchema,
-  rewardsClaimedSchema,
   linkSchema,
-  ratingSchema,
-  claimInfoSchema,
   aggregatedHistorySchema,
   leaderboardSchema,
   accountDetailsSchema,
   accountReferralsSchema,
 } from './schemas/index.js';
 import type { SupportedChainId } from '../../types.js';
-import contractsAddressesSchema from './schemas/contractsAddressesSchema.js';
 
 export type { AccountDetails, AccountReferrals, Leaderboard } from './schemas';
-
-type CreateLinkPayloadType = {
-  referer: string
-  link_option: number
-};
-
-type ClaimRewardsPayload = {
-  reward_recipient: string
-  chain_id: number
-};
 
 type SubscribePayloadType = {
   ref_target: string
   referral: string
-};
-
-type SignatureType = {
-  signature: string
 };
 
 type AddressType = {
@@ -52,73 +30,14 @@ class ReferralSystem {
   constructor(apiUrl: string) {
     this.apiUrl = apiUrl;
 
-    this.getLink = this.getLink.bind(this);
-    this.getDistinctAnalytics = this.getDistinctAnalytics.bind(this);
-    this.createReferralLink = this.createReferralLink.bind(this);
     this.subscribeToReferral = this.subscribeToReferral.bind(this);
-    this.getMyReferral = this.getMyReferral.bind(this);
-    this.getGlobalAnalytics = this.getGlobalAnalytics.bind(this);
-    this.getMiniStats = this.getMiniStats.bind(this);
-    this.getRewardsMapping = this.getRewardsMapping.bind(this);
-    this.claimRewards = this.claimRewards.bind(this);
-    this.getRating = this.getRating.bind(this);
-    this.getRating = this.getRating.bind(this);
-    this.getContractsAddresses = this.getContractsAddresses.bind(this);
-    this.getClaimInfo = this.getClaimInfo.bind(this);
     this.getAggregatedHistory = this.getAggregatedHistory.bind(this);
     this.getLeaderboard = this.getLeaderboard.bind(this);
     this.getAccountDetails = this.getAccountDetails.bind(this);
     this.getAccountReferrals = this.getAccountReferrals.bind(this);
   }
 
-  getLink = (refererAddress: string) =>
-    fetchWithValidation(`${this.apiUrl}/referer/view/link`, linkSchema, {
-      headers: {
-        'referer-address': refererAddress,
-      },
-    });
-
-  getMyReferral = (myWalletAddress: string) =>
-    fetchWithValidation(`${this.apiUrl}/referral/view/link`, linkSchema, {
-      headers: {
-        referral: myWalletAddress,
-      },
-    });
-
-  getDistinctAnalytics = (refererAddress: string) =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/view/distinct-analytics`,
-      distinctAnalyticsSchema,
-      {
-        headers: {
-          'referer-address': refererAddress,
-        },
-      },
-      errorSchema
-    );
-
-  getGlobalAnalytics = () =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/view/global-analytics`,
-      globalAnalyticsSchema
-    );
-
-  /**
-     * @param refererAddress Address without 0x prefix
-     */
-  getMiniStats = (refererAddress: string) =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/view/mini-latest-stats`,
-      miniStatsSchema,
-      {
-        headers: {
-          'referer-address': refererAddress,
-        },
-      },
-      errorSchema
-    );
-
-  getRewardsMapping = (
+  /* getRewardsMapping = (
     referralAddress: string,
     page = 1,
     positionsPerPage = 10
@@ -131,9 +50,9 @@ class ReferralSystem {
           referral: referralAddress,
         },
       }
-    );
+    ); */
 
-  claimRewards = (payload: ClaimRewardsPayload, signature: SignatureType) =>
+  /* claimRewards = (payload: ClaimRewardsPayload, signature: SignatureType) =>
     fetchWithValidation(
       `${this.apiUrl}/referer/governance/claim-rewards`,
       rewardsClaimedSchema,
@@ -144,18 +63,7 @@ class ReferralSystem {
         method: 'POST',
         body: JSON.stringify({ payload, signature }),
       }
-    );
-
-  createReferralLink = (
-    payload: CreateLinkPayloadType
-  ) =>
-    fetchWithValidation(`${this.apiUrl}/referer/create2`, linkSchema, {
-      headers: {
-        'Content-type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    ); */
 
   subscribeToReferral = (
     payload: SubscribePayloadType
@@ -173,25 +81,15 @@ class ReferralSystem {
       errorSchema
     );
 
-  getRating = (refererAddress: string | undefined, chainId: SupportedChainId) =>
-    fetchWithValidation(
-      `${this.apiUrl}/referer/ve/rating-table-leaderboard?chain_id=${chainId}`,
-      ratingSchema,
-      {
-        headers: refererAddress !== undefined ? { 'referer-address': refererAddress } : {},
-      },
-      errorSchema
-    );
-
-  getContractsAddresses = () =>
+  /* getContractsAddresses = () =>
     fetchWithValidation(
       `${this.apiUrl}/referer/view/contracts`,
       contractsAddressesSchema,
       undefined,
       errorSchema
-    );
+    ); */
 
-  getClaimInfo = (refererAddress: string) =>
+  /* getClaimInfo = (refererAddress: string) =>
     fetchWithValidation(
       `${this.apiUrl}/referer/view/claim-info-with-stats?&suppress_error=1`,
       claimInfoSchema,
@@ -201,7 +99,7 @@ class ReferralSystem {
         },
       },
       errorSchema
-    );
+    ); */
 
   getAggregatedHistory = (
     refererAddress: string,
