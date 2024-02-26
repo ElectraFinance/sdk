@@ -5,7 +5,10 @@ export const topPairsSchema = z.object({
   topPairs: z.array(
     z.object({
       assetPair: z.string(),
-      periodVolume: z.object({ volume24h: z.number(), volume7d: z.number() }),
+      statisticsOverview: z.object({
+        volume24h: z.number(),
+        volume7d: z.number()
+      })
     })
-  ),
+  )
 });
