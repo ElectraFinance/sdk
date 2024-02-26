@@ -96,7 +96,7 @@ export const fullOrderSchema = z.object({
   t: z.number(), // update time
   lv: z.number().optional(), // leverage
   roi: z.number().optional(), // ROI%
-  ep: z.number().optional(), // exit price
+  ep: z.number().optional(), // entry price
   c: subOrderSchema.array(), // sub orders (content)
 
   // CFD only
@@ -129,7 +129,7 @@ export const fullOrderSchema = z.object({
   realizedPnL: o.rpnl,
   leverage: o.lv,
   roi: o.roi,
-  exitPrice: o.ep,
+  entryPrice: o.ep,
   subOrders: getTransformedSubOrders(o.c),
 }));
 
