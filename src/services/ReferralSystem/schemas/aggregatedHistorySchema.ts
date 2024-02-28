@@ -3,6 +3,7 @@ import { z } from 'zod';
 const aggregatedHistorySchema = z.object({
   data: z.array(z.object({
     history_type: z.string(),
+    bonus_description: z.string().nullable(),
     chain_type: z.string(),
     chain_comp: z.string(),
     chain_id: z.number(),
