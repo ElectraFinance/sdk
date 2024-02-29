@@ -6,6 +6,7 @@ import {
   leaderboardSchema,
   accountDetailsSchema,
   accountReferralsSchema,
+  subscribeToReferralErrorSchema,
 } from './schemas/index.js';
 import type { SupportedChainId } from '../../types.js';
 
@@ -50,7 +51,7 @@ class ReferralSystem {
         method: 'POST',
         body: JSON.stringify(payload),
       },
-      errorSchema
+      subscribeToReferralErrorSchema
     );
 
   getAggregatedHistory = (
