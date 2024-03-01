@@ -91,9 +91,6 @@
         },
         "priceFeed": {
           "all": "/price-feed"
-        },
-        "indexer": {
-          "http": "/orion-indexer/"
         }
       }
     },
@@ -109,9 +106,6 @@
         },
         "priceFeed": {
           "all": "/price-feed"
-        },
-        "indexer": {
-          "http": "/orion-indexer/"
         }
       }
     }
@@ -304,9 +298,6 @@
         },
         "priceFeed": {
           "all": "/price-feed"
-        },
-        "indexer": {
-          "http": "/orion-indexer/"
         }
       }
     },
@@ -322,9 +313,6 @@
         },
         "priceFeed": {
           "all": "/price-feed"
-        },
-        "indexer": {
-          "http": "/orion-indexer/"
         }
       }
     }
