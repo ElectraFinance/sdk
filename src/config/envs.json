@@ -284,6 +284,36 @@
             "all": "/price-feed"
           }
         }
+      },
+      "2525": {
+        "api": "https://cfd-inevm.electra.finance/",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "59144": {
+        "api": "https://cfd-linea.electra.finance/",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
       }
     }
   },
