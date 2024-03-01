@@ -115,5 +115,23 @@
     "baseCurrencyName": "DRIP",
     "rpc": "testnet.1d.rip",
     "explorer": "https://explorer-testnet.1d.rip/"
+  },
+  "2525": {
+    "chainId": "2525",
+    "label": "inEVM",
+    "shortName": "inEVM",
+    "code": "inevm",
+    "baseCurrencyName": "INJ",
+    "rpc": "https://inevm.calderachain.xyz/http/",
+    "explorer": "https://explorer.injective.network/"
+  },
+  "59144": {
+    "chainId": "59144",
+    "label": "Linea",
+    "shortName": "Linea",
+    "code": "linea",
+    "baseCurrencyName": "ETH",
+    "rpc": "https://rpc.linea.build/",
+    "explorer": "https://lineascan.build/"
   }
 }
