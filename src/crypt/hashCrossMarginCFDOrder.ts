@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import type { CrossMarginCFDOrder } from '../types.js';
 
-const hashCrossMarginCFDOrder = (order: CrossMarginCFDOrder) => ethers.utils.solidityKeccak256(
+const hashCrossMarginCFDOrder = (order: CrossMarginCFDOrder) => ethers.solidityPackedKeccak256(
   [
     'uint8',
     'address',

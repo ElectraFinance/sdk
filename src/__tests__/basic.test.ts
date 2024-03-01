@@ -188,7 +188,7 @@ describe('Electra', () => {
     expect(unit.aggregator.ws.api).toBe(`ws://localhost:${server1.port}/v1`);
     expect(unit.blockchainService.api).toBe(blockchainServiceAPI);
     expect(unit.priceFeed.api).toBe(electraPriceFeedAPI + '/price-feed');
-    expect(unit.provider.connection.url).toBe('https://cloudflare-eth.com/');
+    expect(unit.provider._getConnection().url).toBe('https://cloudflare-eth.com/');
 
     const info = await simpleFetch(unit.blockchainService.getInfo)();
     expect(info).toBeDefined();
@@ -237,7 +237,7 @@ describe('Electra', () => {
     });
 
     const bscUnit = electra.units[SupportedChainId.BSC_TESTNET]
-    expect(bscUnit?.provider.connection.url).toBe('https://data-seed-prebsc-1-s1.binance.org:8545/');
+    expect(bscUnit?.provider._getConnection().url).toBe('https://data-seed-prebsc-1-s1.binance.org:8545/');
   });
 
   test('Electra Responses', async () => {

@@ -21,7 +21,7 @@ export default class Unit {
 
   public readonly chainId: SupportedChainId;
 
-  public readonly provider: ethers.providers.StaticJsonRpcProvider;
+  public readonly provider: ethers.JsonRpcProvider;
 
   public readonly blockchainService: BlockchainService;
 
@@ -69,7 +69,7 @@ export default class Unit {
     this.baseCurrencyName = chainInfo.baseCurrencyName;
     const intNetwork = parseInt(this.chainId, 10);
     if (Number.isNaN(intNetwork)) throw new Error('Invalid chainId (not a number)' + this.chainId);
-    this.provider = new ethers.providers.StaticJsonRpcProvider(this.config.nodeJsonRpc, intNetwork);
+    this.provider = new ethers.JsonRpcProvider(this.config.nodeJsonRpc, intNetwork);
     this.provider.pollingInterval = 1000;
 
     this.blockchainService = new BlockchainService(
@@ -157,10 +157,10 @@ export default class Unit {
     if (symbolPrice === undefined) throw new Error(`Price for ${symbol} not found`);
 
     const gasPriceWei = await simpleFetch(this.blockchainService.getGasPriceWei)();
-    const gasPriceGwei = ethers.utils.formatUnits(gasPriceWei, 'gwei');
+    const gasPriceGwei = ethers.formatUnits(gasPriceWei, 'gwei');
 
     const pricesWithQuoteAsset = await simpleFetch(this.blockchainService.getPricesWithQuoteAsset)();
-    const baseCurrencyPriceInQuoteAsset = pricesWithQuoteAsset.prices[ethers.constants.AddressZero];
+    const baseCurrencyPriceInQuoteAsset = pricesWithQuoteAsset.prices[ethers.ZeroAddress];
     if (baseCurrencyPriceInQuoteAsset === undefined) throw new Error(`Base currency ${this.baseCurrencyName} price not found. Available: ${Object.keys(pricesWithQuoteAsset).join(', ')}`);
     const feeAssetAddress = assetToAddress[feeAssetName];
     if (feeAssetAddress === undefined) throw new Error(`Fee asset ${feeAssetName} address not found`);

@@ -6,12 +6,12 @@ import {
   pingPongMessageSchema, initMessageSchema,
   errorSchema, orderBookSchema,
   assetPairsConfigSchema, addressUpdateSchema,
-  isolatedAddressUpdateSchema
+  isolatedAddressUpdateSchema, futuresTradesStreamSchema
 } from './schemas/index.js';
 import UnsubscriptionType from './UnsubscriptionType.js';
 import type {
   AssetPairUpdate, OrderbookItem, Balance, CFDBalance,
-  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance,
+  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance, FuturesTradesStream,
 } from '../../../types.js';
 import unsubscriptionDoneSchema from './schemas/unsubscriptionDoneSchema.js';
 import assetPairConfigSchema from './schemas/assetPairConfigSchema.js';
@@ -42,6 +42,7 @@ const messageSchema = z.union([
   assetPairConfigSchema,
   orderBookSchema,
   futuresTradeInfoSchema,
+  futuresTradesStreamSchema,
   errorSchema,
   unsubscriptionDoneSchema,
 ]);
@@ -86,6 +87,10 @@ type FuturesTradeInfoSubscription = {
   payload: FuturesTradeInfoPayload
   callback: (futuresTradeInfo: FuturesTradeInfo) => void
   errorCb?: (message: string) => void
+}
+
+type FuturesTradesStreamSubscription = {
+  callback: (futuresTrades: FuturesTradesStream) => void
 }
 
 type IsolatedAddressUpdateUpdate = {
@@ -187,6 +192,7 @@ type Subscription = {
   [SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]: PairsConfigSubscription
   [SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]: PairConfigSubscription
   [SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]: FuturesTradeInfoSubscription
+  [SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]: FuturesTradesStreamSubscription
 }
 
 const exclusiveSubscriptions = [
@@ -203,11 +209,15 @@ const nonExistentMessageRegex = /Could not cancel nonexistent subscription: (.*)
 //   resolve: () => void
 // };
 
-const FUTURES_SUFFIX = 'USDF';
+const FUTURES_SUFFIX = 'USD';
 
 export type AggregatorWsEvents = {
   open: WebsocketTransportEvents['open']
   close: WebsocketTransportEvents['close']
+}
+
+function isAllUpperCase(str: string) {
+  return str === str.toUpperCase();
 }
 
 class AggregatorWS {
@@ -276,6 +286,7 @@ class AggregatorWS {
   }
 
   private hearbeatIntervalId: NodeJS.Timer | undefined;
+
   private setupHeartbeat() {
     const heartbeat = () => {
       if (this.isAlive) {
@@ -314,7 +325,7 @@ class AggregatorWS {
       if ('payload' in subscription) {
         if (typeof subscription.payload === 'string') {
           subRequest['S'] = subscription.payload;
-        } else { // SwapInfoSubscriptionPayload | FuturesTradeInfoPayload
+        } else { // SwapInfoSubscriptionPayload | FuturesTradeInfoPayload | FuturesTradesStreamSubscription
           subRequest['S'] = {
             d: id,
             ...subscription.payload,
@@ -399,9 +410,7 @@ class AggregatorWS {
     });
 
     const isOrderBooksSubscription = (subId: string) => {
-      const isSpotPairName = subId.includes('-') && subId.split('-').length === 2;
-      const isFuturesPairName = subId.endsWith(FUTURES_SUFFIX);
-      return isSpotPairName || isFuturesPairName;
+      return subId.endsWith(FUTURES_SUFFIX) && !subId.includes('-') && isAllUpperCase(subId);
     }
 
     if (newestSubId.includes('0x')) { // is wallet address (ADDRESS_UPDATE)
@@ -426,6 +435,7 @@ class AggregatorWS {
       // is swap info subscription (contains hyphen)
       delete this.subscriptions[SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]?.[newestSubId];
       delete this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[newestSubId];
+      delete this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.[newestSubId];
       // !!! swap info subscription is uuid that contains hyphen
     } else if (isOrderBooksSubscription(newestSubId)) { // is pair name(AGGREGATED_ORDER_BOOK_UPDATE)
       const aobSubscriptions = this.subscriptions[SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE];
@@ -575,6 +585,24 @@ class AggregatorWS {
             sellPower: json.spw,
             minAmount: json.ma,
           });
+          break;
+        case MessageType.FUTURES_TRADES_STREAM_UPDATE:
+          this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.[json.id]?.callback(
+            {
+              timestamp: json._,
+              sender: json.S,
+              id: json.id,
+              instrument: json.i,
+              side: json.s,
+              amount: json.a,
+              leverage: json.l,
+              price: json.p,
+              txHash: json.h,
+              network: json.n,
+              realizedPnL: json.rpnl,
+              roi: json.r,
+            }
+          );
           break;
         case MessageType.INITIALIZATION:
           this.onInit?.();

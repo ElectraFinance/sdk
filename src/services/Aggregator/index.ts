@@ -2,7 +2,7 @@ import { z } from 'zod';
 import exchangeInfoSchema from './schemas/exchangeInfoSchema.js';
 import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
-import { AggregatorWS } from './ws/index.js';
+import { AggregatorWS } from './ws';
 import type {
   BasicAuthCredentials, IsolatedCFDOrder, SignedCancelOrderRequest, SignedCrossMarginCFDOrder, SignedOrder
 } from '../../types.js';
@@ -56,13 +56,13 @@ class Aggregator {
   }
 
   getOrder = (orderId: string, owner?: string) => {
-    if (!ethers.utils.isHexString(orderId)) {
+    if (!ethers.isHexString(orderId)) {
       throw new Error(`Invalid order id: ${orderId}. Must be a hex string`);
     }
     const url = new URL(`${this.apiUrl}/api/v1/order`);
     url.searchParams.append('orderId', orderId);
     if (owner !== undefined) {
-      if (!ethers.utils.isAddress(owner)) {
+      if (!ethers.isAddress(owner)) {
         throw new Error(`Invalid owner address: ${owner}`);
       }
       url.searchParams.append('owner', owner);
@@ -272,6 +272,7 @@ class Aggregator {
     );
   };
 }
+
 export * as schemas from './schemas/index.js';
 export * as ws from './ws/index.js';
 export { Aggregator };

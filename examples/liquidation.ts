@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import { ethers } from 'ethers';
 import { simpleFetch } from 'simple-typed-fetch';
-import { CrossMarginCFD__factory, ERC20__factory } from '@electra.finance/contracts/lib/ethers-v5/index.js';
+import { CrossMarginCFD__factory, ERC20__factory } from '@electra.finance/contracts/lib/ethers-v6/index.js';
 
 import type { FuturesTradeInfo } from '../src/index.js';
 import { Electra, SupportedChainId, crypt } from '../src/index.js';
@@ -393,10 +393,10 @@ const testLiquidation = async (instrumentName: string) => {
   const allowance = await collateralContract.allowance(walletAddress, address);
 
   const depositAmount = DEPOSIT_AMOUNT + (depositsCount * 10);
-  const bnAmount = ethers.utils.parseUnits(depositAmount.toString(), decimals);
+  const bnAmount = ethers.parseUnits(depositAmount.toString(), decimals);
   if (allowance.lt(bnAmount)) {
     console.log(`${instrumentName}: Approving ${depositAmount} ${collateralAddress} to ${address}`);
-    await collateralContract.approve(address, ethers.constants.MaxUint256); // Sometimes before approve you need to call approve(0)
+    await collateralContract.approve(address, ethers.MaxUint256); // Sometimes before approve you need to call approve(0)
     await delay(2000);
   }
 
@@ -450,7 +450,7 @@ const testLiquidation = async (instrumentName: string) => {
       console.log(`${instrumentName}: Depositing ${dpAmount} ${collateralAddress} to ${address}`);
 
       await crossMarginCFDContract.depositAsset(
-        ethers.utils.parseUnits(
+        ethers.parseUnits(
           dpAmount.toString(),
           decimals
         )

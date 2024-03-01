@@ -52,6 +52,8 @@ export const orderUpdateSchema = z.object({
   t: z.number(), // update time
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
+  lv: z.number().optional(), // leverage
+  roi: z.number().optional(), // ROI%
   rpnl: z.number().optional(), // realized PnL
   sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
   c: subOrderSchema.array(), // sub orders (content)
@@ -67,6 +69,8 @@ export const orderUpdateSchema = z.object({
     liquidated: o.l,
     executionType: o.E,
     triggerCondition: o.C,
+    leverage: o.lv,
+    roi: o.roi,
     realizedPnL: o.rpnl,
     sltp: o.sltp,
     subOrders: getTransformedSubOrders(o.c),
@@ -90,6 +94,9 @@ export const fullOrderSchema = z.object({
   ro: z.boolean().optional(), // reversed order
   T: z.number(), // creation time / unix timestamp
   t: z.number(), // update time
+  lv: z.number().optional(), // leverage
+  roi: z.number().optional(), // ROI%
+  ep: z.number().optional(), // entry price
   c: subOrderSchema.array(), // sub orders (content)
 
   // CFD only
@@ -120,6 +127,9 @@ export const fullOrderSchema = z.object({
   stopPrice: o.L,
   liquidated: o.l,
   realizedPnL: o.rpnl,
+  leverage: o.lv,
+  roi: o.roi,
+  entryPrice: o.ep,
   subOrders: getTransformedSubOrders(o.c),
 }));
 

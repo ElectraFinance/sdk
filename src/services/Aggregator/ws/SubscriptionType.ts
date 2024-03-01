@@ -7,6 +7,7 @@ const SubscriptionType = {
   CFD_ADDRESS_UPDATES_SUBSCRIBE: 'ausf',
   ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE: 'iausf',
   FUTURES_TRADE_INFO_SUBSCRIBE: 'fts',
+  FUTURES_TRADES_STREAM_SUBSCRIBE: 'ftss'
 } as const;
 
 export default SubscriptionType;
