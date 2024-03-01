@@ -4,7 +4,7 @@
     "referralAPI": "https://electra.finance/referral-api",
     "networks": {
       "1": {
-        "api": "https://cfd-ethelectra.finance",
+        "api": "https://cfd-eth.electra.finance",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -76,6 +76,42 @@
           "priceFeed": {
             "all": "/price-feed"
           }
+        }
+      }
+    },
+    "2525": {
+      "api": "https://cfd-inevm.electra.finance/",
+      "services": {
+        "aggregator": {
+          "http": "/backend",
+          "ws": "/v1"
+        },
+        "blockchain": {
+          "http": ""
+        },
+        "priceFeed": {
+          "all": "/price-feed"
+        },
+        "indexer": {
+          "http": "/orion-indexer/"
+        }
+      }
+    },
+    "59144": {
+      "api": "https://cfd-linea.electra.finance/",
+      "services": {
+        "aggregator": {
+          "http": "/backend",
+          "ws": "/v1"
+        },
+        "blockchain": {
+          "http": ""
+        },
+        "priceFeed": {
+          "all": "/price-feed"
+        },
+        "indexer": {
+          "http": "/orion-indexer/"
         }
       }
     }
