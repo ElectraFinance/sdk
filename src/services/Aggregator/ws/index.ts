@@ -594,6 +594,7 @@ class AggregatorWS {
               id: json.id,
               instrument: json.i,
               side: json.s,
+              positionSide: json.ps,
               amount: json.a,
               leverage: json.l,
               price: json.p,

@@ -15,4 +15,6 @@ export const productionChains = [
   SupportedChainId.FANTOM_OPERA,
   SupportedChainId.POLYGON,
   SupportedChainId.OKC,
+  SupportedChainId.INEVM,
+  SupportedChainId.LINEA,
 ];
