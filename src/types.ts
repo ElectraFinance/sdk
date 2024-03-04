@@ -4,7 +4,7 @@ import type subOrderStatuses from './constants/subOrderStatuses.js';
 import type positionStatuses from './constants/positionStatuses.js';
 import type { positionSides } from './constants/positionStatuses.js';
 import type { knownEnvs } from './config/schemas';
-import type { networkCodes } from './constants';
+import type { orderSides, networkCodes } from './constants';
 
 export type DeepPartial<T> = T extends object ? {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -34,6 +34,7 @@ export type Balance = {
   allowance: string
 }
 
+export type OrderSide = typeof orderSides[number];
 export type PositionSide = typeof positionSides[number];
 export type PositionStatus = typeof positionStatuses[number];
 
@@ -262,7 +263,8 @@ export type FuturesTradesStream = {
   sender: string
   id: string
   instrument: string
-  side: PositionSide
+  side: OrderSide
+  positionSide: PositionSide
   amount: string
   leverage: string
   price: string
