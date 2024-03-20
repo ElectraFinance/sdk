@@ -12,7 +12,6 @@ const infoSchema = z.object({
   chainName: z.string(),
   exchangeContractAddress: z.string(),
   oracleContractAddress: z.string(),
-  electraConverterAddress: z.string(),
   matcherAddress: z.string(),
   orderFeePercent: z.number(),
   assetToAddress: z.record(z.string()).transform(makePartial),
