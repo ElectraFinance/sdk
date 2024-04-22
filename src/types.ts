@@ -174,6 +174,7 @@ export enum SupportedChainId {
   FANTOM_OPERA = '250',
   POLYGON = '137',
   OKC = '66',
+  OPBNB = '204',
   INEVM = '2525',
   LINEA = '59144',
   AVAX = '43114',
