@@ -17,4 +17,6 @@ export const productionChains = [
   SupportedChainId.OKC,
   SupportedChainId.INEVM,
   SupportedChainId.LINEA,
+  SupportedChainId.AVAX,
+  SupportedChainId.BASE,
 ];

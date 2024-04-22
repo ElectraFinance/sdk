@@ -116,6 +116,15 @@
     "rpc": "testnet.1d.rip",
     "explorer": "https://explorer-testnet.1d.rip/"
   },
+  "204": {
+    "chainId": "204",
+    "explorer": "http://opbnbscan.com/",
+    "label": "opBNB Chain",
+    "shortName": "opBNB",
+    "code": "opbnb",
+    "rpc": "https://opbnb-mainnet-rpc.bnbchain.org",
+    "baseCurrencyName": "BNB"
+  },
   "2525": {
     "chainId": "2525",
     "label": "inEVM",
@@ -133,5 +142,23 @@
     "baseCurrencyName": "ETH",
     "rpc": "https://rpc.linea.build/",
     "explorer": "https://lineascan.build/"
+  },
+  "43114": {
+    "chainId": "43114",
+    "label": "Avalanche Network",
+    "shortName": "Avax",
+    "code": "avax",
+    "baseCurrencyName": "AVAX",
+    "rpc": "https://api.avax.network/ext/bc/C/rpc/",
+    "explorer": "https://snowtrace.io/"
+  },
+  "8453": {
+    "chainId": "8453",
+    "label": "Base",
+    "shortName": "BASE",
+    "code": "base",
+    "baseCurrencyName": "ETH",
+    "rpc": "https://mainnet.base.org/",
+    "explorer": "https://basescan.org/"
   }
 }
