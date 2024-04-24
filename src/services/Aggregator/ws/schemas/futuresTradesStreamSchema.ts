@@ -19,5 +19,6 @@ export const futuresTradesStreamSchema = z.object({
   h: z.string(), // transaction hash
   n: z.enum(networkCodes), // network
   rpnl: z.string().optional(), // realized PnL, optional
+  rfr: z.string().optional(), // realized FR, optional
   r: z.string().optional(), // ROI in %, optional
 });
