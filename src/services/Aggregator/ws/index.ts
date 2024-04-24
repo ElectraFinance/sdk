@@ -601,6 +601,7 @@ class AggregatorWS {
               txHash: json.h,
               network: json.n,
               realizedPnL: json.rpnl,
+              realizedFR: json.rfr,
               roi: json.r,
             }
           );

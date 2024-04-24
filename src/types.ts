@@ -274,6 +274,7 @@ export type FuturesTradesStream = {
   txHash: string
   network: NetworkShortName
   realizedPnL: string | undefined
+  realizedFR: string | undefined
   roi: string | undefined
 }
 
