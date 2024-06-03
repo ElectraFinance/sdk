@@ -457,6 +457,7 @@ class AggregatorWS {
     subscription: keyof typeof UnsubscriptionType | string,
     details?: string,
   ) {
+    console.log('=== unsubscribe', subscription, details);
     const newestSubId = this.getNewestSubscriptionId(subscription);
     this.send({
       T: UNSUBSCRIBE,
