@@ -385,7 +385,8 @@ class AggregatorWS {
 
         console.log('=== SDK ===', {
           subKey,
-          ausf: JSON.stringify(this.subscriptions.ausf),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          subscriptions: JSON.parse(JSON.stringify(this.subscriptions)),
           prevSubscriptionId,
         });
       } else {
@@ -415,7 +416,6 @@ class AggregatorWS {
       this.logger?.(
         `Sending subscription request: ${JSON.stringify(subRequest)}`,
       );
-      console.log('--- subRequest ---', JSON.stringify(subRequest));
       this.send(subRequest);
     };
 
