@@ -385,7 +385,7 @@ class AggregatorWS {
 
         console.log('=== SDK ===', {
           subKey,
-          subscriptions: this.subscriptions,
+          subscriptions: JSON.stringify(this.subscriptions),
           prevSubscriptionId,
         });
       } else {
