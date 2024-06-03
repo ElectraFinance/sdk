@@ -3,25 +3,46 @@ import { validate as uuidValidate, v4 as uuidv4 } from 'uuid';
 import MessageType from './MessageType.js';
 import SubscriptionType from './SubscriptionType.js';
 import {
-  pingPongMessageSchema, initMessageSchema,
-  errorSchema, orderBookSchema,
-  assetPairsConfigSchema, addressUpdateSchema,
-  isolatedAddressUpdateSchema, futuresTradesStreamSchema
+  pingPongMessageSchema,
+  initMessageSchema,
+  errorSchema,
+  orderBookSchema,
+  assetPairsConfigSchema,
+  addressUpdateSchema,
+  isolatedAddressUpdateSchema,
+  futuresTradesStreamSchema,
 } from './schemas/index.js';
 import UnsubscriptionType from './UnsubscriptionType.js';
 import type {
-  AssetPairUpdate, OrderbookItem, Balance, CFDBalance,
-  FuturesTradeInfo, Json, BasicAuthCredentials, IsolatedCFDBalance, FuturesTradesStream,
+  AssetPairUpdate,
+  OrderbookItem,
+  Balance,
+  CFDBalance,
+  FuturesTradeInfo,
+  Json,
+  BasicAuthCredentials,
+  IsolatedCFDBalance,
+  FuturesTradesStream,
 } from '../../../types.js';
 import unsubscriptionDoneSchema from './schemas/unsubscriptionDoneSchema.js';
 import assetPairConfigSchema from './schemas/assetPairConfigSchema.js';
-import type { fullOrderSchema, orderUpdateSchema } from './schemas/addressUpdateSchema.js';
-import type { isolatedFullOrderSchema, isolatedOrderUpdateSchema } from './schemas/isolatedAddressUpdateSchema.js';
+import type {
+  fullOrderSchema,
+  orderUpdateSchema,
+} from './schemas/addressUpdateSchema.js';
+import type {
+  isolatedFullOrderSchema,
+  isolatedOrderUpdateSchema,
+} from './schemas/isolatedAddressUpdateSchema.js';
 import cfdAddressUpdateSchema from './schemas/cfdAddressUpdateSchema.js';
 import isolatedCFDAddressUpdateSchema from './schemas/isolatedCFDAddressUpdateSchema.js';
 import futuresTradeInfoSchema from './schemas/futuresTradeInfoSchema.js';
 import { objectKeys } from '../../../utils/objectKeys.js';
-import { WebsocketTransport, type BufferLike, type WebsocketTransportEvents } from '../../WebsocketTransport.js';
+import {
+  WebsocketTransport,
+  type BufferLike,
+  type WebsocketTransportEvents,
+} from '../../WebsocketTransport.js';
 import { createNanoEvents, type Emitter } from 'nanoevents';
 // import assertError from '../../../utils/assertError.js';
 // import errorSchema from './schemas/errorSchema';
@@ -48,161 +69,165 @@ const messageSchema = z.union([
 ]);
 
 type FuturesTradeInfoPayload = {
-  s: string // wallet address
-  i: string // pair
-  a: number // amount
-  l?: number // leverage
-  p?: number // price
-  sl?: number // slippage
-  f?: number // blockchain fee (USDF)
-  F?: number // volume fee
-}
+  s: string; // wallet address
+  i: string; // pair
+  a: number; // amount
+  l?: number; // leverage
+  p?: number; // price
+  sl?: number; // slippage
+  f?: number; // blockchain fee (USDF)
+  F?: number; // volume fee
+};
 
 type PairsConfigSubscription = {
-  callback: ({ kind, data }: {
-    kind: 'initial' | 'update'
-    data: Partial<Record<string, AssetPairUpdate>>
-  }) => void
-}
+  callback: ({
+    kind,
+    data,
+  }: {
+    kind: 'initial' | 'update';
+    data: Partial<Record<string, AssetPairUpdate>>;
+  }) => void;
+};
 
 type PairConfigSubscription = {
-  payload: string
-  callback: ({ kind, data }: {
-    kind: 'initial' | 'update'
-    data: AssetPairUpdate
-  }) => void
-}
+  payload: string;
+  callback: ({
+    kind,
+    data,
+  }: {
+    kind: 'initial' | 'update';
+    data: AssetPairUpdate;
+  }) => void;
+};
 
 type AggregatedOrderbookSubscription = {
-  payload: string
+  payload: string;
   callback: (
     asks: OrderbookItem[],
     bids: OrderbookItem[],
-    pair: string
-  ) => void
-  errorCb?: (message: string) => void
-}
+    pair: string,
+  ) => void;
+  errorCb?: (message: string) => void;
+};
 
 type FuturesTradeInfoSubscription = {
-  payload: FuturesTradeInfoPayload
-  callback: (futuresTradeInfo: FuturesTradeInfo) => void
-  errorCb?: (message: string) => void
-}
+  payload: FuturesTradeInfoPayload;
+  callback: (futuresTradeInfo: FuturesTradeInfo) => void;
+  errorCb?: (message: string) => void;
+};
 
 type FuturesTradesStreamSubscription = {
-  callback: (futuresTrades: FuturesTradesStream) => void
-}
+  callback: (futuresTrades: FuturesTradesStream) => void;
+};
 
 type IsolatedAddressUpdateUpdate = {
-  kind: 'update'
-  balances: Partial<
-    Record<
-      string,
-      Balance
-    >
-  >
-  order?: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined
-}
+  kind: 'update';
+  balances: Partial<Record<string, Balance>>;
+  order?:
+    | z.infer<typeof isolatedOrderUpdateSchema>
+    | z.infer<typeof isolatedFullOrderSchema>
+    | undefined;
+};
 
 type AddressUpdateUpdate = {
-  kind: 'update'
-  balances: Partial<
-    Record<
-      string,
-      Balance
-    >
-  >
-  order?: z.infer<typeof orderUpdateSchema> | z.infer<typeof fullOrderSchema> | undefined
-}
+  kind: 'update';
+  balances: Partial<Record<string, Balance>>;
+  order?:
+    | z.infer<typeof orderUpdateSchema>
+    | z.infer<typeof fullOrderSchema>
+    | undefined;
+};
 
 type IsolatedAddressUpdateInitial = {
-  kind: 'initial'
-  balances: Partial<
-    Record<
-      string,
-      Balance
-    >
-  >
-  orders?: Array<z.infer<typeof isolatedFullOrderSchema>> | undefined // The field is not defined if the user has no orders
-}
+  kind: 'initial';
+  balances: Partial<Record<string, Balance>>;
+  orders?: Array<z.infer<typeof isolatedFullOrderSchema>> | undefined; // The field is not defined if the user has no orders
+};
 
 type AddressUpdateInitial = {
-  kind: 'initial'
-  balances: Partial<
-    Record<
-      string,
-      Balance
-    >
-  >
-  orders?: Array<z.infer<typeof fullOrderSchema>> | undefined // The field is not defined if the user has no orders
-}
+  kind: 'initial';
+  balances: Partial<Record<string, Balance>>;
+  orders?: Array<z.infer<typeof fullOrderSchema>> | undefined; // The field is not defined if the user has no orders
+};
 
 type IsolatedCFDAddressUpdateUpdate = {
-  kind: 'update'
-  balances?: IsolatedCFDBalance[] | undefined
-  order?: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined
-}
+  kind: 'update';
+  balances?: IsolatedCFDBalance[] | undefined;
+  order?:
+    | z.infer<typeof isolatedOrderUpdateSchema>
+    | z.infer<typeof isolatedFullOrderSchema>
+    | undefined;
+};
 
 type CfdAddressUpdateUpdate = {
-  kind: 'update'
-  balance?: CFDBalance | undefined
-  order?: z.infer<typeof orderUpdateSchema> | z.infer<typeof fullOrderSchema> | undefined
-}
+  kind: 'update';
+  balance?: CFDBalance | undefined;
+  order?:
+    | z.infer<typeof orderUpdateSchema>
+    | z.infer<typeof fullOrderSchema>
+    | undefined;
+};
 
 type IsolatedCFDAddressUpdateInitial = {
-  kind: 'initial'
-  balances: IsolatedCFDBalance[]
-  orders?: Array<z.infer<typeof isolatedFullOrderSchema>> | undefined // The field is not defined if the user has no orders
-}
+  kind: 'initial';
+  balances: IsolatedCFDBalance[];
+  orders?: Array<z.infer<typeof isolatedFullOrderSchema>> | undefined; // The field is not defined if the user has no orders
+};
 
 type CfdAddressUpdateInitial = {
-  kind: 'initial'
-  balance: CFDBalance
-  orders?: Array<z.infer<typeof fullOrderSchema>> | undefined // The field is not defined if the user has no orders
-}
+  kind: 'initial';
+  balance: CFDBalance;
+  orders?: Array<z.infer<typeof fullOrderSchema>> | undefined; // The field is not defined if the user has no orders
+};
 
 type IsolatedAddressUpdateSubscription = {
-  payload: string
-  callback: (data: IsolatedAddressUpdateUpdate | IsolatedAddressUpdateInitial) => void
-  errorCb?: (message: string) => void
-}
+  payload: string;
+  callback: (
+    data: IsolatedAddressUpdateUpdate | IsolatedAddressUpdateInitial,
+  ) => void;
+  errorCb?: (message: string) => void;
+};
 
 type AddressUpdateSubscription = {
-  payload: string
-  callback: (data: AddressUpdateUpdate | AddressUpdateInitial) => void
-  errorCb?: (message: string) => void
-}
+  payload: string;
+  callback: (data: AddressUpdateUpdate | AddressUpdateInitial) => void;
+  errorCb?: (message: string) => void;
+};
 
 type IsolatedCFDAddressUpdateSubscription = {
-  payload: string
-  callback: (data: IsolatedCFDAddressUpdateUpdate | IsolatedCFDAddressUpdateInitial) => void
-}
+  payload: string;
+  callback: (
+    data: IsolatedCFDAddressUpdateUpdate | IsolatedCFDAddressUpdateInitial,
+  ) => void;
+};
 
 type CfdAddressUpdateSubscription = {
-  payload: string
-  callback: (data: CfdAddressUpdateUpdate | CfdAddressUpdateInitial) => void
-}
+  payload: string;
+  callback: (data: CfdAddressUpdateUpdate | CfdAddressUpdateInitial) => void;
+};
 
 type Subscription = {
-  [SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE]: AddressUpdateSubscription
-  [SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE]: IsolatedAddressUpdateSubscription
-  [SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE]: CfdAddressUpdateSubscription
-  [SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE]: IsolatedCFDAddressUpdateSubscription
-  [SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE]: AggregatedOrderbookSubscription
-  [SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]: PairsConfigSubscription
-  [SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]: PairConfigSubscription
-  [SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]: FuturesTradeInfoSubscription
-  [SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]: FuturesTradesStreamSubscription
-}
+  [SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE]: AddressUpdateSubscription;
+  [SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE]: IsolatedAddressUpdateSubscription;
+  [SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE]: CfdAddressUpdateSubscription;
+  [SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE]: IsolatedCFDAddressUpdateSubscription;
+  [SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE]: AggregatedOrderbookSubscription;
+  [SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]: PairsConfigSubscription;
+  [SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]: PairConfigSubscription;
+  [SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]: FuturesTradeInfoSubscription;
+  [SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]: FuturesTradesStreamSubscription;
+};
 
 const exclusiveSubscriptions = [
   SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE,
 ] as const;
 
-const isSubType = (subType: string): subType is keyof Subscription => Object.values(SubscriptionType).some((t) => t === subType);
+const isSubType = (subType: string): subType is keyof Subscription =>
+  Object.values(SubscriptionType).some((t) => t === subType);
 
 const unknownMessageTypeRegex = /An unknown message type: '(.*)', json: (.*)/;
-const nonExistentMessageRegex = /Could not cancel nonexistent subscription: (.*)/;
+const nonExistentMessageRegex =
+  /Could not cancel nonexistent subscription: (.*)/;
 
 // type Message = {
 //   message: Json
@@ -212,9 +237,9 @@ const nonExistentMessageRegex = /Could not cancel nonexistent subscription: (.*)
 const FUTURES_SUFFIX = 'USD';
 
 export type AggregatorWsEvents = {
-  open: WebsocketTransportEvents['open']
-  close: WebsocketTransportEvents['close']
-}
+  open: WebsocketTransportEvents['open'];
+  close: WebsocketTransportEvents['close'];
+};
 
 function isAllUpperCase(str: string) {
   return str === str.toUpperCase();
@@ -230,16 +255,16 @@ class AggregatorWS {
   private isClosedIntentionally = false;
 
   readonly subscriptions: Partial<{
-    [K in keyof Subscription]: Partial<Record<string, Subscription[K]>>
+    [K in keyof Subscription]: Partial<Record<string, Subscription[K]>>;
   }> = {};
 
-  public onInit: (() => void) | undefined
+  public onInit: (() => void) | undefined;
 
-  public onError: ((err: string) => void) | undefined
+  public onError: ((err: string) => void) | undefined;
 
-  public logger: ((message: string) => void) | undefined
+  public logger: ((message: string) => void) | undefined;
 
-  private subIdReplacements: Partial<Record<string, string>> = {}
+  private subIdReplacements: Partial<Record<string, string>> = {};
 
   private readonly wsUrl: string;
 
@@ -260,20 +285,17 @@ class AggregatorWS {
 
   readonly basicAuth?: BasicAuthCredentials | undefined;
 
-  readonly emitter: Emitter<AggregatorWsEvents>
+  readonly emitter: Emitter<AggregatorWsEvents>;
 
-  constructor(
-    wsUrl: string,
-    basicAuth?: BasicAuthCredentials
-  ) {
-    this.wsUrl = wsUrl
-    this.basicAuth = basicAuth
-    this.emitter = createNanoEvents()
+  constructor(wsUrl: string, basicAuth?: BasicAuthCredentials) {
+    this.wsUrl = wsUrl;
+    this.basicAuth = basicAuth;
+    this.emitter = createNanoEvents();
   }
 
   private readonly handleWsOpen = () => {
     this.setupHeartbeat();
-  }
+  };
 
   private sendRaw(data: BufferLike) {
     this.transport?.sendMessage(data);
@@ -299,7 +321,10 @@ class AggregatorWS {
       }
     };
 
-    this.hearbeatIntervalId = setInterval(heartbeat, SERVER_PING_INTERVAL + HEARBEAT_THRESHOLD);
+    this.hearbeatIntervalId = setInterval(
+      heartbeat,
+      SERVER_PING_INTERVAL + HEARBEAT_THRESHOLD,
+    );
   }
 
   private clearHeartbeat() {
@@ -307,14 +332,17 @@ class AggregatorWS {
     clearInterval(this.hearbeatIntervalId);
   }
 
-  subscribe<T extends typeof SubscriptionType[keyof typeof SubscriptionType]>(
+  subscribe<T extends (typeof SubscriptionType)[keyof typeof SubscriptionType]>(
     type: T,
     subscription: Subscription[T],
-    prevSubscriptionId?: string
+    prevSubscriptionId?: string,
   ) {
-    const id = type === 'aobus'
-      ? ((subscription as any).payload as string) // TODO: Refactor!!!
-      : uuidv4();
+    const id =
+      type === 'aobus'
+        ? ((subscription as any).payload as string) // TODO: Refactor!!!
+        : uuidv4();
+
+    console.log('=== SDK ===', { id, type, subscription, prevSubscriptionId });
 
     const makeSubscription = () => {
       const isExclusive = exclusiveSubscriptions.some((t) => t === type);
@@ -325,7 +353,8 @@ class AggregatorWS {
       if ('payload' in subscription) {
         if (typeof subscription.payload === 'string') {
           subRequest['S'] = subscription.payload;
-        } else { // SwapInfoSubscriptionPayload | FuturesTradeInfoPayload | FuturesTradesStreamSubscription
+        } else {
+          // SwapInfoSubscriptionPayload | FuturesTradeInfoPayload | FuturesTradesStreamSubscription
           subRequest['S'] = {
             d: id,
             ...subscription.payload,
@@ -335,18 +364,38 @@ class AggregatorWS {
 
       const subKey = isExclusive ? 'default' : id;
 
-      if (prevSubscriptionId === undefined) { // Just subscribe
+      if (prevSubscriptionId === undefined) {
+        // Just subscribe
+
         const subs = this.subscriptions[type];
         if (isExclusive && subs && Object.keys(subs).length > 0) {
-          throw new Error(`Subscription '${type}' already exists. Please unsubscribe first.`);
+          throw new Error(
+            `Subscription '${type}' already exists. Please unsubscribe first.`,
+          );
         }
-        this.logger?.(`Subscribing to ${type} with id ${id}. Subscription request: ${JSON.stringify(subRequest)}`);
+        this.logger?.(
+          `Subscribing to ${type} with id ${id}. Subscription request: ${JSON.stringify(
+            subRequest,
+          )}`,
+        );
         this.subscriptions[type] = {
           ...this.subscriptions[type],
           [subKey]: subscription,
         };
-      } else { // Replace subscription. Set new sub id, but save callback
-        this.logger?.(`Resubscribing to ${type} with id ${id}. Subscription request: ${JSON.stringify(subRequest)}`);
+
+        console.log('=== SDK ===', {
+          subKey,
+          subscriptions: this.subscriptions,
+          prevSubscriptionId,
+        });
+      } else {
+        console.log('Fallback to else block');
+        // Replace subscription. Set new sub id, but save callback
+        this.logger?.(
+          `Resubscribing to ${type} with id ${id}. Subscription request: ${JSON.stringify(
+            subRequest,
+          )}`,
+        );
         const prevSub = this.subscriptions[type]?.[prevSubscriptionId];
         if (prevSub) {
           this.subIdReplacements[prevSubscriptionId] = id; // Save mapping for future use (unsubscribe)
@@ -358,14 +407,17 @@ class AggregatorWS {
             [subKey]: {
               ...subscription,
               callback: prevSub.callback,
-            }
+            },
           };
         }
       }
 
-      this.logger?.(`Sending subscription request: ${JSON.stringify(subRequest)}`);
+      this.logger?.(
+        `Sending subscription request: ${JSON.stringify(subRequest)}`,
+      );
+      console.log('--- subRequest ---', JSON.stringify(subRequest));
       this.send(subRequest);
-    }
+    };
 
     // if (!this.ws) {
     //   this.initAsync()
@@ -401,53 +453,89 @@ class AggregatorWS {
     return id;
   }
 
-  unsubscribe(subscription: keyof typeof UnsubscriptionType | string, details?: string) {
+  unsubscribe(
+    subscription: keyof typeof UnsubscriptionType | string,
+    details?: string,
+  ) {
     const newestSubId = this.getNewestSubscriptionId(subscription);
     this.send({
       T: UNSUBSCRIBE,
       S: newestSubId,
-      ...(details !== undefined) && { d: details },
+      ...(details !== undefined && { d: details }),
     });
 
     const isOrderBooksSubscription = (subId: string) => {
-      return subId.endsWith(FUTURES_SUFFIX) && !subId.includes('-') && isAllUpperCase(subId);
-    }
+      return (
+        subId.endsWith(FUTURES_SUFFIX) &&
+        !subId.includes('-') &&
+        isAllUpperCase(subId)
+      );
+    };
 
-    if (newestSubId.includes('0x')) { // is wallet address (ADDRESS_UPDATE)
-      const auSubscriptions = this.subscriptions[SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE];
+    if (newestSubId.includes('0x')) {
+      // is wallet address (ADDRESS_UPDATE)
+      const auSubscriptions =
+        this.subscriptions[SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE];
       if (auSubscriptions) {
-        const targetAuSub = Object.entries(auSubscriptions).find(([, value]) => value?.payload === newestSubId);
+        const targetAuSub = Object.entries(auSubscriptions).find(
+          ([, value]) => value?.payload === newestSubId,
+        );
         if (targetAuSub) {
           const [key] = targetAuSub;
-          delete this.subscriptions[SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE]?.[key];
+          delete this.subscriptions[
+            SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE
+          ]?.[key];
         }
       }
 
-      const aufSubscriptions = this.subscriptions[SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE];
+      const aufSubscriptions =
+        this.subscriptions[SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE];
       if (aufSubscriptions) {
-        const targetAufSub = Object.entries(aufSubscriptions).find(([, value]) => value?.payload === newestSubId);
+        const targetAufSub = Object.entries(aufSubscriptions).find(
+          ([, value]) => value?.payload === newestSubId,
+        );
         if (targetAufSub) {
           const [key] = targetAufSub;
-          delete this.subscriptions[SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE]?.[key];
+          delete this.subscriptions[
+            SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE
+          ]?.[key];
         }
       }
     } else if (uuidValidate(newestSubId)) {
       // is swap info subscription (contains hyphen)
-      delete this.subscriptions[SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE]?.[newestSubId];
-      delete this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[newestSubId];
-      delete this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.[newestSubId];
+      delete this.subscriptions[
+        SubscriptionType.ASSET_PAIR_CONFIG_UPDATES_SUBSCRIBE
+      ]?.[newestSubId];
+      delete this.subscriptions[
+        SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE
+      ]?.[newestSubId];
+      delete this.subscriptions[
+        SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE
+      ]?.[newestSubId];
       // !!! swap info subscription is uuid that contains hyphen
-    } else if (isOrderBooksSubscription(newestSubId)) { // is pair name(AGGREGATED_ORDER_BOOK_UPDATE)
-      const aobSubscriptions = this.subscriptions[SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE];
+    } else if (isOrderBooksSubscription(newestSubId)) {
+      // is pair name(AGGREGATED_ORDER_BOOK_UPDATE)
+      const aobSubscriptions =
+        this.subscriptions[
+          SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE
+        ];
       if (aobSubscriptions) {
-        const targetAobSub = Object.entries(aobSubscriptions).find(([, value]) => value?.payload === newestSubId);
+        const targetAobSub = Object.entries(aobSubscriptions).find(
+          ([, value]) => value?.payload === newestSubId,
+        );
         if (targetAobSub) {
           const [key] = targetAobSub;
-          delete this.subscriptions[SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE]?.[key];
+          delete this.subscriptions[
+            SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE
+          ]?.[key];
         }
       }
-    } else if (newestSubId === UnsubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_UNSUBSCRIBE) {
-      delete this.subscriptions[SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE]?.['default'];
+    } else if (
+      newestSubId === UnsubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_UNSUBSCRIBE
+    ) {
+      delete this.subscriptions[
+        SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE
+      ]?.['default'];
     }
   }
 
@@ -499,11 +587,15 @@ class AggregatorWS {
       this.clearHeartbeat();
       this.transport?.unsubscribe();
       this.emitter.emit('close', e);
-      this.logger?.(`AggregatorWS: connection closed ${this.isClosedIntentionally ? 'intentionally' : ''}`);
+      this.logger?.(
+        `AggregatorWS: connection closed ${
+          this.isClosedIntentionally ? 'intentionally' : ''
+        }`,
+      );
       if (!this.isClosedIntentionally) {
         setTimeout(() => {
-          this.init(true)
-        }, 5000)
+          this.init(true);
+        }, 5000);
       }
     });
     this.transport.onOpen((e) => {
@@ -518,55 +610,88 @@ class AggregatorWS {
             if (subscriptions) {
               Object.keys(subscriptions).forEach((subId) => {
                 const subPayload = subscriptions[subId];
-                this.logger?.(`AggregatorWS: reconnecting to subscription ${subType} ${subId}. Params: ${JSON.stringify(subPayload)}`);
+                this.logger?.(
+                  `AggregatorWS: reconnecting to subscription ${subType} ${subId}. Params: ${JSON.stringify(
+                    subPayload,
+                  )}`,
+                );
                 if (subPayload) this.subscribe(subType, subPayload, subId);
               });
             }
           });
       }
-      this.logger?.(`AggregatorWS: connection opened${isReconnect ? ' (reconnect)' : ''}`);
+      this.logger?.(
+        `AggregatorWS: connection opened${isReconnect ? ' (reconnect)' : ''}`,
+      );
     });
     this.transport.onMessage((e) => {
       this.isAlive = true;
       const { data } = e;
-      if (typeof data !== 'string') throw new Error('AggregatorWS: received non-string message');
+      if (typeof data !== 'string')
+        throw new Error('AggregatorWS: received non-string message');
       this.logger?.(`AggregatorWS: received message: ${data}`);
       const rawJson: unknown = JSON.parse(data);
 
       const json = messageSchema.parse(rawJson);
 
       switch (json.T) {
-        case MessageType.ERROR: {
-          const err = errorSchema.parse(json);
-          // Get subscription error callback
-          // 2. Find subscription by id
-          // 3. Call onError callback
+        case MessageType.ERROR:
+          {
+            const err = errorSchema.parse(json);
+            // Get subscription error callback
+            // 2. Find subscription by id
+            // 3. Call onError callback
 
-          const { id, m } = err;
-          if (id !== undefined) {
-            const nonExistentMessageMatch = m.match(nonExistentMessageRegex);
-            const unknownMessageMatch = m.match(unknownMessageTypeRegex);
-            if (nonExistentMessageMatch !== null) {
-              const [, subscription] = nonExistentMessageMatch;
-              if (subscription === undefined) throw new TypeError('Subscription is undefined. This should not happen.')
-              console.warn(`You tried to unsubscribe from non-existent subscription '${subscription}'. This is probably a bug in the code. Please be sure that you are unsubscribing from the subscription that you are subscribed to.`)
-            } else if (unknownMessageMatch !== null) {
-              const [, subscription, jsonPayload] = unknownMessageMatch;
-              if (subscription === undefined) throw new TypeError('Subscription is undefined. This should not happen.')
-              if (jsonPayload === undefined) throw new TypeError('JSON payload is undefined. This should not happen.')
-              console.warn(`You tried to subscribe to '${subscription}' with unknown payload '${jsonPayload}'. This is probably a bug in the code. Please be sure that you are subscribing to the existing subscription with the correct payload.`)
-            } else {
-              const subType = objectKeys(this.subscriptions).find((st) => this.subscriptions[st]?.[id]);
-              if (subType === undefined) throw new Error(`AggregatorWS: cannot find subscription type by id ${id}. Current subscriptions: ${JSON.stringify(this.subscriptions)}`);
-              const sub = this.subscriptions[subType]?.[id];
-              if (sub === undefined) throw new Error(`AggregatorWS: cannot find subscription by id ${id}. Current subscriptions: ${JSON.stringify(this.subscriptions)}`);
-              if ('errorCb' in sub) {
-                sub.errorCb(err.m);
+            const { id, m } = err;
+            if (id !== undefined) {
+              const nonExistentMessageMatch = m.match(nonExistentMessageRegex);
+              const unknownMessageMatch = m.match(unknownMessageTypeRegex);
+              if (nonExistentMessageMatch !== null) {
+                const [, subscription] = nonExistentMessageMatch;
+                if (subscription === undefined)
+                  throw new TypeError(
+                    'Subscription is undefined. This should not happen.',
+                  );
+                console.warn(
+                  `You tried to unsubscribe from non-existent subscription '${subscription}'. This is probably a bug in the code. Please be sure that you are unsubscribing from the subscription that you are subscribed to.`,
+                );
+              } else if (unknownMessageMatch !== null) {
+                const [, subscription, jsonPayload] = unknownMessageMatch;
+                if (subscription === undefined)
+                  throw new TypeError(
+                    'Subscription is undefined. This should not happen.',
+                  );
+                if (jsonPayload === undefined)
+                  throw new TypeError(
+                    'JSON payload is undefined. This should not happen.',
+                  );
+                console.warn(
+                  `You tried to subscribe to '${subscription}' with unknown payload '${jsonPayload}'. This is probably a bug in the code. Please be sure that you are subscribing to the existing subscription with the correct payload.`,
+                );
+              } else {
+                const subType = objectKeys(this.subscriptions).find(
+                  (st) => this.subscriptions[st]?.[id],
+                );
+                if (subType === undefined)
+                  throw new Error(
+                    `AggregatorWS: cannot find subscription type by id ${id}. Current subscriptions: ${JSON.stringify(
+                      this.subscriptions,
+                    )}`,
+                  );
+                const sub = this.subscriptions[subType]?.[id];
+                if (sub === undefined)
+                  throw new Error(
+                    `AggregatorWS: cannot find subscription by id ${id}. Current subscriptions: ${JSON.stringify(
+                      this.subscriptions,
+                    )}`,
+                  );
+                if ('errorCb' in sub) {
+                  sub.errorCb(err.m);
+                }
               }
             }
+            this.onError?.(err.m);
           }
-          this.onError?.(err.m);
-        }
           break;
         case MessageType.PING_PONG:
           this.sendRaw(data);
@@ -575,7 +700,9 @@ class AggregatorWS {
           // const { id } = json;
           break;
         case MessageType.FUTURES_TRADE_INFO_UPDATE:
-          this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[json.id]?.callback({
+          this.subscriptions[SubscriptionType.FUTURES_TRADE_INFO_SUBSCRIBE]?.[
+            json.id
+          ]?.callback({
             futuresTradeRequestId: json.id,
             sender: json.S,
             instrument: json.i,
@@ -587,55 +714,53 @@ class AggregatorWS {
           });
           break;
         case MessageType.FUTURES_TRADES_STREAM_UPDATE:
-          this.subscriptions[SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE]?.[json.id]?.callback(
-            {
-              timestamp: json._,
-              sender: json.S,
-              id: json.id,
-              instrument: json.i,
-              side: json.s,
-              positionSide: json.ps,
-              amount: json.a,
-              leverage: json.l,
-              price: json.p,
-              txHash: json.h,
-              network: json.n,
-              realizedPnL: json.rpnl,
-              roi: json.r,
-            }
-          );
+          this.subscriptions[
+            SubscriptionType.FUTURES_TRADES_STREAM_SUBSCRIBE
+          ]?.[json.id]?.callback({
+            timestamp: json._,
+            sender: json.S,
+            id: json.id,
+            instrument: json.i,
+            side: json.s,
+            positionSide: json.ps,
+            amount: json.a,
+            leverage: json.l,
+            price: json.p,
+            txHash: json.h,
+            network: json.n,
+            realizedPnL: json.rpnl,
+            roi: json.r,
+          });
           break;
         case MessageType.INITIALIZATION:
           this.onInit?.();
           break;
-        case MessageType.AGGREGATED_ORDER_BOOK_UPDATE: {
-          const { ob, S } = json;
-          const mapOrderbookItems = (rawItems: typeof ob.a | typeof ob.b) => rawItems.reduce<OrderbookItem[]>((acc, item) => {
-            const [
-              price,
-              amount,
-              vob,
-            ] = item;
+        case MessageType.AGGREGATED_ORDER_BOOK_UPDATE:
+          {
+            const { ob, S } = json;
+            const mapOrderbookItems = (rawItems: typeof ob.a | typeof ob.b) =>
+              rawItems.reduce<OrderbookItem[]>((acc, item) => {
+                const [price, amount, vob] = item;
 
-            acc.push({
-              price,
-              amount,
-              vob: vob.map(([side, pairName]) => ({
-                side,
-                pairName,
-              })),
-            });
+                acc.push({
+                  price,
+                  amount,
+                  vob: vob.map(([side, pairName]) => ({
+                    side,
+                    pairName,
+                  })),
+                });
 
-            return acc;
-          }, []);
-          this.subscriptions[
-            SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE
-          ]?.[json.S]?.callback(
-            mapOrderbookItems(ob.a),
-            mapOrderbookItems(ob.b),
-            S,
-          );
-        }
+                return acc;
+              }, []);
+            this.subscriptions[
+              SubscriptionType.AGGREGATED_ORDER_BOOK_UPDATES_SUBSCRIBE
+            ]?.[json.S]?.callback(
+              mapOrderbookItems(ob.a),
+              mapOrderbookItems(ob.b),
+              S,
+            );
+          }
           break;
         case MessageType.ASSET_PAIR_CONFIG_UPDATE: {
           const pair = json.u;
@@ -653,212 +778,275 @@ class AggregatorWS {
 
           break;
         }
-        case MessageType.ASSET_PAIRS_CONFIG_UPDATE: {
-          const pairs = json;
-          const priceUpdates: Partial<Record<string, AssetPairUpdate>> = {};
+        case MessageType.ASSET_PAIRS_CONFIG_UPDATE:
+          {
+            const pairs = json;
+            const priceUpdates: Partial<Record<string, AssetPairUpdate>> = {};
 
-          pairs.u.forEach(([pairName, minQty, pricePrecision]) => {
-            priceUpdates[pairName] = {
-              minQty,
-              pricePrecision,
-            };
-          });
+            pairs.u.forEach(([pairName, minQty, pricePrecision]) => {
+              priceUpdates[pairName] = {
+                minQty,
+                pricePrecision,
+              };
+            });
 
-          this.subscriptions[
-            SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE
-          ]?.['default']?.callback({
-            kind: json.k === 'i' ? 'initial' : 'update',
-            data: priceUpdates,
-          });
-        }
+            this.subscriptions[
+              SubscriptionType.ASSET_PAIRS_CONFIG_UPDATES_SUBSCRIBE
+            ]?.['default']?.callback({
+              kind: json.k === 'i' ? 'initial' : 'update',
+              data: priceUpdates,
+            });
+          }
           break;
         case MessageType.CFD_ADDRESS_UPDATE:
-          switch (json.k) { // message kind
-            case 'i': { // initial
-              const fullOrders = (json.o)
-                ? json.o.reduce<Array<z.infer<typeof fullOrderSchema>>>((prev, o) => {
-                  prev.push(o);
+          switch (
+            json.k // message kind
+          ) {
+            case 'i':
+              {
+                // initial
+                const fullOrders = json.o
+                  ? json.o.reduce<Array<z.infer<typeof fullOrderSchema>>>(
+                      (prev, o) => {
+                        prev.push(o);
 
-                  return prev;
-                }, [])
-                : undefined;
+                        return prev;
+                      },
+                      [],
+                    )
+                  : undefined;
 
-              this.subscriptions[
-                SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'initial',
-                orders: fullOrders,
-                balance: json.b,
-              });
-            }
-              break;
-            case 'u': { // update
-              let orderUpdate: z.infer<typeof orderUpdateSchema> | z.infer<typeof fullOrderSchema> | undefined;
-              if (json.o) {
-                const firstOrder = json.o[0];
-                orderUpdate = firstOrder;
+                this.subscriptions[
+                  SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE
+                ]?.[json.id]?.callback({
+                  kind: 'initial',
+                  orders: fullOrders,
+                  balance: json.b,
+                });
               }
+              break;
+            case 'u':
+              {
+                // update
+                let orderUpdate:
+                  | z.infer<typeof orderUpdateSchema>
+                  | z.infer<typeof fullOrderSchema>
+                  | undefined;
+                if (json.o) {
+                  const firstOrder = json.o[0];
+                  orderUpdate = firstOrder;
+                }
 
-              this.subscriptions[
-                SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'update',
-                order: orderUpdate,
-                balance: json.b,
-              });
-            }
+                this.subscriptions[
+                  SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE
+                ]?.[json.id]?.callback({
+                  kind: 'update',
+                  order: orderUpdate,
+                  balance: json.b,
+                });
+              }
               break;
             default:
               break;
           }
           break;
         case MessageType.ISOLATED_CFD_ADDRESS_UPDATE:
-          switch (json.k) { // message kind
-            case 'i': { // initial
-              const isolatedFullOrders = (json.o)
-                ? json.o.reduce<Array<z.infer<typeof isolatedFullOrderSchema>>>((prev, o) => {
-                  prev.push(o);
+          switch (
+            json.k // message kind
+          ) {
+            case 'i':
+              {
+                // initial
+                const isolatedFullOrders = json.o
+                  ? json.o.reduce<
+                      Array<z.infer<typeof isolatedFullOrderSchema>>
+                    >((prev, o) => {
+                      prev.push(o);
 
-                  return prev;
-                }, [])
-                : undefined;
+                      return prev;
+                    }, [])
+                  : undefined;
 
-              this.subscriptions[
-                SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'initial',
-                orders: isolatedFullOrders,
-                balances: json.b,
-              });
-            }
-              break;
-            case 'u': { // update
-              let isolatedOrderUpdate: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined;
-              if (json.o) {
-                const isolatedFirstOrder = json.o[0];
-                isolatedOrderUpdate = isolatedFirstOrder;
+                this.subscriptions[
+                  SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE
+                ]?.[json.id]?.callback({
+                  kind: 'initial',
+                  orders: isolatedFullOrders,
+                  balances: json.b,
+                });
               }
+              break;
+            case 'u':
+              {
+                // update
+                let isolatedOrderUpdate:
+                  | z.infer<typeof isolatedOrderUpdateSchema>
+                  | z.infer<typeof isolatedFullOrderSchema>
+                  | undefined;
+                if (json.o) {
+                  const isolatedFirstOrder = json.o[0];
+                  isolatedOrderUpdate = isolatedFirstOrder;
+                }
 
-              this.subscriptions[
-                SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'update',
-                order: isolatedOrderUpdate,
-                balances: json.b,
-              });
-            }
+                this.subscriptions[
+                  SubscriptionType.ISOLATED_CFD_ADDRESS_UPDATES_SUBSCRIBE
+                ]?.[json.id]?.callback({
+                  kind: 'update',
+                  order: isolatedOrderUpdate,
+                  balances: json.b,
+                });
+              }
               break;
             default:
               break;
           }
           break;
-        case MessageType.ADDRESS_UPDATE: {
-          const balances = (json.b)
-            ? Object.entries(json.b)
-              .reduce<Partial<Record<string, Balance>>>((prev, [asset, assetBalances]) => {
-                if (!assetBalances) return prev;
-                const [tradable, reserved, contract, wallet, allowance] = assetBalances;
+        case MessageType.ADDRESS_UPDATE:
+          {
+            const balances = json.b
+              ? Object.entries(json.b).reduce<Partial<Record<string, Balance>>>(
+                  (prev, [asset, assetBalances]) => {
+                    if (!assetBalances) return prev;
+                    const [tradable, reserved, contract, wallet, allowance] =
+                      assetBalances;
 
-                prev[asset] = {
-                  tradable, reserved, contract, wallet, allowance,
-                };
+                    prev[asset] = {
+                      tradable,
+                      reserved,
+                      contract,
+                      wallet,
+                      allowance,
+                    };
 
-                return prev;
-              }, {})
-            : {};
-          switch (json.k) { // message kind
-            case 'i': { // initial
-              const fullOrders = json.o
-                ? json.o.reduce<Array<z.infer<typeof fullOrderSchema>>>((prev, o) => {
-                  prev.push(o);
+                    return prev;
+                  },
+                  {},
+                )
+              : {};
+            switch (
+              json.k // message kind
+            ) {
+              case 'i':
+                {
+                  // initial
+                  const fullOrders = json.o
+                    ? json.o.reduce<Array<z.infer<typeof fullOrderSchema>>>(
+                        (prev, o) => {
+                          prev.push(o);
 
-                  return prev;
-                }, [])
-                : undefined;
+                          return prev;
+                        },
+                        [],
+                      )
+                    : undefined;
 
-              this.subscriptions[
-                SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'initial',
-                orders: fullOrders,
-                balances,
-              });
+                  this.subscriptions[
+                    SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE
+                  ]?.[json.id]?.callback({
+                    kind: 'initial',
+                    orders: fullOrders,
+                    balances,
+                  });
+                }
+                break;
+              case 'u':
+                {
+                  // update
+                  let orderUpdate:
+                    | z.infer<typeof orderUpdateSchema>
+                    | z.infer<typeof fullOrderSchema>
+                    | undefined;
+                  if (json.o) {
+                    const firstOrder = json.o[0];
+                    orderUpdate = firstOrder;
+                  }
+
+                  this.subscriptions[
+                    SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE
+                  ]?.[json.id]?.callback({
+                    kind: 'update',
+                    order: orderUpdate,
+                    balances,
+                  });
+                }
+                break;
+              default:
+                break;
             }
-              break;
-            case 'u': { // update
-              let orderUpdate: z.infer<typeof orderUpdateSchema> | z.infer<typeof fullOrderSchema> | undefined;
-              if (json.o) {
-                const firstOrder = json.o[0];
-                orderUpdate = firstOrder;
-              }
-
-              this.subscriptions[
-                SubscriptionType.ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'update',
-                order: orderUpdate,
-                balances,
-              });
-            }
-              break;
-            default:
-              break;
           }
-        }
           break;
-        case MessageType.ISOLATED_ADDRESS_UPDATE: {
-          const balances = (json.b)
-            ? Object.entries(json.b)
-              .reduce<Partial<Record<string, Balance>>>((prev, [asset, assetBalances]) => {
-                if (!assetBalances) return prev;
-                const [tradable, reserved, contract, wallet, allowance] = assetBalances;
+        case MessageType.ISOLATED_ADDRESS_UPDATE:
+          {
+            const balances = json.b
+              ? Object.entries(json.b).reduce<Partial<Record<string, Balance>>>(
+                  (prev, [asset, assetBalances]) => {
+                    if (!assetBalances) return prev;
+                    const [tradable, reserved, contract, wallet, allowance] =
+                      assetBalances;
 
-                prev[asset] = {
-                  tradable, reserved, contract, wallet, allowance,
-                };
+                    prev[asset] = {
+                      tradable,
+                      reserved,
+                      contract,
+                      wallet,
+                      allowance,
+                    };
 
-                return prev;
-              }, {})
-            : {};
-          switch (json.k) { // message kind
-            case 'i': { // initial
-              const isolatedFullOrders = json.o
-                ? json.o.reduce<Array<z.infer<typeof isolatedFullOrderSchema>>>((prev, o) => {
-                  prev.push(o);
+                    return prev;
+                  },
+                  {},
+                )
+              : {};
+            switch (
+              json.k // message kind
+            ) {
+              case 'i':
+                {
+                  // initial
+                  const isolatedFullOrders = json.o
+                    ? json.o.reduce<
+                        Array<z.infer<typeof isolatedFullOrderSchema>>
+                      >((prev, o) => {
+                        prev.push(o);
 
-                  return prev;
-                }, [])
-                : undefined;
+                        return prev;
+                      }, [])
+                    : undefined;
 
-              this.subscriptions[
-                SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'initial',
-                orders: isolatedFullOrders,
-                balances,
-              });
+                  this.subscriptions[
+                    SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE
+                  ]?.[json.id]?.callback({
+                    kind: 'initial',
+                    orders: isolatedFullOrders,
+                    balances,
+                  });
+                }
+                break;
+              case 'u':
+                {
+                  // update
+                  let isolatedOrderUpdate:
+                    | z.infer<typeof isolatedOrderUpdateSchema>
+                    | z.infer<typeof isolatedFullOrderSchema>
+                    | undefined;
+                  if (json.o) {
+                    const isolatedFirstOrder = json.o[0];
+                    isolatedOrderUpdate = isolatedFirstOrder;
+                  }
+
+                  this.subscriptions[
+                    SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE
+                  ]?.[json.id]?.callback({
+                    kind: 'update',
+                    order: isolatedOrderUpdate,
+                    balances,
+                  });
+                }
+                break;
+              default:
+                break;
             }
-              break;
-            case 'u': { // update
-              let isolatedOrderUpdate: z.infer<typeof isolatedOrderUpdateSchema> | z.infer<typeof isolatedFullOrderSchema> | undefined;
-              if (json.o) {
-                const isolatedFirstOrder = json.o[0];
-                isolatedOrderUpdate = isolatedFirstOrder;
-              }
-
-              this.subscriptions[
-                SubscriptionType.ISOLATED_ADDRESS_UPDATES_SUBSCRIBE
-              ]?.[json.id]?.callback({
-                kind: 'update',
-                order: isolatedOrderUpdate,
-                balances,
-              });
-            }
-              break;
-            default:
-              break;
           }
-        }
           break;
         default:
           break;
@@ -868,9 +1056,4 @@ class AggregatorWS {
 }
 
 export * as schemas from './schemas/index.js';
-export {
-  AggregatorWS,
-  SubscriptionType,
-  UnsubscriptionType,
-  MessageType,
-};
+export { AggregatorWS, SubscriptionType, UnsubscriptionType, MessageType };
