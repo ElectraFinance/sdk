@@ -457,8 +457,8 @@ class AggregatorWS {
     subscription: keyof typeof UnsubscriptionType | string,
     details?: string,
   ) {
-    console.log('=== unsubscribe', subscription, details);
     const newestSubId = this.getNewestSubscriptionId(subscription);
+    console.log('=== unsubscribe', newestSubId, subscription, details);
     this.send({
       T: UNSUBSCRIBE,
       S: newestSubId,
@@ -491,10 +491,12 @@ class AggregatorWS {
 
       const aufSubscriptions =
         this.subscriptions[SubscriptionType.CFD_ADDRESS_UPDATES_SUBSCRIBE];
+      console.log('--- unsub ->', aufSubscriptions);
       if (aufSubscriptions) {
         const targetAufSub = Object.entries(aufSubscriptions).find(
           ([, value]) => value?.payload === newestSubId,
         );
+        console.log('--- unsub =>', targetAufSub);
         if (targetAufSub) {
           const [key] = targetAufSub;
           delete this.subscriptions[
