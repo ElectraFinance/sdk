@@ -26,41 +26,32 @@
     "rpc": "https://bsc-stage.node.electra.finance/",
     "baseCurrencyName": "BNB"
   },
-  "3": {
-    "chainId": "3",
-    "explorer": "https://ropsten.etherscan.io/",
-    "label": "Ropsten",
-    "shortName": "ETH-Ropsten",
+  "204": {
+    "chainId": "204",
+    "explorer": "http://opbnbscan.com/",
+    "label": "opBNB Chain",
+    "shortName": "opBNB",
+    "code": "opbnb",
+    "rpc": "https://opbnb-mainnet-rpc.bnbchain.org",
+    "baseCurrencyName": "BNB"
+  },
+  "11155111": {
+    "chainId": "11155111",
+    "explorer": "https://sepolia.etherscan.io/",
+    "label": "Sepolia",
+    "shortName": "ETH-Sepolia",
     "code": "eth",
-    "rpc": "https://testing.electra.finance/eth-ropsten/rpc",
+    "rpc": "https://gateway.tenderly.co/public/sepolia",
     "baseCurrencyName": "ETH"
   },
-  "5": {
-    "chainId": "5",
-    "explorer": "https://goerli.etherscan.io/",
-    "label": "Goerli",
-    "shortName": "ETH-Goerli",
-    "code": "eth",
-    "rpc": "https://testing.electra.finance/eth-goerli/rpc",
-    "baseCurrencyName": "ETH"
-  },
-  "421613": {
-    "chainId": "421613",
-    "explorer": "https://goerli.arbiscan.io/",
-    "label": "Arbitrum Goerli",
-    "shortName": "Arbitrum Goerli",
+  "42161": {
+    "chainId": "42161",
+    "explorer": "https://arbiscan.io/",
+    "label": "Arbitrum",
+    "shortName": "Arbitrum",
     "code": "arb",
-    "rpc": "https://goerli-rollup.arbitrum.io/rpc",
+    "rpc": "https://arb1.arbitrum.io/rpc",
     "baseCurrencyName": "ETH"
-  },
-  "4002": {
-    "chainId": "4002",
-    "explorer": "https://testnet.ftmscan.com/",
-    "label": "Fantom Testnet",
-    "shortName": "FTM-Testnet",
-    "code": "ftm",
-    "rpc": "https://testing.electra.finance/ftm-testnet/rpc",
-    "baseCurrencyName": "FTM"
   },
   "250": {
     "chainId": "250",
@@ -80,15 +71,6 @@
     "rpc": "https://polygon-rpc.com/",
     "explorer": "https://polygonscan.com/"
   },
-  "80001": {
-    "chainId": "80001",
-    "label": "Polygon Mumbai",
-    "shortName": "Polygon Mumbai",
-    "code": "polygon",
-    "baseCurrencyName": "MATIC",
-    "rpc": "https://rpc-mumbai.matic.today",
-    "explorer": "https://mumbai.polygonscan.com/"
-  },
   "66": {
     "chainId": "66",
     "explorer": "https://www.oklink.com/okc/",
@@ -97,33 +79,6 @@
     "code": "okc",
     "rpc": "https://exchainrpc.okex.org/",
     "baseCurrencyName": "OKT"
-  },
-  "65": {
-    "chainId": "65",
-    "explorer": "https://www.oklink.com/okc-test/",
-    "label": "OKC Testnet",
-    "shortName": "OKC-Testnet",
-    "code": "okc",
-    "rpc": "https://exchaintestrpc.okex.org/",
-    "baseCurrencyName": "OKT"
-  },
-  "56303": {
-    "chainId": "56303",
-    "label": "DRIP Chain",
-    "shortName": "DRIP Chain",
-    "code": "drip",
-    "baseCurrencyName": "DRIP",
-    "rpc": "https://testnet.1d.rip/",
-    "explorer": "https://explorer-testnet.1d.rip/"
-  },
-  "204": {
-    "chainId": "204",
-    "explorer": "http://opbnbscan.com/",
-    "label": "opBNB Chain",
-    "shortName": "opBNB",
-    "code": "opbnb",
-    "rpc": "https://opbnb-mainnet-rpc.bnbchain.org",
-    "baseCurrencyName": "BNB"
   },
   "2525": {
     "chainId": "2525",

@@ -97,6 +97,21 @@
         }
       }
     },
+    "42161": {
+      "api": "https://electra.finance/arbitrum-one",
+      "services": {
+        "aggregator": {
+          "http": "/backend",
+          "ws": "/v1"
+        },
+        "blockchain": {
+          "http": ""
+        },
+        "priceFeed": {
+          "all": "/price-feed"
+        }
+      }
+    },
     "2525": {
       "api": "https://electra.finance/inevm-mainnet",
       "services": {
@@ -177,68 +192,8 @@
           }
         }
       },
-      "5": {
-        "api": "https://testing.electra.finance/eth-goerli",
-        "services": {
-          "aggregator": {
-            "http": "/backend",
-            "ws": "/v1"
-          },
-          "blockchain": {
-            "http": ""
-          },
-          "priceFeed": {
-            "all": "/price-feed"
-          }
-        }
-      },
-      "421613": {
-        "api": "https://testing.electra.finance/arbitrum-goerli",
-        "services": {
-          "aggregator": {
-            "http": "/backend",
-            "ws": "/v1"
-          },
-          "blockchain": {
-            "http": ""
-          },
-          "priceFeed": {
-            "all": "/price-feed"
-          }
-        }
-      },
-      "4002": {
-        "api": "https://testing.electra.finance/ftm-testnet",
-        "services": {
-          "aggregator": {
-            "http": "/backend",
-            "ws": "/v1"
-          },
-          "blockchain": {
-            "http": ""
-          },
-          "priceFeed": {
-            "all": "/price-feed"
-          }
-        }
-      },
-      "80001": {
-        "api": "https://testing.electra.finance/polygon-mumbai",
-        "services": {
-          "aggregator": {
-            "http": "/backend",
-            "ws": "/v1"
-          },
-          "blockchain": {
-            "http": ""
-          },
-          "priceFeed": {
-            "all": "/price-feed"
-          }
-        }
-      },
-      "56303": {
-        "api": "https://testing.electra.finance/drip-testnet",
+      "11155111": {
+        "api": "https://testing.electra.finance/eth-sepolia",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -256,10 +211,10 @@
   },
   "staging": {
     "marginMode": "isolated",
-    "referralAPI": "https://staging.electra.finance/referral-api",
+    "referralAPI": "https://electra.finance/referral-api",
     "networks": {
       "1": {
-        "api": "https://staging.electra.finance/eth-mainnet",
+        "api": "https://electra.finance/eth-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -274,7 +229,7 @@
         }
       },
       "56": {
-        "api": "https://staging.electra.finance/bsc-mainnet",
+        "api": "https://electra.finance/bsc-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -289,7 +244,7 @@
         }
       },
       "250": {
-        "api": "https://staging.electra.finance/ftm-mainnet",
+        "api": "https://electra.finance/ftm-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -304,7 +259,7 @@
         }
       },
       "137": {
-        "api": "https://staging.electra.finance/polygon-mainnet",
+        "api": "https://electra.finance/polygon-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -319,7 +274,7 @@
         }
       },
       "66": {
-        "api": "https://staging.electra.finance/okc-mainnet",
+        "api": "https://electra.finance/okc-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -335,7 +290,7 @@
       }
     },
     "204": {
-      "api": "https://staging.electra.finance/opbnb-mainnet",
+      "api": "https://electra.finance/opbnb-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -352,8 +307,23 @@
         }
       }
     },
+    "42161": {
+      "api": "https://electra.finance/arbitrum-one",
+      "services": {
+        "aggregator": {
+          "http": "/backend",
+          "ws": "/v1"
+        },
+        "blockchain": {
+          "http": ""
+        },
+        "priceFeed": {
+          "all": "/price-feed"
+        }
+      }
+    },
     "2525": {
-      "api": "https://staging.electra.finance/inevm-mainnet",
+      "api": "https://electra.finance/inevm-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -368,7 +338,7 @@
       }
     },
     "59144": {
-      "api": "https://staging.electra.finance/linea-mainnet",
+      "api": "https://electra.finance/linea-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -383,7 +353,7 @@
       }
     },
     "43114": {
-      "api": "https://staging.electra.finance/avalanche-c-chain",
+      "api": "https://electra.finance/avalanche-c-chain",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -398,7 +368,7 @@
       }
     },
     "8453": {
-      "api": "https://staging.electra.finance/base-mainnet",
+      "api": "https://electra.finance/base-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -415,10 +385,10 @@
   },
   "experimental": {
     "marginMode": "isolated",
-    "referralAPI": "https://exp.electra.finance/referral-api",
+    "referralAPI": "https://testing.electra.finance/referral-api",
     "networks": {
       "97": {
-        "api": "https://exp.electra.finance/bsc-testnet",
+        "api": "https://testing.electra.finance/bsc-testnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -432,8 +402,8 @@
           }
         }
       },
-      "3": {
-        "api": "https://exp.electra.finance/eth-ropsten",
+      "11155111": {
+        "api": "https://testing.electra.finance/eth-sepolia",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -444,6 +414,183 @@
           },
           "priceFeed": {
             "all": "/price-feed"
+          }
+        }
+      }
+    }
+  },
+  "kucoin-production": {
+    "marginMode": "isolated",
+    "referralAPI": "https://electra.finance/referral-api",
+    "networks": {
+      "1": {
+        "api": "https://electra.finance/eth-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "56": {
+        "api": "https://electra.finance/bsc-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "250": {
+        "api": "https://electra.finance/ftm-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "137": {
+        "api": "https://electra.finance/polygon-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "66": {
+        "api": "https://electra.finance/okc-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "42161": {
+        "api": "https://electra.finance/arbitrum-one",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "204": {
+        "api": "https://electra.finance/opbnb-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          },
+          "indexer": {
+            "http": "/orion-indexer/"
+          }
+        }
+      },
+      "2525": {
+        "api": "https://electra.finance/inevm-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "59144": {
+        "api": "https://electra.finance/linea-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "43114": {
+        "api": "https://electra.finance/avalanche-c-chain",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
+      },
+      "8453": {
+        "api": "https://electra.finance/base-mainnet",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          },
+          "indexer": {
+            "http": "/orion-indexer/"
           }
         }
       }

@@ -173,9 +173,7 @@ export type Pair = {
 
 export enum SupportedChainId {
   MAINNET = '1',
-  ROPSTEN = '3',
-  GOERLI = '5',
-  ARBITRUM_GOERLI = '421613',
+  BSC = '56',
   FANTOM_OPERA = '250',
   POLYGON = '137',
   OKC = '66',
@@ -184,13 +182,10 @@ export enum SupportedChainId {
   LINEA = '59144',
   AVAX = '43114',
   BASE = '8453',
+  ARBITRUM = '42161',
 
-  POLYGON_TESTNET = '80001',
-  FANTOM_TESTNET = '4002',
-  BSC = '56',
   BSC_TESTNET = '97',
-  OKC_TESTNET = '65',
-  DRIP_TESTNET = '56303',
+  SEPOLIA = '11155111',
 
   // For testing and debug purpose
   // BROKEN = '0',
