@@ -211,10 +211,10 @@
   },
   "staging": {
     "marginMode": "isolated",
-    "referralAPI": "https://electra.finance/referral-api",
+    "referralAPI": "https://staging.electra.finance/referral-api",
     "networks": {
       "1": {
-        "api": "https://electra.finance/eth-mainnet",
+        "api": "https://staging.electra.finance/eth-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -229,7 +229,7 @@
         }
       },
       "56": {
-        "api": "https://electra.finance/bsc-mainnet",
+        "api": "https://staging.electra.finance/bsc-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -244,7 +244,7 @@
         }
       },
       "250": {
-        "api": "https://electra.finance/ftm-mainnet",
+        "api": "https://staging.electra.finance/ftm-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -259,7 +259,7 @@
         }
       },
       "137": {
-        "api": "https://electra.finance/polygon-mainnet",
+        "api": "https://staging.electra.finance/polygon-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -274,7 +274,7 @@
         }
       },
       "66": {
-        "api": "https://electra.finance/okc-mainnet",
+        "api": "https://staging.electra.finance/okc-mainnet",
         "services": {
           "aggregator": {
             "http": "/backend",
@@ -290,7 +290,7 @@
       }
     },
     "204": {
-      "api": "https://electra.finance/opbnb-mainnet",
+      "api": "https://staging.electra.finance/opbnb-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -308,7 +308,7 @@
       }
     },
     "42161": {
-      "api": "https://electra.finance/arbitrum-one",
+      "api": "https://staging.electra.finance/arbitrum-one",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -323,7 +323,7 @@
       }
     },
     "2525": {
-      "api": "https://electra.finance/inevm-mainnet",
+      "api": "https://staging.electra.finance/inevm-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -338,7 +338,7 @@
       }
     },
     "59144": {
-      "api": "https://electra.finance/linea-mainnet",
+      "api": "https://staging.electra.finance/linea-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -353,7 +353,7 @@
       }
     },
     "43114": {
-      "api": "https://electra.finance/avalanche-c-chain",
+      "api": "https://staging.electra.finance/avalanche-c-chain",
       "services": {
         "aggregator": {
           "http": "/backend",
@@ -368,7 +368,7 @@
       }
     },
     "8453": {
-      "api": "https://electra.finance/base-mainnet",
+      "api": "https://staging.electra.finance/base-mainnet",
       "services": {
         "aggregator": {
           "http": "/backend",
