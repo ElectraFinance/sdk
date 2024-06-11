@@ -2,12 +2,7 @@ import { SupportedChainId } from '../types.js';
 
 export const developmentChains = [
   SupportedChainId.BSC_TESTNET,
-  SupportedChainId.ROPSTEN,
-  SupportedChainId.GOERLI,
-  SupportedChainId.ARBITRUM_GOERLI,
-  SupportedChainId.FANTOM_TESTNET,
-  SupportedChainId.POLYGON_TESTNET,
-  SupportedChainId.OKC_TESTNET,
+  SupportedChainId.SEPOLIA,
 ];
 export const productionChains = [
   SupportedChainId.MAINNET,
@@ -20,4 +15,5 @@ export const productionChains = [
   SupportedChainId.LINEA,
   SupportedChainId.AVAX,
   SupportedChainId.BASE,
+  SupportedChainId.ARBITRUM,
 ];
