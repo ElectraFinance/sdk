@@ -13,7 +13,9 @@ export const subscriptions = {
     payload: false as const,
   },
   [priceFeedSubscriptions.TICKER]: {
-    schema: z.tuple([z.number(), tickerInfoSchema]).transform(([, tickerInfo]) => tickerInfo),
+    schema: z
+      .tuple([z.number(), tickerInfoSchema])
+      .transform(([, tickerInfo]) => tickerInfo),
     payload: true as const,
   },
   [priceFeedSubscriptions.LAST_PRICE]: {
@@ -29,18 +31,21 @@ export const subscriptions = {
 export type SubscriptionType = keyof typeof subscriptions;
 export type Subscription<
   T extends SubscriptionType,
-  Schema = z.infer<typeof subscriptions[T]['schema']>
-> = typeof subscriptions[T] extends { payload: true }
+  Schema = z.infer<(typeof subscriptions)[T]['schema']>,
+> = (typeof subscriptions)[T] extends { payload: true }
   ? {
-    callback: (data: Schema) => void
-    errorCallback?: (error: Error) => void
-    payload: string
-  } : {
-    callback: (data: Schema) => void
-    errorCallback?: (error: Error) => void
-  }
+      callback: (data: Schema) => void;
+      errorCallback?: (error: Error) => void;
+      payload: string;
+    }
+  : {
+      callback: (data: Schema) => void;
+      errorCallback?: (error: Error) => void;
+    };
 
-export default class PriceFeedSubscription<T extends SubscriptionType = SubscriptionType> {
+export default class PriceFeedSubscription<
+  T extends SubscriptionType = SubscriptionType,
+> {
   public readonly id: string;
 
   private readonly callback: Subscription<T>['callback'];
@@ -119,10 +124,10 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
     this.isClosedIntentionally = false;
 
     const { payload, url, type } = this;
+
+    console.log('=== PriceFeedSubscription.init', { url, type, payload });
     this.ws = new WebSocket(
-      `${url}/${type}${payload !== undefined
-        ? `/${payload.toString()}`
-        : ''}`
+      `${url}/${type}${payload !== undefined ? `/${payload.toString()}` : ''}`,
     );
 
     this.ws.onopen = (e) => {
@@ -131,7 +136,7 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
       if (this.onOpen !== undefined) {
         this.onOpen(e);
       }
-    }
+    };
 
     this.ws.onmessage = (e) => {
       this.isAlive = true;
@@ -146,7 +151,8 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
         dataString = data.toString();
       } else if (Array.isArray(data)) {
         dataString = Buffer.concat(data).toString();
-      } else { // ArrayBuffer
+      } else {
+        // ArrayBuffer
         dataString = Buffer.from(data).toString();
       }
 
@@ -155,8 +161,12 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
       const subscription = subscriptions[type];
       const parseResult = subscription.schema.safeParse(json);
       if (!parseResult.success) {
-        const errorsMessage = parseResult.error.errors.map((error) => `[${error.path.join('.')}] ${error.message}`).join(', ');
-        const error = new Error(`Can't recognize PriceFeed "${type}" subscription message "${dataString}": ${errorsMessage}`);
+        const errorsMessage = parseResult.error.errors
+          .map((error) => `[${error.path.join('.')}] ${error.message}`)
+          .join(', ');
+        const error = new Error(
+          `Can't recognize PriceFeed "${type}" subscription message "${dataString}": ${errorsMessage}`,
+        );
         if (this.errorCallback !== undefined) {
           this.errorCallback(error);
         } else throw error;
@@ -169,7 +179,7 @@ export default class PriceFeedSubscription<T extends SubscriptionType = Subscrip
       if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
       if (!this.isClosedIntentionally) {
         setTimeout(() => {
-          this.init()
+          this.init();
         }, 5000);
       }
     };
