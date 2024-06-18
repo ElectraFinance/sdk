@@ -206,6 +206,21 @@
             "all": "/price-feed"
           }
         }
+      },
+      "123420000034": {
+        "api": "https://testing.electra.finance/event-horizon",
+        "services": {
+          "aggregator": {
+            "http": "/backend",
+            "ws": "/v1"
+          },
+          "blockchain": {
+            "http": ""
+          },
+          "priceFeed": {
+            "all": "/price-feed"
+          }
+        }
       }
     }
   },
