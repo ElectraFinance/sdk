@@ -208,7 +208,7 @@
         }
       },
       "123420000034": {
-        "api": "https://testing.electra.finance/event-horizon",
+        "api": "https://testing.electra.finance/event-horizon-testnet",
         "services": {
           "aggregator": {
             "http": "/backend",
