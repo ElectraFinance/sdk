@@ -115,5 +115,14 @@
     "baseCurrencyName": "ETH",
     "rpc": "https://mainnet.base.org/",
     "explorer": "https://basescan.org/"
+  },
+  "123420000034": {
+    "chainId": "123420000034",
+    "explorer": "https://blockscout-123420000034.raas-testnet.gelato.digital/",
+    "label": "Event Horizon Testnet",
+    "shortName": "EH-Testnet",
+    "code": "eth",
+    "rpc": "https://rpc-123420000034.raas-testnet.gelato.digital/",
+    "baseCurrencyName": "ETH"
   }
 }
