@@ -119,9 +119,9 @@
   "123420000034": {
     "chainId": "123420000034",
     "explorer": "https://blockscout-123420000034.raas-testnet.gelato.digital/",
-    "label": "Event Horizon Testnet",
-    "shortName": "EH-Testnet",
-    "code": "eth",
+    "label": "Horizon",
+    "shortName": "Horizon",
+    "code": "horizon",
     "rpc": "https://rpc-123420000034.raas-testnet.gelato.digital/",
     "baseCurrencyName": "ETH"
   }
