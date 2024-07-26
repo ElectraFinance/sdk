@@ -221,6 +221,42 @@ class Aggregator {
     );
   };
 
+  getOrderBooks = (pairName: string, depth = 1) => {
+    const url = new URL(`${this.apiUrl}/api/v1/orderbook/`);
+    url.searchParams.append('pair', pairName);
+    url.searchParams.append('depth', depth.toString());
+
+    return fetchWithValidation(
+      url.toString(),
+      z.object({
+        asks: z.array(
+          z.object({
+            price: z.number(),
+            amount: z.number(),
+            exchanges: z.array(z.string()),
+            path: z.array(z.object({
+              assetPair: z.string(),
+              action: z.string()
+            }))
+          })
+        ),
+        bids: z.array(
+          z.object({
+            price: z.number(),
+            amount: z.number(),
+            exchanges: z.array(z.string()),
+            path: z.array(z.object({
+              assetPair: z.string(),
+              action: z.string()
+            }))
+          })
+        )
+      }),
+      { headers: this.basicAuthHeaders },
+      errorSchema,
+    );
+  }
+
   placeCrossMarginOrder = (
     signedOrder: SignedCrossMarginCFDOrder,
   ) => {
