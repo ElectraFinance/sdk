@@ -127,11 +127,11 @@
   },
   "1952959480": {
     "chainId": "1952959480",
-    "explorer": "https://blockscout-123420000034.raas-testnet.gelato.digital/",
+    "explorer": "https://testnet-explorer.lumia.org/",
     "label": "Lumia L2 Testnet",
     "shortName": "Lumia L2 Testnet",
     "code": "Lumia L2 Testnet",
-    "rpc": "https://rpc-123420000034.raas-testnet.gelato.digital/",
+    "rpc": "https://testnet-rpc.lumia.org/",
     "baseCurrencyName": "LUMIA"
   }
 }
