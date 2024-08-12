@@ -124,5 +124,14 @@
     "code": "eth",
     "rpc": "https://rpc-123420000034.raas-testnet.gelato.digital/",
     "baseCurrencyName": "ETH"
+  },
+  "1952959480": {
+    "chainId": "1952959480",
+    "explorer": "https://blockscout-123420000034.raas-testnet.gelato.digital/",
+    "label": "Lumia L2 Testnet",
+    "shortName": "Lumia L2 Testnet",
+    "code": "Lumia L2 Testnet",
+    "rpc": "https://rpc-123420000034.raas-testnet.gelato.digital/",
+    "baseCurrencyName": "LUMIA"
   }
 }
