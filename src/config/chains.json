@@ -130,7 +130,7 @@
     "explorer": "https://testnet-explorer.lumia.org/",
     "label": "Lumia L2 Testnet",
     "shortName": "Lumia L2 Testnet",
-    "code": "Lumia L2 Testnet",
+    "code": "lumia",
     "rpc": "https://testnet-rpc.lumia.org/",
     "baseCurrencyName": "LUMIA"
   }
