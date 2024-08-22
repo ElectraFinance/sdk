@@ -275,8 +275,6 @@ class Aggregator {
   withdraw = (signedInternalTransfer: InternalTransfer) => {
     const headers = {
       'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...this.basicAuthHeaders,
     };
 
     const url = new URL(`${this.apiUrl}/api/v1/address/futures/balance/spv/withdraw`);
