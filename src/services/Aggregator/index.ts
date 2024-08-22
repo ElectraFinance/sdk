@@ -272,7 +272,7 @@ class Aggregator {
     );
   };
 
-  getWithdrawal = (signedInternalTransfer: InternalTransfer) => {
+  withdraw = (signedInternalTransfer: InternalTransfer) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -283,7 +283,7 @@ class Aggregator {
 
     return fetchWithValidation(
       url.toString(),
-      z.undefined(),
+      z.null(),
       {
         headers,
         method: 'POST',
