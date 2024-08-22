@@ -283,7 +283,7 @@ class Aggregator {
 
     return fetchWithValidation(
       url.toString(),
-      z.null(),
+      z.any(),
       {
         headers,
         method: 'POST',
