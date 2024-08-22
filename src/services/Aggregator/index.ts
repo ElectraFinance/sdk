@@ -4,7 +4,7 @@ import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws';
 import type {
-  BasicAuthCredentials, IsolatedCFDOrder, SignedCancelOrderRequest, SignedCrossMarginCFDOrder, SignedOrder
+  BasicAuthCredentials, InternalTransfer, IsolatedCFDOrder, SignedCancelOrderRequest, SignedCrossMarginCFDOrder, SignedOrder
 } from '../../types.js';
 import { pairConfigSchema, futuresBalancesSchema } from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
@@ -271,6 +271,27 @@ class Aggregator {
       errorSchema,
     );
   };
+
+  getWithdrawal = (signedInternalTransfer: InternalTransfer) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...this.basicAuthHeaders,
+    };
+
+    const url = new URL(`${this.apiUrl}/api/v1/address/futures/balance/spv/withdraw`);
+
+    return fetchWithValidation(
+      url.toString(),
+      z.undefined(),
+      {
+        headers,
+        method: 'POST',
+        body: JSON.stringify(signedInternalTransfer),
+      },
+      errorSchema,
+    )
+  }
 }
 
 export * as schemas from './schemas/index.js';
