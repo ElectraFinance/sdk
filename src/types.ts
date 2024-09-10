@@ -194,6 +194,7 @@ export enum SupportedChainId {
   AVAX = '43114',
   BASE = '8453',
   ARBITRUM = '42161',
+  LUMIA = '994873017',
 
   BSC_TESTNET = '97',
   SEPOLIA = '11155111',

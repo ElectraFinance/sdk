@@ -133,5 +133,14 @@
     "code": "lumia",
     "rpc": "https://testnet-rpc.lumia.org/",
     "baseCurrencyName": "LUMIA"
+  },
+  "994873017": {
+    "chainId": "994873017",
+    "explorer": "https://explorer.lumia.org",
+    "label": "Lumia",
+    "shortName": "Lumia",
+    "code": "lumia",
+    "rpc": "https://explorer.lumia.org/api/",
+    "baseCurrencyName": "LUMIA"
   }
 }
