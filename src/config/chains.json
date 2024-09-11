@@ -140,7 +140,7 @@
     "label": "Lumia",
     "shortName": "Lumia",
     "code": "lumia",
-    "rpc": "https://explorer.lumia.org/api/",
+    "rpc": "https://mainnet-rpc.lumia.org/",
     "baseCurrencyName": "LUMIA"
   }
 }
