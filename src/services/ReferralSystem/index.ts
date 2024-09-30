@@ -7,6 +7,7 @@ import {
   accountDetailsSchema,
   accountReferralsSchema,
   subscribeToReferralErrorSchema,
+  isWhitelistedSchema,
 } from './schemas/index.js';
 import type { SupportedChainId } from '../../types.js';
 
@@ -36,6 +37,7 @@ class ReferralSystem {
     this.getLeaderboard = this.getLeaderboard.bind(this);
     this.getAccountDetails = this.getAccountDetails.bind(this);
     this.getAccountReferrals = this.getAccountReferrals.bind(this);
+    this.getIsWhitelisted = this.getIsWhitelisted.bind(this);
   }
 
   subscribeToReferral = (
@@ -109,6 +111,13 @@ class ReferralSystem {
     return fetchWithValidation(
       `${this.apiUrl}/referer/futures/account-referrals?address=${address}&page=${page}`,
       accountReferralsSchema,
+    );
+  }
+
+  getIsWhitelisted = ({ address }: AddressType) => {
+    return fetchWithValidation(
+      `${this.apiUrl}/referer/futures/is_whitelisted?address=${address}`,
+      isWhitelistedSchema,
     );
   }
 }

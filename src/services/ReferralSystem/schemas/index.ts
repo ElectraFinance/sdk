@@ -7,3 +7,4 @@ export {
 } from './accountDetailsSchema';
 export { type AccountReferrals, accountReferralsSchema } from './accountReferralsSchema';
 export { leaderboardSchema, type Leaderboard } from './leaderboardSchema';
+export { isWhitelistedSchema } from './isWhitelistedSchema';
