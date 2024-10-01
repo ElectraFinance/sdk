@@ -13,6 +13,7 @@ import {
   crossMarginInfoSchema,
   baseLimitsSchema,
   pricesWithQuoteAssetSchema,
+  getDelegateStatusSchema,
 } from './schemas/index.js';
 import type { BasicAuthCredentials } from '../../types.js';
 
@@ -21,6 +22,15 @@ type CfdHistoryQuery = {
   page?: number
   limit?: number
 } & Partial<Record<string, string | number>>
+
+type SetDelegateOrderPayload = {
+  trader: string
+  delegate: string
+  isSetDelegate: boolean
+  deadline: number
+  signature: string
+}
+
 class BlockchainService {
   private readonly apiUrl: string;
 
@@ -50,6 +60,8 @@ class BlockchainService {
     this.getGovernanceContracts = this.getGovernanceContracts.bind(this);
     this.getGovernanceChainsInfo = this.getGovernanceChainsInfo.bind(this);
     this.getBaseLimits = this.getBaseLimits.bind(this);
+    this.setDelegateOrder = this.setDelegateOrder.bind(this);
+    this.getDelegateStatus = this.getDelegateStatus.bind(this);
   }
 
   get basicAuthHeaders() {
@@ -182,6 +194,32 @@ class BlockchainService {
       { headers: this.basicAuthHeaders }
     );
   };
+
+  setDelegateOrder = (payload: SetDelegateOrderPayload) => {
+    const url = new URL(`${this.apiUrl}/api/cfd/cross-margin/set-delegate-order`);
+    return fetchWithValidation(
+      url.toString(),
+      z.any(),
+      {
+        headers: {
+          ...this.basicAuthHeaders,
+          'Content-type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }
+    );
+  }
+
+  getDelegateStatus = (address: string) => {
+    const url = new URL(`${this.apiUrl}/api/cfd/cross-margin/set-delegate-status?address=${address}`);
+
+    return fetchWithValidation(
+      url.toString(),
+      getDelegateStatusSchema,
+      { headers: this.basicAuthHeaders }
+    );
+  }
 }
 
 export * as schemas from './schemas/index.js';

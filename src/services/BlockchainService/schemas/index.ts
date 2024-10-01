@@ -5,5 +5,6 @@ export { cfdHistorySchema, crossMarginHistorySchema } from './cfdHistorySchema.j
 export { default as governanceContractsSchema } from './governanceContractsSchema.js';
 export { default as governanceChainsInfoSchema } from './governanceChainsInfoSchema.js';
 export { default as crossMarginInfoSchema } from './crossMarginInfoSchema.js';
+export { default as getDelegateStatusSchema } from './getDelegateStatusSchema.js';
 export { default as baseLimitsSchema } from './baseLimitsSchema.js';
 export { pricesWithQuoteAssetSchema } from './pricesWithQuoteAssetSchema.js';
