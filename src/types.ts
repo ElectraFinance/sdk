@@ -107,6 +107,17 @@ export type Order = {
   isPersonalSign: boolean // bool
 }
 
+export type InternalTransfer = {
+  from: string // address
+  to: string // address
+  amount: string // uint112
+  expiration: string // uint64
+  nonce: string // uint64
+  chainId: number // uint64
+  reserved: number // uint192
+  signature: string // bytes
+}
+
 export type SignedOrder = {
   id: string // hash of Order (it's not part of order structure in smart-contract)
   signature: string // bytes
@@ -183,10 +194,12 @@ export enum SupportedChainId {
   AVAX = '43114',
   BASE = '8453',
   ARBITRUM = '42161',
+  LUMIA = '994873017',
 
   BSC_TESTNET = '97',
   SEPOLIA = '11155111',
   EVENT_HORIZON_TESTNET = '123420000034',
+  LUMIA_TESTNET = '1952959480'
 
   // For testing and debug purpose
   // BROKEN = '0',
