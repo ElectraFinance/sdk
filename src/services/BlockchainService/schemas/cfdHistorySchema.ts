@@ -10,7 +10,7 @@ const baseHistoryItem = z.object({
   _id: z.string(),
   __v: z.number(),
   address: z.string(),
-  balance: z.string(),
+  balance: z.string().optional(),
   amount: z.string(),
   amountNumber: z.string(),
   reason: z.enum(['WITHDRAW', 'DEPOSIT']),
