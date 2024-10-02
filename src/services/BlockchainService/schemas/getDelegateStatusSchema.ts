@@ -9,7 +9,7 @@ const activeRequest = z.object({
 });
 
 const getDelegateStatusSchema = z.object({
-  deadline: z.number(),
+  deadline: z.number().optional(),
   activeRequests: z.array(activeRequest),
 });
 
