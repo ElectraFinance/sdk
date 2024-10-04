@@ -211,8 +211,9 @@ class BlockchainService {
     );
   }
 
-  getDelegateStatus = (address: string) => {
-    const url = new URL(`${this.apiUrl}/api/cfd/cross-margin/set-delegate-status?address=${address}`);
+  getDelegateStatus = (address: string, status?: 'pending' | 'ok' | 'fail') => {
+    const statusQuery = status === undefined ? '' : `&status=${status}`
+    const url = new URL(`${this.apiUrl}/api/cfd/cross-margin/set-delegate-status?address=${address}${statusQuery}`);
 
     return fetchWithValidation(
       url.toString(),
