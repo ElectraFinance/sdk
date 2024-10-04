@@ -211,7 +211,7 @@ class BlockchainService {
     );
   }
 
-  getDelegateStatus = (address: string, status?: 'pending' | 'ok' | 'fail') => {
+  getDelegateStatus = (address: string, status?: 'pending' | 'ok' | 'fail' | 'all') => {
     const statusQuery = status === undefined ? '' : `&status=${status}`
     const url = new URL(`${this.apiUrl}/api/cfd/cross-margin/set-delegate-status?address=${address}${statusQuery}`);
 
