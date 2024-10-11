@@ -17,7 +17,6 @@ const signCancelOrder = async (
     senderAddress,
     isPersonalSign: usePersonalSign,
     isFromDelegate,
-    signerChainId: chainId,
   };
 
   const signature = usePersonalSign
