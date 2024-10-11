@@ -7,7 +7,7 @@ import type {
 } from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
 import getDomainData from './getDomainData.js';
-import { CROSS_MARGIN_CFD_ORDER_TYPES } from '../constants/cfdOrderTypes.js';
+import { CROSS_MARGIN_CFD_ORDER_TYPES_V2 } from '../constants/cfdOrderTypes.js';
 import signCrossMarginCFDOrderPersonal from './signCrossMarginCFDOrderPersonal.js';
 import hashCrossMarginCFDOrder from './hashCrossMarginCFDOrder.js';
 
@@ -66,7 +66,7 @@ export const signCrossMarginCFDOrder = async (
     ? await signCrossMarginCFDOrderPersonal(order, signer)
     : await signer.signTypedData(
         getDomainData(chainId),
-        CROSS_MARGIN_CFD_ORDER_TYPES,
+        CROSS_MARGIN_CFD_ORDER_TYPES_V2,
         order
       );
 
