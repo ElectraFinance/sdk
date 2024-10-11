@@ -167,6 +167,7 @@ export type CancelOrderRequest = {
   senderAddress: string;
   isPersonalSign: boolean;
   isFromDelegate?: boolean | undefined;
+  signerChainId: number;
 };
 
 export type SignedCancelOrderRequest = {
