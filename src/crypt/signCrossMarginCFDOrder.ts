@@ -1,7 +1,10 @@
 import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants';
-import type { CrossMarginCFDOrder, SignedCrossMarginCFDOrder, SupportedChainId } from '../types.js';
+import type {
+  CrossMarginCFDOrder,
+  SignedCrossMarginCFDOrder,
+} from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
 import getDomainData from './getDomainData.js';
 import { CROSS_MARGIN_CFD_ORDER_TYPES } from '../constants/cfdOrderTypes.js';
@@ -18,52 +21,54 @@ export const signCrossMarginCFDOrder = async (
   matcherAddress: string,
   usePersonalSign: boolean,
   signer: ethers.Signer,
-  chainId: SupportedChainId,
+  chainId: number,
   stopPrice: BigNumber.Value | undefined,
   leverage: string | undefined,
-  isFromDelegate?: boolean,
+  isFromDelegate?: boolean
 ) => {
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
 
   const order: CrossMarginCFDOrder = {
     senderAddress,
-    matcherAddress,
+    price: Number(
+      normalizeNumber(price, INTERNAL_PROTOCOL_PRECISION, BigNumber.ROUND_FLOOR)
+    ),
     instrumentIndex,
-    amount: Number(normalizeNumber(
-      amount,
-      INTERNAL_PROTOCOL_PRECISION,
-      BigNumber.ROUND_FLOOR,
-    )),
-    price: Number(normalizeNumber(
-      price,
-      INTERNAL_PROTOCOL_PRECISION,
-      BigNumber.ROUND_FLOOR,
-    )),
-    matcherFee: Number(normalizeNumber(
-      matcherFee,
-      INTERNAL_PROTOCOL_PRECISION,
-      BigNumber.ROUND_CEIL, // ROUND_CEIL because we don't want get "not enough fee" error
-    )),
+    matcherAddress,
+    price2: 0,
+    amount: Number(
+      normalizeNumber(
+        amount,
+        INTERNAL_PROTOCOL_PRECISION,
+        BigNumber.ROUND_FLOOR
+      )
+    ),
+    matcherFee: Number(
+      normalizeNumber(
+        matcherFee,
+        INTERNAL_PROTOCOL_PRECISION,
+        BigNumber.ROUND_CEIL // ROUND_CEIL because we don't want get "not enough fee" error
+      )
+    ),
     expiration,
     buySide: side === 'BUY' ? 1 : 0,
-    stopPrice: stopPrice !== undefined
-      ? new BigNumber(stopPrice).toNumber()
-      : undefined,
-    leverage: leverage !== undefined
-      ? leverage
-      : undefined,
+    stopPrice:
+      stopPrice !== undefined ? new BigNumber(stopPrice).toNumber() : undefined,
+    leverage: leverage !== undefined ? leverage : undefined,
     isPersonalSign: usePersonalSign,
     isFromDelegate,
+    signerChainId: chainId,
+    orderType: 0,
   };
 
   const signature = usePersonalSign
     ? await signCrossMarginCFDOrderPersonal(order, signer)
     : await signer.signTypedData(
-      getDomainData(chainId),
-      CROSS_MARGIN_CFD_ORDER_TYPES,
-      order,
-    );
+        getDomainData(chainId),
+        CROSS_MARGIN_CFD_ORDER_TYPES,
+        order
+      );
 
   // https://github.com/poap-xyz/poap-fun/pull/62#issue-928290265
   // "Signature's v was always send as 27 or 28, but from Ledger was 0 or 1"
