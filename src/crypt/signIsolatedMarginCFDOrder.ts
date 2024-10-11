@@ -12,7 +12,7 @@ import normalizeNumber from '../utils/normalizeNumber.js';
 import getDomainData from './getDomainData.js';
 import signIsolatedMarginCFDOrderPersonal from './signIsolatedMarginCFDOrderPersonal.js';
 import hashIsolatedMarginCFDOrder from './hashIsolatedMarginCFDOrder.js';
-import { ISOLATED_MARGIN_CFD_ORDER_TYPES_V2 } from '../constants/cfdOrderTypes.js';
+import { ISOLATED_MARGIN_CFD_ORDER_TYPES } from '../constants/cfdOrderTypes.js';
 
 export const signIsolatedMarginCFDOrder = async (
   instrumentAddress: string,
@@ -68,7 +68,7 @@ export const signIsolatedMarginCFDOrder = async (
     ? await signIsolatedMarginCFDOrderPersonal(order, signer)
     : await signer.signTypedData(
         getDomainData(chainId),
-        ISOLATED_MARGIN_CFD_ORDER_TYPES_V2,
+        ISOLATED_MARGIN_CFD_ORDER_TYPES,
         order
       );
 
