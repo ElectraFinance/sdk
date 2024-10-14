@@ -4,7 +4,13 @@ import cancelOrderSchema from './schemas/cancelOrderSchema.js';
 import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws';
 import type {
-  BasicAuthCredentials, InternalTransfer, IsolatedCFDOrder, SignedCancelOrderRequest, SignedCrossMarginCFDOrder, SignedOrder
+  BasicAuthCredentials,
+  InternalTransfer,
+  IsolatedCFDOrder,
+  ReplaceFuturesSLTPOrder,
+  SignedCancelOrderRequest,
+  SignedCrossMarginCFDOrder,
+  SignedOrder,
 } from '../../types.js';
 import { pairConfigSchema, futuresBalancesSchema } from './schemas/index.js';
 import toUpperCase from '../../utils/toUpperCase.js';
@@ -49,7 +55,9 @@ class Aggregator {
   get basicAuthHeaders() {
     if (this.basicAuth) {
       return {
-        Authorization: `Basic ${btoa(`${this.basicAuth.username}:${this.basicAuth.password}`)}`,
+        Authorization: `Basic ${btoa(
+          `${this.basicAuth.username}:${this.basicAuth.password}`
+        )}`,
       };
     }
     return {};
@@ -71,9 +79,9 @@ class Aggregator {
       url.toString(),
       orderSchema,
       { headers: this.basicAuthHeaders },
-      errorSchema,
+      errorSchema
     );
-  }
+  };
 
   getPrices = (assetPair: string) => {
     const url = new URL(`${this.apiUrl}/api/v1/prices/`);
@@ -82,7 +90,7 @@ class Aggregator {
       url.toString(),
       z.number(),
       { headers: this.basicAuthHeaders },
-      errorSchema,
+      errorSchema
     );
   };
 
@@ -93,7 +101,7 @@ class Aggregator {
     return fetchWithValidation(
       url.toString(),
       z.array(z.string().toUpperCase()),
-      { headers: this.basicAuthHeaders },
+      { headers: this.basicAuthHeaders }
     );
   };
 
@@ -105,98 +113,106 @@ class Aggregator {
       url.toString(),
       exchangeInfoSchema,
       { headers: this.basicAuthHeaders },
-      errorSchema,
+      errorSchema
     );
-  }
+  };
 
-  getVersion = () => fetchWithValidation(
-    `${this.apiUrl}/api/v1/version`,
-    z.object({
-      serviceName: z.string(),
-      version: z.string(),
-      apiVersion: z.string(),
-    }),
-    { headers: this.basicAuthHeaders },
-    errorSchema,
-  );
+  getVersion = () =>
+    fetchWithValidation(
+      `${this.apiUrl}/api/v1/version`,
+      z.object({
+        serviceName: z.string(),
+        version: z.string(),
+        apiVersion: z.string(),
+      }),
+      { headers: this.basicAuthHeaders },
+      errorSchema
+    );
 
-  getPairConfig = (assetPair: string) => fetchWithValidation(
-    `${this.apiUrl}/api/v1/pairs/exchangeInfo/${assetPair}`,
-    pairConfigSchema,
-    { headers: this.basicAuthHeaders },
-    errorSchema,
-  );
+  getPairConfig = (assetPair: string) =>
+    fetchWithValidation(
+      `${this.apiUrl}/api/v1/pairs/exchangeInfo/${assetPair}`,
+      pairConfigSchema,
+      { headers: this.basicAuthHeaders },
+      errorSchema
+    );
 
-  checkWhitelisted = (address: string) => fetchWithValidation(
-    `${this.apiUrl}/api/v1/whitelist/check?address=${address}`,
-    z.boolean(),
-    { headers: this.basicAuthHeaders },
-    errorSchema,
-  );
+  checkWhitelisted = (address: string) =>
+    fetchWithValidation(
+      `${this.apiUrl}/api/v1/whitelist/check?address=${address}`,
+      z.boolean(),
+      { headers: this.basicAuthHeaders },
+      errorSchema
+    );
 
   placeOrder = (
     signedOrder: SignedOrder,
     isCreateInternalOrder: boolean,
-    partnerId?: string,
+    partnerId?: string
   ) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...(partnerId !== undefined) && { 'X-Partner-Id': partnerId },
+      ...(partnerId !== undefined && { 'X-Partner-Id': partnerId }),
       ...this.basicAuthHeaders,
     };
 
-    const url = new URL(`${this.apiUrl}/api/v1/order/${isCreateInternalOrder ? 'internal' : ''}`);
+    const url = new URL(
+      `${this.apiUrl}/api/v1/order/${isCreateInternalOrder ? 'internal' : ''}`
+    );
 
     return fetchWithValidation(
       url.toString(),
       z.object({
         orderId: z.string(),
-        placementRequests: z.array(
-          z.object({
-            amount: z.number(),
-            brokerAddress: z.string(),
-            exchange: z.string(),
-          }),
-        ).optional(),
+        placementRequests: z
+          .array(
+            z.object({
+              amount: z.number(),
+              brokerAddress: z.string(),
+              exchange: z.string(),
+            })
+          )
+          .optional(),
       }),
       {
         headers,
         method: 'POST',
         body: JSON.stringify(signedOrder),
       },
-      errorSchema,
+      errorSchema
     );
   };
 
-  cancelOrder = (signedCancelOrderRequest: SignedCancelOrderRequest) => fetchWithValidation(
-    `${this.apiUrl}/api/v1/order`,
-    cancelOrderSchema,
-    {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        ...this.basicAuthHeaders,
+  cancelOrder = (signedCancelOrderRequest: SignedCancelOrderRequest) =>
+    fetchWithValidation(
+      `${this.apiUrl}/api/v1/order`,
+      cancelOrderSchema,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          ...this.basicAuthHeaders,
+        },
+        body: JSON.stringify({
+          ...signedCancelOrderRequest,
+          sender: signedCancelOrderRequest.senderAddress,
+        }),
       },
-      body: JSON.stringify({
-        ...signedCancelOrderRequest,
-        sender: signedCancelOrderRequest.senderAddress,
-      }),
-    },
-    errorSchema,
-  );
+      errorSchema
+    );
 
   placeCFDOrder = (
     signedOrder: IsolatedCFDOrder,
-    isReversedOrder?: boolean,
+    isReversedOrder?: boolean
   ) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...(isReversedOrder !== undefined) && {
+      ...(isReversedOrder !== undefined && {
         'X-Reverse-Order': isReversedOrder ? 'true' : 'false',
-      },
+      }),
       ...this.basicAuthHeaders,
     };
 
@@ -204,26 +220,26 @@ class Aggregator {
       `${this.apiUrl}/api/v1/order/futures`,
       z.object({
         orderId: z.string(),
-        placementRequests: z.array(
-          z.object({
-            amount: z.number(),
-            brokerAddress: z.string(),
-            exchange: z.string(),
-          }),
-        ).optional(),
+        placementRequests: z
+          .array(
+            z.object({
+              amount: z.number(),
+              brokerAddress: z.string(),
+              exchange: z.string(),
+            })
+          )
+          .optional(),
       }),
       {
         headers,
         method: 'POST',
         body: JSON.stringify(signedOrder),
       },
-      errorSchema,
+      errorSchema
     );
   };
 
-  placeCrossMarginOrder = (
-    signedOrder: SignedCrossMarginCFDOrder,
-  ) => {
+  placeCrossMarginOrder = (signedOrder: SignedCrossMarginCFDOrder) => {
     const headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -234,41 +250,76 @@ class Aggregator {
       `${this.apiUrl}/api/v1/order/futures`,
       z.object({
         orderId: z.string(),
-        placementRequests: z.array(
-          z.object({
-            amount: z.number(),
-            brokerAddress: z.string(),
-            exchange: z.string(),
-          }),
-        ).optional(),
+        placementRequests: z
+          .array(
+            z.object({
+              amount: z.number(),
+              brokerAddress: z.string(),
+              exchange: z.string(),
+            })
+          )
+          .optional(),
       }),
       {
         headers,
         method: 'POST',
         body: JSON.stringify(signedOrder),
       },
-      errorSchema,
+      errorSchema
+    );
+  };
+
+  replaceFuturesSLTPOrder = (signedOrder: ReplaceFuturesSLTPOrder) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...this.basicAuthHeaders,
+    };
+
+    return fetchWithValidation(
+      `${this.apiUrl}/api/v1/order/futures/sltp/replace`,
+      z.object({
+        orderId: z.string(),
+        placementRequests: z
+          .array(
+            z.object({
+              amount: z.number(),
+              brokerAddress: z.string(),
+              exchange: z.string(),
+            })
+          )
+          .optional(),
+      }),
+      {
+        headers,
+        method: 'POST',
+        body: JSON.stringify(signedOrder),
+      },
+      errorSchema
     );
   };
 
   getBalance = (address: string) => {
-    const url = new URL(`${this.apiUrl}/api/v1/address/futures/balance/${address}`);
-    return fetchWithValidation(
-      url.toString(),
-      futuresBalancesSchema,
+    const url = new URL(
+      `${this.apiUrl}/api/v1/address/futures/balance/${address}`
     );
-  }
+    return fetchWithValidation(url.toString(), futuresBalancesSchema);
+  };
 
   getLockedBalance = (address: string, currency: string) => {
-    const url = new URL(`${this.apiUrl}/api/v1/address/balance/reserved/${currency}`);
+    const url = new URL(
+      `${this.apiUrl}/api/v1/address/balance/reserved/${currency}`
+    );
     url.searchParams.append('address', address);
     return fetchWithValidation(
       url.toString(),
-      z.object({
-        [currency]: z.number(),
-      }).partial(),
+      z
+        .object({
+          [currency]: z.number(),
+        })
+        .partial(),
       { headers: this.basicAuthHeaders },
-      errorSchema,
+      errorSchema
     );
   };
 
@@ -277,7 +328,9 @@ class Aggregator {
       'Content-Type': 'application/json',
     };
 
-    const url = new URL(`${this.apiUrl}/api/v1/address/futures/balance/spv/withdraw`);
+    const url = new URL(
+      `${this.apiUrl}/api/v1/address/futures/balance/spv/withdraw`
+    );
 
     return fetchWithValidation(
       url.toString(),
@@ -287,9 +340,9 @@ class Aggregator {
         method: 'POST',
         body: JSON.stringify(signedInternalTransfer),
       },
-      errorSchema,
-    )
-  }
+      errorSchema
+    );
+  };
 }
 
 export * as schemas from './schemas/index.js';
