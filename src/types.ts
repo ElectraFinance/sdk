@@ -128,9 +128,11 @@ export type SignedOrder = {
 
 type BaseFuturesOrder = {
   senderAddress: string; // address
-  matcherAddress: string; // address
-  amount: number; // uint64
   price: number; // uint64
+  matcherAddress: string; // address
+  price2: number;
+  orderType: number;
+  amount: number; // uint64
   matcherFee: number; // uint64
   expiration: number; // uint64
   buySide: 0 | 1; // uint8, 1=buy, 0=sell
@@ -138,6 +140,7 @@ type BaseFuturesOrder = {
   leverage?: string | undefined; // string
   isPersonalSign: boolean; // bool
   isFromDelegate?: boolean | undefined; // bool
+  signerChainId: number;
 };
 
 export type IsolatedCFDOrder = {
@@ -169,6 +172,7 @@ export type CancelOrderRequest = {
   senderAddress: string;
   isPersonalSign: boolean;
   isFromDelegate?: boolean | undefined;
+  signerChainId: number;
 };
 
 export type SignedCancelOrderRequest = {

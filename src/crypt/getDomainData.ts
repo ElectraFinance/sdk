@@ -17,7 +17,7 @@ function removeUndefined<T>(obj: Record<string, T | undefined>) {
 /**
  * See {@link https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator}
  */
-const getDomainData = (chainId: SupportedChainId) => ({
+const getDomainData = (chainId: number) => ({
   ...removeUndefined(EIP712Domain),
   chainId,
 });
