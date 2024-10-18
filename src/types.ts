@@ -207,7 +207,7 @@ export enum SupportedChainId {
   EVENT_HORIZON_TESTNET = '123420000034',
   LUMIA_TESTNET = '1952959480',
 
-  TON = 'ton',
+  TON = '18446744073709552000',
 
   // For testing and debug purpose
   // BROKEN = '0',
