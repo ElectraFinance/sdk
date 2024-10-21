@@ -162,6 +162,11 @@ export type SignedCrossMarginCFDOrder = {
   signature: string; // bytes
 } & CrossMarginCFDOrder;
 
+export type ReplaceFuturesSLTPOrder = {
+  blockchainOrder: SignedCrossMarginCFDOrder;
+  id: string;
+};
+
 export type CancelOrderRequest = {
   id: number | string;
   senderAddress: string;
