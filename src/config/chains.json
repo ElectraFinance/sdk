@@ -149,7 +149,6 @@
     "label": "TON Testnet",
     "shortName": "TON Testnet",
     "code": "tonTestnet",
-    "icon": "ton",
     "rpc": "https://testnet-v4.tonhubapi.com",
     "baseCurrencyName": "TON"
   },
@@ -159,7 +158,6 @@
     "label": "TON Mainnet",
     "shortName": "TON Mainnet",
     "code": "ton",
-    "icon": "ton",
     "rpc": "https://mainnet-v4.tonhubapi.com",
     "baseCurrencyName": "TON"
   }
