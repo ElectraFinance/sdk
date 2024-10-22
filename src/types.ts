@@ -119,6 +119,18 @@ export type InternalTransfer = {
   reserved: number; // uint192
   signature: string; // bytes
 };
+export type InternalTransferV2 = {
+  from: string; // address
+  to: string; // address
+  amount: string; // uint112
+  expiration: string; // uint64
+  nonce: string; // uint64
+  chainId: number; // uint64
+  signerChainId: number; // uint64
+  uniqueHash: string; // bytes32
+  externalAddress: string; // bytes
+  signature: string; // bytes
+};
 
 export type SignedOrder = {
   id: string; // hash of Order (it's not part of order structure in smart-contract)
@@ -211,6 +223,9 @@ export enum SupportedChainId {
   SEPOLIA = '11155111',
   EVENT_HORIZON_TESTNET = '123420000034',
   LUMIA_TESTNET = '1952959480',
+
+  TON = '4398026970693',
+  TON_TESTNET = '4398026970694',
 
   // For testing and debug purpose
   // BROKEN = '0',
