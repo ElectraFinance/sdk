@@ -13,4 +13,5 @@ export default [
   'base',
   'lumia',
   'ton',
+  'tonTestnet',
 ] as const;
