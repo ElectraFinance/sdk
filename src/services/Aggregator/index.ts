@@ -6,6 +6,7 @@ import { AggregatorWS } from './ws';
 import type {
   BasicAuthCredentials,
   InternalTransfer,
+  InternalTransferV2,
   IsolatedCFDOrder,
   ReplaceFuturesSLTPOrder,
   SignedCancelOrderRequest,
@@ -323,7 +324,7 @@ class Aggregator {
     );
   };
 
-  withdraw = (signedInternalTransfer: InternalTransfer) => {
+  withdraw = (signedInternalTransfer: InternalTransferV2) => {
     const headers = {
       'Content-Type': 'application/json',
     };
