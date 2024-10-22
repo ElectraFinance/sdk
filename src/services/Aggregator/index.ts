@@ -5,7 +5,7 @@ import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws';
 import type {
   BasicAuthCredentials,
-  InternalTransferV2,
+  InternalTransfer,
   IsolatedCFDOrder,
   ReplaceFuturesSLTPOrder,
   SignedCancelOrderRequest,
@@ -323,7 +323,7 @@ class Aggregator {
     );
   };
 
-  withdraw = (signedInternalTransfer: InternalTransferV2) => {
+  withdraw = (signedInternalTransfer: InternalTransfer) => {
     const headers = {
       'Content-Type': 'application/json',
     };
