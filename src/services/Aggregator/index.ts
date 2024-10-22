@@ -5,7 +5,6 @@ import errorSchema from './schemas/errorSchema.js';
 import { AggregatorWS } from './ws';
 import type {
   BasicAuthCredentials,
-  InternalTransfer,
   InternalTransferV2,
   IsolatedCFDOrder,
   ReplaceFuturesSLTPOrder,
