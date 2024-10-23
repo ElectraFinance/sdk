@@ -145,7 +145,7 @@
   },
   "4398026970694": {
     "chainId": "4398026970694",
-    "explorer": "https://tonscan.org/",
+    "explorer": "https://testnet.tonscan.org/",
     "label": "TON Testnet",
     "shortName": "TON Testnet",
     "code": "tonTestnet",
