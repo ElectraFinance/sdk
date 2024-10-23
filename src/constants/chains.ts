@@ -5,6 +5,7 @@ export const developmentChains = [
   SupportedChainId.SEPOLIA,
   SupportedChainId.EVENT_HORIZON_TESTNET,
   SupportedChainId.LUMIA_TESTNET,
+  SupportedChainId.TON_TESTNET,
 ];
 export const productionChains = [
   SupportedChainId.MAINNET,
@@ -18,4 +19,5 @@ export const productionChains = [
   SupportedChainId.AVAX,
   SupportedChainId.BASE,
   SupportedChainId.ARBITRUM,
+  SupportedChainId.TON,
 ];
