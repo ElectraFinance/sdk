@@ -128,7 +128,7 @@ export type InternalTransferV2 = {
   chainId: number; // uint64
   signerChainId: number; // uint64
   uniqueHash: string; // bytes32
-  externalAddress: string; // bytes
+  externalAddress: Uint8Array; // bytes
   signature: string; // bytes
 };
 
