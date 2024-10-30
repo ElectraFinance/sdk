@@ -244,7 +244,7 @@ class BlockchainService {
   generateTonPk = (proofPayload: ProofPayload) => {
     const url = new URL(`${this.apiUrl}/api/auth/ton/gen-pk`);
     return fetchWithValidation(url.toString(), z.any(), {
-      headers: this.basicAuthHeaders,
+      headers: { ...this.basicAuthHeaders, 'Content-type': 'application/json' },
       method: 'POST',
       body: JSON.stringify(proofPayload),
     });
