@@ -2,7 +2,7 @@ import { fetchWithValidation } from 'simple-typed-fetch';
 import {
   errorSchema,
   linkSchema,
-  // aggregatedCommissionHistorySchema,
+  aggregatedCommissionHistorySchema,
   aggregatedHistorySchema,
   leaderboardSchema,
   accountDetailsSchema,
@@ -57,41 +57,41 @@ class ReferralSystem {
       subscribeToReferralErrorSchema
     );
 
-  // getAggregatedCommissionHistory = (
-  //   refererAddress: string,
-  //   chainId: SupportedChainId | undefined,
-  //   types: string[] | undefined,
-  //   itemPerPage: number,
-  //   page: number
-  // ) => {
-  //   const queryParams: Record<string, string | number> = {
-  //     n_per_page: itemPerPage,
-  //     address: refererAddress,
-  //     page,
-  //     suppress_error: 1
-  //   };
+  getAggregatedCommissionHistory = (
+    refererAddress: string,
+    chainId: SupportedChainId | undefined,
+    types: string[] | undefined,
+    itemPerPage: number,
+    page: number
+  ) => {
+    const queryParams: Record<string, string | number> = {
+      n_per_page: itemPerPage,
+      address: refererAddress,
+      page,
+      suppress_error: 1
+    };
 
-  //   if (chainId !== undefined) {
-  //     queryParams['chain_id'] = chainId;
-  //   }
+    if (chainId !== undefined) {
+      queryParams['chain_id'] = chainId;
+    }
 
-  //   if (types !== undefined) {
-  //     queryParams['history_filter'] = encodeURIComponent(types.join(','));
-  //   }
+    if (types !== undefined) {
+      queryParams['history_filter'] = encodeURIComponent(types.join(','));
+    }
 
-  //   const queryString = Object.entries(queryParams).map(([k, v]) => `${k}=${v}`).join('&')
+    const queryString = Object.entries(queryParams).map(([k, v]) => `${k}=${v}`).join('&')
 
-  //   return fetchWithValidation(
-  //     `${this.apiUrl}/v3/accruals?${queryString}`,
-  //     aggregatedCommissionHistorySchema,
-  //     {
-  //       headers: {
-  //         'referer-address': refererAddress,
-  //       },
-  //     },
-  //     errorSchema
-  //   );
-  // }
+    return fetchWithValidation(
+      `${this.apiUrl}/v3/accruals?${queryString}`,
+      aggregatedCommissionHistorySchema,
+      {
+        headers: {
+          'referer-address': refererAddress,
+        },
+      },
+      errorSchema
+    );
+  }
 
   getAggregatedHistory = (
     refererAddress: string,
