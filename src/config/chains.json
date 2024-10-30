@@ -148,7 +148,7 @@
     "explorer": "https://testnet.tonscan.org/",
     "label": "TON Testnet",
     "shortName": "TON Testnet",
-    "code": "tonTestnet",
+    "code": "ton",
     "rpc": "https://testnet-v4.tonhubapi.com",
     "baseCurrencyName": "TON"
   },
