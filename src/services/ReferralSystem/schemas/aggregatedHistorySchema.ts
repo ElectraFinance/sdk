@@ -14,7 +14,7 @@ const aggregatedHistorySchema = z.object({
     amount_token_fmt: z.number(),
     amount_usd: z.string(),
     amount_usd_fmt: z.number(),
-    // pair: z.string(), 
+    pair: z.string(), 
     token_price: z.string(),
     token_price_fmt: z.number()
   })),
