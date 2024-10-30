@@ -1,6 +1,7 @@
 export { default as linkSchema } from './linkSchema';
 export { errorSchema } from './errorSchema';
 export { subscribeToReferralErrorSchema } from './subscribeToReferralErrorSchema';
+export { default as aggregatedCommissionHistorySchema } from './aggregatedCommissionHistorySchema';
 export { default as aggregatedHistorySchema } from './aggregatedHistorySchema';
 export {
   type AccountDetails, accountDetailsSchema
