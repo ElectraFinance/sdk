@@ -224,9 +224,6 @@ export enum SupportedChainId {
   SEPOLIA = '11155111',
   EVENT_HORIZON_TESTNET = '123420000034',
   LUMIA_TESTNET = '1952959480',
-  TON_TESTNET = '4398026970692'
-
-  TON = '4398026970693',
   TON_TESTNET = '4398026970692',
 
   // For testing and debug purpose
