@@ -67,7 +67,7 @@
     "label": "Polygon Mainnet",
     "shortName": "Polygon",
     "code": "polygon",
-    "baseCurrencyName": "MATIC",
+    "baseCurrencyName": "POL",
     "rpc": "https://polygon-rpc.com/",
     "explorer": "https://polygonscan.com/"
   },
