@@ -366,3 +366,11 @@ export type Json =
   | { [key: string]: Json };
 
 export type MarginMode = 'cross' | 'isolated';
+
+export enum OrderType {
+  LIMIT = 0,
+  MARKET = 1,
+  TAKE_PROFIT = 2,
+  STOP_LOSS = 4,
+  STOP_LIMIT = 8,
+}
