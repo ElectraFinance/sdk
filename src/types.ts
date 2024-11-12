@@ -172,6 +172,7 @@ export type SignedIsolatedMarginCFDOrder = {
 export type SignedCrossMarginCFDOrder = {
   id: string; // hash of Order (it's not part of order structure in smart-contract)
   signature: string; // bytes
+  protectedOrderId?: string;
 } & CrossMarginCFDOrder;
 
 export type ReplaceFuturesSLTPOrder = {

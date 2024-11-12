@@ -26,7 +26,8 @@ export const signCrossMarginCFDOrder = async (
   stopPrice: BigNumber.Value | undefined,
   leverage: string | undefined,
   isFromDelegate?: boolean,
-  orderType?: OrderType
+  orderType?: OrderType,
+  protectedOrderId?: string
 ) => {
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
@@ -83,6 +84,9 @@ export const signCrossMarginCFDOrder = async (
     id: hashCrossMarginCFDOrder(order),
     signature: fixedSignature,
   };
+  if (protectedOrderId) {
+    signedOrder.protectedOrderId = protectedOrderId;
+  }
 
   return signedOrder;
 };
