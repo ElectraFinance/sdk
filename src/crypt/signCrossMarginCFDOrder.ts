@@ -40,13 +40,11 @@ export const signCrossMarginCFDOrder = async (
     instrumentIndex,
     matcherAddress,
     price2: 0,
-    amount: Number(
-      normalizeNumber(
-        amount,
-        INTERNAL_PROTOCOL_PRECISION,
-        BigNumber.ROUND_FLOOR
-      )
-    ),
+    amount: normalizeNumber(
+      amount,
+      INTERNAL_PROTOCOL_PRECISION,
+      BigNumber.ROUND_FLOOR
+    ).toString(),
     matcherFee: Number(
       normalizeNumber(
         matcherFee,

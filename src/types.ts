@@ -144,7 +144,7 @@ type BaseFuturesOrder = {
   matcherAddress: string; // address
   price2: number;
   orderType: number;
-  amount: number; // uint64
+  amount: number | string; // bigint
   matcherFee: number; // uint64
   expiration: number; // uint64
   buySide: 0 | 1; // uint8, 1=buy, 0=sell
