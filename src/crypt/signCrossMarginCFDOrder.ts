@@ -1,6 +1,10 @@
 import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
-import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants';
+import {
+  DEFAULT_EXPIRATION,
+  INTERNAL_PROTOCOL_PRECISION,
+  UINT96_MAX,
+} from '../constants';
 import type {
   CrossMarginCFDOrder,
   OrderType,
@@ -31,6 +35,7 @@ export const signCrossMarginCFDOrder = async (
 ) => {
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
+  const strAmount = amount.toString();
 
   const order: CrossMarginCFDOrder = {
     senderAddress,
@@ -40,11 +45,14 @@ export const signCrossMarginCFDOrder = async (
     instrumentIndex,
     matcherAddress,
     price2: 0,
-    amount: normalizeNumber(
-      amount,
-      INTERNAL_PROTOCOL_PRECISION,
-      BigNumber.ROUND_FLOOR
-    ).toString(),
+    amount:
+      strAmount === UINT96_MAX.toString()
+        ? strAmount
+        : normalizeNumber(
+            amount,
+            INTERNAL_PROTOCOL_PRECISION,
+            BigNumber.ROUND_FLOOR
+          ).toString(),
     matcherFee: Number(
       normalizeNumber(
         matcherFee,
