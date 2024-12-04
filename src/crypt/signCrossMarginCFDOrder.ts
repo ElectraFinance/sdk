@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { DEFAULT_EXPIRATION, INTERNAL_PROTOCOL_PRECISION } from '../constants';
 import type {
   CrossMarginCFDOrder,
+  OrderType,
   SignedCrossMarginCFDOrder,
 } from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
@@ -24,7 +25,9 @@ export const signCrossMarginCFDOrder = async (
   chainId: number,
   stopPrice: BigNumber.Value | undefined,
   leverage: string | undefined,
-  isFromDelegate?: boolean
+  isFromDelegate?: boolean,
+  orderType?: OrderType,
+  protectedOrderId?: string
 ) => {
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
@@ -59,7 +62,7 @@ export const signCrossMarginCFDOrder = async (
     isPersonalSign: usePersonalSign,
     isFromDelegate,
     signerChainId: chainId,
-    orderType: 0,
+    orderType: orderType ?? 0,
   };
 
   const signature = usePersonalSign
@@ -81,6 +84,9 @@ export const signCrossMarginCFDOrder = async (
     id: hashCrossMarginCFDOrder(order),
     signature: fixedSignature,
   };
+  if (protectedOrderId) {
+    signedOrder.protectedOrderId = protectedOrderId;
+  }
 
   return signedOrder;
 };

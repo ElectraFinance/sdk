@@ -6,6 +6,7 @@ import {
 } from '../constants/index.js';
 import type {
   IsolatedCFDOrder,
+  OrderType,
   SignedIsolatedMarginCFDOrder,
 } from '../types.js';
 import normalizeNumber from '../utils/normalizeNumber.js';
@@ -26,7 +27,8 @@ export const signIsolatedMarginCFDOrder = async (
   signer: ethers.Signer,
   chainId: number,
   stopPrice: BigNumber.Value | undefined,
-  isFromDelegate?: boolean
+  isFromDelegate?: boolean,
+  orderType?: OrderType
 ) => {
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
@@ -36,7 +38,7 @@ export const signIsolatedMarginCFDOrder = async (
     matcherAddress,
     instrumentAddress,
     price2: 0,
-    orderType: 0,
+    orderType: orderType ?? 0,
     signerChainId: chainId,
     amount: Number(
       normalizeNumber(
