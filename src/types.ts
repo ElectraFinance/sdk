@@ -144,7 +144,7 @@ type BaseFuturesOrder = {
   matcherAddress: string; // address
   price2: number;
   orderType: number;
-  amount: number; // uint64
+  amount: number | string; // bigint
   matcherFee: number; // uint64
   expiration: number; // uint64
   buySide: 0 | 1; // uint8, 1=buy, 0=sell
@@ -172,6 +172,7 @@ export type SignedIsolatedMarginCFDOrder = {
 export type SignedCrossMarginCFDOrder = {
   id: string; // hash of Order (it's not part of order structure in smart-contract)
   signature: string; // bytes
+  protectedOrderId?: string;
 } & CrossMarginCFDOrder;
 
 export type ReplaceFuturesSLTPOrder = {
@@ -366,3 +367,11 @@ export type Json =
   | { [key: string]: Json };
 
 export type MarginMode = 'cross' | 'isolated';
+
+export enum OrderType {
+  LIMIT = 0,
+  MARKET = 1,
+  TAKE_PROFIT = 2,
+  STOP_LOSS = 4,
+  STOP_LIMIT = 8,
+}
