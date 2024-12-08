@@ -8,4 +8,4 @@ export * from './chains.js';
 export * from './precisions.js';
 export * from './gasLimits.js';
 
-export const DEFAULT_EXPIRATION = 29 * 24 * 60 * 60 * 1000; // 29 days
+export const DEFAULT_EXPIRATION = 365 * 24 * 60 * 60 * 1000; // 365 days
