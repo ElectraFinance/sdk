@@ -52,7 +52,7 @@ class ReferralSystem {
           'Content-type': 'application/json',
         },
         method: 'POST',
-        body: JSON.stringify({ reward_recipient: address }),
+        body: JSON.stringify({ payload: { reward_recipient: address } }),
       },
       errorSchema
     );
