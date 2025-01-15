@@ -7,6 +7,7 @@ import type {
   BasicAuthCredentials,
   InternalTransferV2,
   IsolatedCFDOrder,
+  Leverage,
   ReplaceFuturesSLTPOrder,
   SignedCancelOrderRequest,
   SignedCrossMarginCFDOrder,
@@ -339,6 +340,27 @@ class Aggregator {
         headers,
         method: 'POST',
         body: JSON.stringify(signedInternalTransfer),
+      },
+      errorSchema
+    );
+  };
+
+  setLeverage = (signedLeverage: Leverage) => {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    const url = new URL(
+      `${this.apiUrl}/api/v1/address/leverage`
+    );
+
+    return fetchWithValidation(
+      url.toString(),
+      z.any(),
+      {
+        headers,
+        method: 'POST',
+        body: JSON.stringify(signedLeverage),
       },
       errorSchema
     );

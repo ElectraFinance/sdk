@@ -123,12 +123,23 @@ export type InternalTransferV2 = {
   from: string; // address
   to: string; // address
   amount: string; // uint112
-  expiration: string; // uint64
+  expiration: number; // uint64
   nonce: string; // uint64
   chainId: number; // uint64
   signerChainId: number; // uint64
   uniqueHash: string; // bytes32
   externalAddress: string; // bytes
+  signature: string; // bytes
+};
+export type LeverageRequest = {
+  senderAddress: string; // address
+  instrumentIndex: number; // address
+  expiration: number; // uint64
+  signerChainId: number; // uint64
+  leverage: string; // uint64
+  isFromDelegate: boolean; // bytes32
+};
+export type Leverage = LeverageRequest & {
   signature: string; // bytes
 };
 
@@ -291,6 +302,7 @@ export type FuturesTradeInfo = {
   instrument: string;
   buyPrice: number | undefined;
   sellPrice: number | undefined;
+  leverage: number;
   buyPower: number;
   sellPower: number;
   minAmount: number;
