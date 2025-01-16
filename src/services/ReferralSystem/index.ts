@@ -11,17 +11,18 @@ import {
   isWhitelistedSchema,
 } from './schemas/index.js';
 import type { SupportedChainId } from '../../types.js';
+import { claimRewardsSchema } from './schemas/claimRewardsSchema.js';
 
 export type { AccountDetails, AccountReferrals, Leaderboard } from './schemas';
 
 type SubscribePayloadType = {
-  ref_target: string
-  referral: string
+  ref_target: string;
+  referral: string;
 };
 
 type AddressType = {
-  address: string
-}
+  address: string;
+};
 
 class ReferralSystem {
   private readonly apiUrl: string;
@@ -39,11 +40,24 @@ class ReferralSystem {
     this.getAccountDetails = this.getAccountDetails.bind(this);
     this.getAccountReferrals = this.getAccountReferrals.bind(this);
     this.getIsWhitelisted = this.getIsWhitelisted.bind(this);
+    this.getClaimRewards = this.getClaimRewards.bind(this);
   }
 
-  subscribeToReferral = (
-    payload: SubscribePayloadType
-  ) =>
+  getClaimRewards = (address: string) =>
+    fetchWithValidation(
+      `${this.apiUrl}/v3/claim-rewards`,
+      claimRewardsSchema,
+      {
+        headers: {
+          'Content-type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({ payload: { reward_recipient: address } }),
+      },
+      errorSchema
+    );
+
+  subscribeToReferral = (payload: SubscribePayloadType) =>
     fetchWithValidation(
       `${this.apiUrl}/referer/subscribe2`,
       linkSchema,
@@ -68,7 +82,7 @@ class ReferralSystem {
       n_per_page: itemPerPage,
       address: refererAddress,
       page,
-      suppress_error: 1
+      suppress_error: 1,
     };
 
     if (chainId !== undefined) {
@@ -79,7 +93,9 @@ class ReferralSystem {
       queryParams['history_filter'] = encodeURIComponent(types.join(','));
     }
 
-    const queryString = Object.entries(queryParams).map(([k, v]) => `${k}=${v}`).join('&')
+    const queryString = Object.entries(queryParams)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('&');
 
     return fetchWithValidation(
       `${this.apiUrl}/v3/accruals?${queryString}`,
@@ -91,7 +107,7 @@ class ReferralSystem {
       },
       errorSchema
     );
-  }
+  };
 
   getAggregatedHistory = (
     refererAddress: string,
@@ -103,7 +119,7 @@ class ReferralSystem {
     const queryParams: Record<string, string | number> = {
       n_per_page: itemPerPage,
       page,
-      suppress_error: 1
+      suppress_error: 1,
     };
 
     if (chainId !== undefined) {
@@ -114,7 +130,9 @@ class ReferralSystem {
       queryParams['history_filter'] = encodeURIComponent(types.join(','));
     }
 
-    const queryString = Object.entries(queryParams).map(([k, v]) => `${k}=${v}`).join('&')
+    const queryString = Object.entries(queryParams)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('&');
 
     return fetchWithValidation(
       `${this.apiUrl}/referer/view/aggregated-history?${queryString}`,
@@ -126,37 +144,38 @@ class ReferralSystem {
       },
       errorSchema
     );
-  }
+  };
 
-  getLeaderboard = ({
-    page = 1
-  }: { page: number }) => {
+  getLeaderboard = ({ page = 1 }: { page: number }) => {
     return fetchWithValidation(
       `${this.apiUrl}/referer/futures/leaderboard?page=${page}`,
       leaderboardSchema
     );
-  }
+  };
 
   getAccountDetails = ({ address }: AddressType) => {
     return fetchWithValidation(
       `${this.apiUrl}/referer/futures/account-details?address=${address}`,
-      accountDetailsSchema,
+      accountDetailsSchema
     );
-  }
+  };
 
-  getAccountReferrals = ({ address, page = 1 }: AddressType & { page: number }) => {
+  getAccountReferrals = ({
+    address,
+    page = 1,
+  }: AddressType & { page: number }) => {
     return fetchWithValidation(
       `${this.apiUrl}/referer/futures/account-referrals?address=${address}&page=${page}`,
-      accountReferralsSchema,
+      accountReferralsSchema
     );
-  }
+  };
 
   getIsWhitelisted = ({ address }: AddressType) => {
     return fetchWithValidation(
       `${this.apiUrl}/referer/futures/is_whitelisted?address=${address}`,
-      isWhitelistedSchema,
+      isWhitelistedSchema
     );
-  }
+  };
 }
 
 export * as schemas from './schemas/index.js';

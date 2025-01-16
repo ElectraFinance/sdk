@@ -579,6 +579,7 @@ class AggregatorWS {
             futuresTradeRequestId: json.id,
             sender: json.S,
             instrument: json.i,
+            leverage: json.l,
             buyPrice: json.bp,
             sellPrice: json.sp,
             buyPower: json.bpw,
