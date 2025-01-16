@@ -2,6 +2,7 @@ export { default as cancelOrderTypes } from './cancelOrderTypes.js';
 export { default as orderStatuses } from './orderStatuses.js';
 export { default as subOrderStatuses } from './subOrderStatuses.js';
 export { default as networkCodes } from './networkCodes.js';
+export { default as setLeverageTypes } from './setLeverageTypes.js';
 
 export * from './orderSides';
 export * from './chains.js';

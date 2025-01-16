@@ -9,6 +9,7 @@ const futuresTradeInfoSchema = z.object({
   bp: z.number().optional(), // buy price
   sp: z.number().optional(), // sell price
   bpw: z.number(), // buy power
+  l: z.number(), // leverage
   spw: z.number(), // sell power
   ma: z.number(), // min amount
 });
