@@ -1,24 +1,23 @@
 import { z } from 'zod';
 import positionStatuses from '../../../../constants/positionStatuses.js';
 
-const sbiSchema = z
-  .object({
-    i: z.string(), // instrument
-    s: z.enum(positionStatuses), // position status
-    cp: z.string(), // current price
-    pnl: z.string(), // floating profit & loss
-    fr: z.string(), // accumulated funding rate
-    p: z.string(), // position
-    pp: z.string(), // position price
-    m: z.string(), // margin
-    mu: z.string(), // margin in USD
-    l: z.string(), // leverage
-    lfrs: z.string(), // long funding rate per second
-    lfrd: z.string(), // long funding rate per day
-    sfrs: z.string(), // short funding rate per second
-    sfrd: z.string(), // short funding rate per day
-    sop: z.string().optional() // stop out price
-  })
+const sbiSchema = z.object({
+  i: z.string(), // instrument
+  s: z.enum(positionStatuses), // position status
+  cp: z.string(), // current price
+  pnl: z.string(), // floating profit & loss
+  fr: z.string(), // accumulated funding rate
+  p: z.string(), // position
+  pp: z.string(), // position price
+  m: z.string(), // margin
+  mu: z.string(), // margin in USD
+  l: z.string(), // leverage
+  lfrs: z.string(), // long funding rate per second
+  lfrd: z.string(), // long funding rate per day
+  sfrs: z.string(), // short funding rate per second
+  sfrd: z.string(), // short funding rate per day
+  sop: z.string().optional(), // stop out price
+});
 
 export const cfdBalanceSchema = z
   .object({
@@ -29,9 +28,10 @@ export const cfdBalanceSchema = z
     r: z.string(), // total reserves
     m: z.string().optional(), // margin
     mu: z.string(), // total margin in USD
+    mmu: z.string(), // maintenance margin in USD
     fmu: z.string(), // total free margin in USD
     awb: z.string(), // available withdraw balance
-    sbi: sbiSchema.array() // states by instruments
+    sbi: sbiSchema.array(), // states by instruments
   })
   .transform((obj) => {
     const sbi = obj.sbi.map((state) => {
@@ -51,7 +51,7 @@ export const cfdBalanceSchema = z
         shortFundingRatePerSecond: state.sfrs,
         shortFundingRatePerDay: state.sfrd,
         stopOutPrice: state.sop,
-      }
+      };
     });
 
     return {
@@ -62,10 +62,11 @@ export const cfdBalanceSchema = z
       reserves: obj.r,
       margin: obj.m,
       marginUSD: obj.mu,
+      maintenanceMarginUSD: obj.mmu,
       freeMarginUSD: obj.fmu,
       availableWithdrawBalance: obj.awb,
       statesByInstruments: sbi,
-    }
+    };
   });
 
 const cfdBalancesSchema = z.array(cfdBalanceSchema);

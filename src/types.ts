@@ -66,6 +66,7 @@ export type CFDBalance = {
   reserves: string;
   margin: string | undefined;
   marginUSD: string;
+  maintenanceMarginUSD: string;
   freeMarginUSD: string;
   availableWithdrawBalance: string;
   statesByInstruments: StatesByInstrument[];
