@@ -16,8 +16,9 @@ import { claimRewardsSchema } from './schemas/claimRewardsSchema.js';
 export type { AccountDetails, AccountReferrals, Leaderboard } from './schemas';
 
 type SubscribePayloadType = {
-  ref_target: string;
+  ref_target?: string;
   referral: string;
+  tg_user_id?: number;
 };
 
 type AddressType = {
