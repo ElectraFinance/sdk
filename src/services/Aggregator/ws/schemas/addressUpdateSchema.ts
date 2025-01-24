@@ -52,6 +52,8 @@ export const orderUpdateSchema = z.object({
   t: z.number(), // update time
   E: z.enum(executionTypes).optional(), // execution type
   C: z.string().optional(), // trigger condition
+  F: z.string().toUpperCase().optional(), // fee asset
+  f: z.number().optional(), // fee
   lv: z.number().optional(), // leverage
   roi: z.number().optional(), // ROI%
   rpnl: z.number().optional(), // realized PnL
@@ -69,6 +71,8 @@ export const orderUpdateSchema = z.object({
     liquidated: o.l,
     executionType: o.E,
     triggerCondition: o.C,
+    feeAsset: o.F,
+    fee: o.f,
     leverage: o.lv,
     roi: o.roi,
     realizedPnL: o.rpnl,
