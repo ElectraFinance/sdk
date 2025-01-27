@@ -165,6 +165,7 @@ type BaseFuturesOrder = {
   isPersonalSign: boolean; // bool
   isFromDelegate?: boolean | undefined; // bool
   signerChainId: number;
+  reduceOnly?: boolean;
 };
 
 export type IsolatedCFDOrder = {
