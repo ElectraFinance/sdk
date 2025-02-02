@@ -10,8 +10,10 @@ const internalFeeAssetSchema = z.object({
 const infoSchema = z.object({
   chainId: z.number(),
   chainName: z.string(),
+  swapExecutorContractAddress: z.string().optional(),
   exchangeContractAddress: z.string(),
   oracleContractAddress: z.string(),
+  cfdOracleContractAddress: z.string().optional(),
   matcherAddress: z.string(),
   orderFeePercent: z.number(),
   assetToAddress: z.record(z.string()).transform(makePartial),
