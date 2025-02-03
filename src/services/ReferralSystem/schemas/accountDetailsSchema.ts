@@ -8,7 +8,7 @@ const pointsAdditionalSchema = z.object({
 export const accountDetailsSchema = z.object({
   address: z.string(),
   ref_link: z.string(),
-  rank: z.number(),
+  rank: z.number().optional(),
   referrals_count: z.number(),
   direct_referrals_count: z.number(),
   points_total: z.number(),
