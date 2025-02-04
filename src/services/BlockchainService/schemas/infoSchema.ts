@@ -6,6 +6,10 @@ const internalFeeAssetSchema = z.object({
   value: z.number(),
   asset: z.string(),
 });
+const l2Schema = z.object({
+  enabled: z.boolean(),
+  l1ChainId: z.number().nullable(),
+});
 
 const infoSchema = z.object({
   chainId: z.number(),
@@ -21,6 +25,7 @@ const infoSchema = z.object({
   assetToIcons: z.record(z.string()).transform(makePartial).optional(),
   cexTokens: z.string().array(),
   internalFeeAssets: internalFeeAssetSchema.array().optional(),
+  l2: l2Schema,
 });
 
 export default infoSchema;
