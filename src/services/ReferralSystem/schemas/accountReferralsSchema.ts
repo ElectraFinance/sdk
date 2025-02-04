@@ -13,4 +13,6 @@ export const accountReferralsSchema = z.object({
   pagination_info: paginationInfoSchema
 })
 
+export const bitgetReferralsSchema = z.array(z.string())
+
 export type AccountReferrals = z.infer<typeof accountReferralsSchema>;
