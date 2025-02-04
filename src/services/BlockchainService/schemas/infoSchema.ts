@@ -25,7 +25,7 @@ const infoSchema = z.object({
   assetToIcons: z.record(z.string()).transform(makePartial).optional(),
   cexTokens: z.string().array(),
   internalFeeAssets: internalFeeAssetSchema.array().optional(),
-  l2: l2Schema,
+  l2: l2Schema.optional(),
 });
 
 export default infoSchema;
