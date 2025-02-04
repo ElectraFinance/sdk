@@ -27,7 +27,8 @@ export const signCrossMarginCFDOrder = async (
   leverage: string | undefined,
   isFromDelegate?: boolean,
   orderType?: OrderType,
-  protectedOrderId?: string
+  protectedOrderId?: string,
+  isOrderClosing?: boolean
 ) => {
   const nonce = Date.now();
   const expiration = nonce + DEFAULT_EXPIRATION;
@@ -72,6 +73,10 @@ export const signCrossMarginCFDOrder = async (
         CROSS_MARGIN_CFD_ORDER_TYPES_V2,
         order
       );
+
+  if (isOrderClosing) {
+    order.reduceOnly = true;
+  }
 
   // https://github.com/poap-xyz/poap-fun/pull/62#issue-928290265
   // "Signature's v was always send as 27 or 28, but from Ledger was 0 or 1"
