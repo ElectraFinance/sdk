@@ -12,6 +12,7 @@ import {
 } from './schemas/index.js';
 import type { SupportedChainId } from '../../types.js';
 import { claimRewardsSchema } from './schemas/claimRewardsSchema.js';
+import { bitgetReferralsSchema } from './schemas/accountReferralsSchema.js';
 
 export type { AccountDetails, AccountReferrals, Leaderboard } from './schemas';
 
@@ -169,6 +170,16 @@ class ReferralSystem {
     return fetchWithValidation(
       `${this.apiUrl}/referer/futures/account-referrals?address=${address}&page=${page}`,
       accountReferralsSchema
+    );
+  };
+
+  getBitgetReferrals = ({
+    address,
+    page = 1,
+  }: AddressType & { page: number }) => {
+    return fetchWithValidation(
+      `${this.apiUrl}/referer/futures/temp-bitget-list?address=${address}&page=${page}`,
+      bitgetReferralsSchema
     );
   };
 
