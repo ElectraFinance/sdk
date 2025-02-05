@@ -270,6 +270,50 @@ class Aggregator {
     );
   };
 
+  placeCrossMarginBatchOrder = (batch: SignedCrossMarginCFDOrder[]) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...this.basicAuthHeaders,
+    };
+
+    return fetchWithValidation(
+      `${this.apiUrl}/api/v1/order/futures/batch`,
+      z.object({
+        placementResponses: z
+          .array(
+            z.union([
+              z.object({
+                orderId: z.string(),
+                placementRequests: z.array(
+                  z.object({
+                    amount: z.number(),
+                    brokerAddress: z.string(),
+                    exchange: z.string(),
+                  })
+                ),
+              }),
+              z.object({
+                orderId: z.string(),
+                error: z.object({
+                  code: z.number(),
+                  reason: z.string(),
+                  httpStatusCode: z.number(),
+                }),
+              }),
+            ])
+          )
+          .optional(),
+      }),
+      {
+        headers,
+        method: 'POST',
+        body: JSON.stringify({ blockchainOrders: batch }),
+      },
+      errorSchema
+    );
+  };
+
   replaceFuturesSLTPOrder = (signedOrder: ReplaceFuturesSLTPOrder) => {
     const headers = {
       'Content-Type': 'application/json',
@@ -350,9 +394,7 @@ class Aggregator {
       'Content-Type': 'application/json',
     };
 
-    const url = new URL(
-      `${this.apiUrl}/api/v1/address/leverage`
-    );
+    const url = new URL(`${this.apiUrl}/api/v1/address/leverage`);
 
     return fetchWithValidation(
       url.toString(),
