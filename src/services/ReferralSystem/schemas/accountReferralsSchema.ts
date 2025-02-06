@@ -21,4 +21,8 @@ export const tmaUserPoints = z.object({
   status_of_claim: z.string(),
 });
 
+export const calimPointsResultSchema = z.object({
+  status: z.string(),
+});
+
 export type AccountReferrals = z.infer<typeof accountReferralsSchema>;
