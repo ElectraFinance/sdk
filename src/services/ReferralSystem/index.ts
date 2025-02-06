@@ -14,6 +14,7 @@ import type { SupportedChainId } from '../../types.js';
 import { claimRewardsSchema } from './schemas/claimRewardsSchema.js';
 import {
   bitgetReferralsSchema,
+  calimPointsResultSchema,
   tmaUserPoints,
 } from './schemas/accountReferralsSchema.js';
 
@@ -199,6 +200,24 @@ class ReferralSystem {
       tmaUserPoints
     );
   };
+
+  claimTMAPoints = (payload: {
+    address: string;
+    tg_user_id: string;
+    overload_status?: string;
+  }) =>
+    fetchWithValidation(
+      `${this.apiUrl}/referer/tma/claim-points`,
+      calimPointsResultSchema,
+      {
+        headers: {
+          'Content-type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+      errorSchema
+    );
 }
 
 export * as schemas from './schemas/index.js';
