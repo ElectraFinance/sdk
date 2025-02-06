@@ -194,7 +194,6 @@ class ReferralSystem {
   };
 
   getUserTMAPoints = ({ tgUserId }: { tgUserId: number }) => {
-    console.log('getUserTMAPointsgetUserTMAPointsgetUserTMAPoints');
     return fetchWithValidation(
       `${this.apiUrl}/referer/tma/points?tg_user_id=${tgUserId}`,
       tmaUserPoints
