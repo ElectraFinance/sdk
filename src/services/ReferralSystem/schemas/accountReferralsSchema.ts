@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { paginationInfoSchema } from "./paginationInfoSchema";
+import { z } from 'zod';
+import { paginationInfoSchema } from './paginationInfoSchema';
 
 const dataSchema = z.object({
   referral: z.string(),
