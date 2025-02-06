@@ -12,7 +12,10 @@ import {
 } from './schemas/index.js';
 import type { SupportedChainId } from '../../types.js';
 import { claimRewardsSchema } from './schemas/claimRewardsSchema.js';
-import { bitgetReferralsSchema } from './schemas/accountReferralsSchema.js';
+import {
+  bitgetReferralsSchema,
+  tmaUserPoints,
+} from './schemas/accountReferralsSchema.js';
 
 export type { AccountDetails, AccountReferrals, Leaderboard } from './schemas';
 
@@ -187,6 +190,14 @@ class ReferralSystem {
     return fetchWithValidation(
       `${this.apiUrl}/referer/futures/is_whitelisted?address=${address}`,
       isWhitelistedSchema
+    );
+  };
+
+  getUserTMAPoints = ({ tgUserId }: { tgUserId: number }) => {
+    console.log('getUserTMAPointsgetUserTMAPointsgetUserTMAPoints');
+    return fetchWithValidation(
+      `${this.apiUrl}/referer/tma/points?tg_user_id=${tgUserId}`,
+      tmaUserPoints
     );
   };
 }
