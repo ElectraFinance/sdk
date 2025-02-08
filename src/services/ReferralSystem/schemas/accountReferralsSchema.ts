@@ -26,3 +26,5 @@ export const calimPointsResultSchema = z.object({
 });
 
 export type AccountReferrals = z.infer<typeof accountReferralsSchema>;
+
+export const bitgetVolumesSchema = z.record(z.string(), z.number());
