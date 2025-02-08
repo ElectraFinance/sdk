@@ -14,6 +14,7 @@ import type { SupportedChainId } from '../../types.js';
 import { claimRewardsSchema } from './schemas/claimRewardsSchema.js';
 import {
   bitgetReferralsSchema,
+  bitgetVolumesSchema,
   calimPointsResultSchema,
   tmaUserPoints,
 } from './schemas/accountReferralsSchema.js';
@@ -198,6 +199,13 @@ class ReferralSystem {
     return fetchWithValidation(
       `${this.apiUrl}/referer/tma/points?tg_user_id=${tgUserId}`,
       tmaUserPoints
+    );
+  };
+
+  getBitgetVolumes = () => {
+    return fetchWithValidation(
+      `${this.apiUrl}/referer/futures/temp-bitget-volumes`,
+      bitgetVolumesSchema
     );
   };
 
