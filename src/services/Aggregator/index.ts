@@ -407,6 +407,19 @@ class Aggregator {
       errorSchema
     );
   };
+
+  getInstrumentsConfig = async () => {
+    const url = new URL(
+      `${this.apiUrl}/api/v1/instruments/config`
+    );
+    const response = await fetch(url.toString());
+
+    if (!response.ok) {
+      throw new Error('Unable to get instruments');
+    }
+
+    return await response.json();
+  };
 }
 
 export * as schemas from './schemas/index.js';
