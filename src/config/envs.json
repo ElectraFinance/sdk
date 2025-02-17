@@ -2,6 +2,7 @@
   "production": {
     "marginMode": "isolated",
     "referralAPI": "https://electra.finance/referral-api",
+    "bonusAPI": "https://electra.finance",
     "networks": {
       "1": {
         "api": "https://electra.finance/eth-mainnet",
@@ -192,6 +193,7 @@
   "testing": {
     "marginMode": "isolated",
     "referralAPI": "https://testing.electra.finance/referral-api",
+    "bonusAPI": "https://testing.electra.finance",
     "networks": {
       "97": {
         "api": "https://testing.electra.finance/bsc-testnet",
@@ -259,6 +261,7 @@
   "staging": {
     "marginMode": "isolated",
     "referralAPI": "https://staging.electra.finance/referral-api",
+    "bonusAPI": "https://staging.electra.finance",
     "networks": {
       "1": {
         "api": "https://staging.electra.finance/eth-mainnet",
@@ -433,6 +436,7 @@
   "experimental": {
     "marginMode": "isolated",
     "referralAPI": "https://testing.electra.finance/referral-api",
+    "bonusAPI": "https://testing.electra.finance",
     "networks": {
       "97": {
         "api": "https://testing.electra.finance/bsc-testnet",
@@ -469,6 +473,7 @@
   "kucoin-production": {
     "marginMode": "isolated",
     "referralAPI": "https://electra.finance/referral-api",
+    "bonusAPI": "https://electra.finance",
     "networks": {
       "1": {
         "api": "https://electra.finance/eth-mainnet",
