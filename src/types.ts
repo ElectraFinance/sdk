@@ -144,6 +144,14 @@ export type Leverage = LeverageRequest & {
   signature: string; // bytes
 };
 
+export type BonusClaimRequest = {
+  address: string; // address
+  bonusId: number; // bytes
+};
+export type BonusClaim = BonusClaimRequest & {
+  signature: string; // bytes
+};
+
 export type SignedOrder = {
   id: string; // hash of Order (it's not part of order structure in smart-contract)
   signature: string; // bytes

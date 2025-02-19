@@ -49,7 +49,7 @@ export class BonusSystem {
 
   async getDepositConditions(amount: string): Promise<DepositConditionResponse> {
     const response = await fetch(
-      `${this.apiUrl}/api/v1/bonuses/conditions/deposit?amount=${amount}`,
+      `${this.apiUrl}/api/v1/bonus/conditions/deposit?amount=${amount}`,
       {
         headers: {
           'Content-type': 'application/json',
