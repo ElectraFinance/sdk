@@ -146,7 +146,8 @@ export type Leverage = LeverageRequest & {
 
 export type BonusClaimRequest = {
   address: string; // address
-  bonusId: number; // bytes
+  bonusId: string; // bytes
+  chainId: number; // uint64
 };
 export type BonusClaim = BonusClaimRequest & {
   signature: string; // bytes

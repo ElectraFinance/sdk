@@ -43,8 +43,7 @@ export class BonusSystem {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: ClaimBonusResponse = await response.json();
-    return data;
+    return response;
   }
 
   async getDepositConditions(amount: string): Promise<DepositConditionResponse> {

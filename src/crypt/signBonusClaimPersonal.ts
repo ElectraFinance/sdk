@@ -8,16 +8,15 @@ const signBonusClaimPersonal = async (
   const types = [
     'string',
     'address',
-    'uint16',
-    'uint8',
     'uint64',
-    'uint64',
+    'string',
   ];
   const message = ethers.solidityPackedKeccak256(
     types,
     [
       'CFDClaimBonusRequest',
       bonusClaimRequest.address,
+      bonusClaimRequest.chainId,
       bonusClaimRequest.bonusId,
     ],
   );
