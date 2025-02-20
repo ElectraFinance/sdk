@@ -6,10 +6,12 @@ import type { SupportedChainId, DeepPartial, VerboseUnitConfig, KnownEnv, Margin
 import { isValidChainId } from '../utils/index.js';
 import { simpleFetch } from 'simple-typed-fetch';
 import { ReferralSystem } from '../services/ReferralSystem/index.js';
+import { BonusSystem } from '../services/BonusSystem/index.js';
 
 type EnvConfig = {
   marginMode: MarginMode
   referralAPI: string
+  bonusAPI: string
   networks: Partial<
     Record<
       SupportedChainId,
@@ -25,6 +27,8 @@ export default class Electra {
 
   public readonly referralSystem: ReferralSystem;
 
+  public readonly bonusSystem: BonusSystem;
+
   constructor(
     envOrConfig: KnownEnv | EnvConfig = 'production',
     overrides?: DeepPartial<EnvConfig>
@@ -39,6 +43,7 @@ export default class Electra {
       config = {
         marginMode: envConfig.marginMode,
         referralAPI: envConfig.referralAPI,
+        bonusAPI: envConfig.bonusAPI,
         networks: Object.entries(envConfig.networks).map(([chainId, networkConfig]) => {
           if (!isValidChainId(chainId)) throw new Error(`Invalid chainId: ${chainId}`);
           const chainConfig = chains[chainId];
@@ -80,6 +85,7 @@ export default class Electra {
     }
 
     this.referralSystem = new ReferralSystem(config.referralAPI);
+    this.bonusSystem = new BonusSystem(config.bonusAPI);
 
     this.units = Object.entries(config.networks)
       .reduce<Partial<Record<SupportedChainId, Unit>>>((acc, [chainId, networkConfig]) => {

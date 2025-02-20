@@ -22,14 +22,14 @@ import {
 export type { AccountDetails, AccountReferrals, Leaderboard } from './schemas';
 
 type SubscribePayloadType = {
-  ref_target?: string;
-  referral: string;
-  tg_user_id?: number;
-  tg_init_data?: Record<string, any>;
+  ref_target?: string
+  referral: string
+  tg_user_id?: number
+  tg_init_data?: Record<string, any>
 };
 
 type AddressType = {
-  address: string;
+  address: string
 };
 
 class ReferralSystem {
@@ -210,9 +210,9 @@ class ReferralSystem {
   };
 
   claimTMAPoints = (payload: {
-    address: string;
-    tg_user_id: string;
-    overload_status?: string;
+    address: string
+    tg_user_id: string
+    overload_status?: string
   }) =>
     fetchWithValidation(
       `${this.apiUrl}/referer/tma/claim-points`,
