@@ -16,6 +16,8 @@ export const accountDetailsSchema = z.object({
   points_network_trading_volume: z.number(),
   network_trading_volume: z.number(),
   points_additional: z.array(pointsAdditionalSchema),
+  tma_claimed_direct_referrals_count: z.number().optional(),
+  tma_overall_direct_referrals_count: z.number().optional(),
 });
 
 export type AccountDetails = z.infer<typeof accountDetailsSchema>;
