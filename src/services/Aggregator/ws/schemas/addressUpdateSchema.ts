@@ -24,10 +24,10 @@ const subOrderSchema = z.object({
   p: z.number(), // price
   b: z.string(), // broker address
   S: z.enum(subOrderStatuses), // status
-  o: z.boolean().optional() // internal only
+  o: z.boolean().optional(), // internal only
 });
 
-type TSubOrder = z.infer<typeof subOrderSchema>
+type TSubOrder = z.infer<typeof subOrderSchema>;
 
 const getTransformedSubOrders = (subOrders: TSubOrder[]) => {
   return subOrders.map((so) => ({
@@ -41,29 +41,32 @@ const getTransformedSubOrders = (subOrders: TSubOrder[]) => {
     price: so.p,
     brokerAddress: so.b,
     status: so.S,
-  }))
-}
+  }));
+};
 
-export const orderUpdateSchema = z.object({
-  I: z.string(), // id
-  A: z.number(), // settled amount
-  S: z.enum(orderStatuses), // status
-  l: z.boolean().optional(), // is liquidation order
-  t: z.number(), // update time
-  E: z.enum(executionTypes).optional(), // execution type
-  C: z.string().optional(), // trigger condition
-  F: z.string().toUpperCase().optional(), // fee asset
-  f: z.number().optional(), // fee
-  lv: z.number().optional(), // leverage
-  roi: z.number().optional(), // ROI%
-  rpnl: z.number().optional(), // realized PnL
-  sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
-  c: subOrderSchema.array(), // sub orders (content)
-})
+export const orderUpdateSchema = z
+  .object({
+    I: z.string(), // id
+    A: z.number(), // settled amount
+    S: z.enum(orderStatuses), // status
+    l: z.boolean().optional(), // is liquidation order
+    t: z.number(), // update time
+    E: z.enum(executionTypes).optional(), // execution type
+    C: z.string().optional(), // trigger condition
+    F: z.string().toUpperCase().optional(), // fee asset
+    f: z.number().optional(), // fee
+    lv: z.number().optional(), // leverage
+    roi: z.number().optional(), // ROI%
+    rpnl: z.number().optional(), // realized PnL
+    rfr: z.number().optional(), // funding rate realized
+    sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
+    c: subOrderSchema.array(), // sub orders (content)
+  })
   .transform((val) => ({
     ...val,
     k: 'update' as const,
-  })).transform((o) => ({
+  }))
+  .transform((o) => ({
     kind: o.k,
     id: o.I,
     settledAmount: o.A,
@@ -76,66 +79,70 @@ export const orderUpdateSchema = z.object({
     leverage: o.lv,
     roi: o.roi,
     realizedPnL: o.rpnl,
+    realizedFundingRate: o.rfr,
     sltp: o.sltp,
     subOrders: getTransformedSubOrders(o.c),
   }));
 
-export const fullOrderSchema = z.object({
-  I: z.string(), // id
-  O: z.string(), // sender (owner)
-  P: z.string().toUpperCase(), // asset pair
-  s: z.enum(['BUY', 'SELL']), // side
-  sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
-  a: z.number(), // amount
-  A: z.number(), // settled amount
-  p: z.number(), // signed price
-  E: z.enum(executionTypes).optional(), // execution type
-  C: z.string().optional(), // trigger condition
-  F: z.string().toUpperCase(), // fee asset
-  f: z.number().optional(), // fee
-  o: z.boolean(), // internal only
-  S: z.enum(orderStatuses), // status
-  ro: z.boolean().optional(), // reversed order
-  T: z.number(), // creation time / unix timestamp
-  t: z.number(), // update time
-  lv: z.number().optional(), // leverage
-  roi: z.number().optional(), // ROI%
-  ep: z.number().optional(), // entry price
-  c: subOrderSchema.array(), // sub orders (content)
+export const fullOrderSchema = z
+  .object({
+    I: z.string(), // id
+    O: z.string(), // sender (owner)
+    P: z.string().toUpperCase(), // asset pair
+    s: z.enum(['BUY', 'SELL']), // side
+    sltp: z.enum(['STOP_LOSS', 'TAKE_PROFIT']).optional(), // side
+    a: z.number(), // amount
+    A: z.number(), // settled amount
+    p: z.number(), // signed price
+    E: z.enum(executionTypes).optional(), // execution type
+    C: z.string().optional(), // trigger condition
+    F: z.string().toUpperCase(), // fee asset
+    f: z.number().optional(), // fee
+    o: z.boolean(), // internal only
+    S: z.enum(orderStatuses), // status
+    ro: z.boolean().optional(), // reversed order
+    T: z.number(), // creation time / unix timestamp
+    t: z.number(), // update time
+    lv: z.number().optional(), // leverage
+    roi: z.number().optional(), // ROI%
+    ep: z.number().optional(), // entry price
+    c: subOrderSchema.array(), // sub orders (content)
 
-  // CFD only
-  L: z.number().optional(), // stop limit price,
-  l: z.boolean().optional(), // is liquidation order
-  rpnl: z.number().optional(), // realized PnL
-}).transform((val) => ({
-  ...val,
-  k: 'full' as const,
-})).transform((o) => ({
-  kind: o.k,
-  id: o.I,
-  clientOrdId: o.O,
-  instrument: o.P,
-  side: o.s,
-  sltp: o.sltp,
-  amount: o.a,
-  settledAmount: o.A,
-  price: o.p,
-  executionType: o.E,
-  triggerCondition: o.C,
-  feeAsset: o.F,
-  fee: o.f,
-  internalOnly: o.o,
-  status: o.S,
-  date: o.T,
-  updateDate: o.t,
-  stopPrice: o.L,
-  liquidated: o.l,
-  realizedPnL: o.rpnl,
-  leverage: o.lv,
-  roi: o.roi,
-  entryPrice: o.ep,
-  subOrders: getTransformedSubOrders(o.c),
-}));
+    // CFD only
+    L: z.number().optional(), // stop limit price,
+    l: z.boolean().optional(), // is liquidation order
+    rpnl: z.number().optional(), // realized PnL
+  })
+  .transform((val) => ({
+    ...val,
+    k: 'full' as const,
+  }))
+  .transform((o) => ({
+    kind: o.k,
+    id: o.I,
+    clientOrdId: o.O,
+    instrument: o.P,
+    side: o.s,
+    sltp: o.sltp,
+    amount: o.a,
+    settledAmount: o.A,
+    price: o.p,
+    executionType: o.E,
+    triggerCondition: o.C,
+    feeAsset: o.F,
+    fee: o.f,
+    internalOnly: o.o,
+    status: o.S,
+    date: o.T,
+    updateDate: o.t,
+    stopPrice: o.L,
+    liquidated: o.l,
+    realizedPnL: o.rpnl,
+    leverage: o.lv,
+    roi: o.roi,
+    entryPrice: o.ep,
+    subOrders: getTransformedSubOrders(o.c),
+  }));
 
 const updateMessageSchema = baseAddressUpdate.extend({
   k: z.literal('u'), // kind of message: "u" - updates
@@ -147,8 +154,7 @@ const updateMessageSchema = baseAddressUpdate.extend({
 const initialMessageSchema = baseAddressUpdate.extend({
   k: z.literal('i'), // kind of message: "i" - initial
   b: balancesSchema,
-  o: z.array(fullOrderSchema)
-    .optional(), // When no orders — no field
+  o: z.array(fullOrderSchema).optional(), // When no orders — no field
 });
 
 const addressUpdateSchema = z.union([
