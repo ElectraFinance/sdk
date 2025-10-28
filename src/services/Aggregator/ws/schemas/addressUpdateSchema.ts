@@ -112,6 +112,7 @@ export const fullOrderSchema = z
     L: z.number().optional(), // stop limit price,
     l: z.boolean().optional(), // is liquidation order
     rpnl: z.number().optional(), // realized PnL
+    rfr: z.number().optional(), // funding rate realized
   })
   .transform((val) => ({
     ...val,
@@ -138,6 +139,7 @@ export const fullOrderSchema = z
     stopPrice: o.L,
     liquidated: o.l,
     realizedPnL: o.rpnl,
+    realizedFundingRate: o.rfr,
     leverage: o.lv,
     roi: o.roi,
     entryPrice: o.ep,
