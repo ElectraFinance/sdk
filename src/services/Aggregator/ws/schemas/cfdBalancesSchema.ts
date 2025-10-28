@@ -7,6 +7,7 @@ const sbiSchema = z.object({
   cp: z.string(), // current price
   pnl: z.string(), // floating profit & loss
   fr: z.string(), // accumulated funding rate
+  rfr: z.string().optional(), // r accumulated funding rate
   p: z.string(), // position
   pp: z.string(), // position price
   m: z.string(), // margin
@@ -24,6 +25,7 @@ export const cfdBalanceSchema = z
     b: z.string(), // balance
     pnl: z.string(), // total floating profit & loss
     fr: z.string(), // total accumulated funding rate
+    rfr: z.string().optional(), // total accumulated funding rate
     e: z.string(), // equity
     r: z.string(), // total reserves
     m: z.string().optional(), // margin
@@ -41,6 +43,7 @@ export const cfdBalanceSchema = z
         currentPrice: state.cp,
         floatingProfitLoss: state.pnl,
         accumulatedFundingRate: state.fr,
+        rAccumulatedFundingRate: state.rfr,
         position: state.p,
         positionPrice: state.pp,
         margin: state.m,
@@ -58,6 +61,7 @@ export const cfdBalanceSchema = z
       balance: obj.b,
       profitLoss: obj.pnl,
       fundingRate: obj.fr,
+      rfundingRate: obj.rfr,
       equity: obj.e,
       reserves: obj.r,
       margin: obj.m,
